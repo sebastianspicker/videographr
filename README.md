@@ -3,10 +3,10 @@
 A working tree for videographr with an evolving implementation history.
 
 ## Overview
-videographr is moving through bootstrap push work.
+videographr tracks the practical state of the current maintenance pass.
 
 ## Status
-Working state: bootstrap.
+Project phase: bootstrap.
 
 ## Usage
-- Made the provenance assumptions easier to check later.
+- Rewrote the provenance explanation around the maintained behavior.
