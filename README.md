@@ -6,7 +6,10 @@ A working tree for videographr with an evolving implementation history.
 videographr tracks the practical state of the current maintenance pass.
 
 ## Status
-Project phase: bootstrap.
+Lifecycle stage: maintenance. Activity resumed after a longer gap.
 
 ## Usage
-- Rewrote the provenance explanation around the maintained behavior.
+- Merged scattered review guidance into the docs.
+
+## Roadmap
+Keep the next pass focused on verification and smaller changes.
