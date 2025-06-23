@@ -3,13 +3,21 @@
 A working tree for videographr with an evolving implementation history.
 
 ## Overview
-videographr tracks the practical state of the current maintenance pass.
+videographr documents maintained build commands, known limits, and remaining work.
 
 ## Status
-Lifecycle stage: maintenance. Activity resumed after a longer gap.
+Lifecycle stage: core-build-out. Earlier setup detail now lives in maintained guidance.
 
 ## Usage
-- Merged scattered review guidance into the docs.
+- Rewrote the release explanation around the maintained behavior.
 
-## Roadmap
+- Earlier scratch detail is now represented in maintained sections.
+
+## Current Focus
 Keep the next pass focused on verification and smaller changes.
+
+Use the next review to check behavior before adding surface area.
+## Features
+- Left release concrete enough for the next pass to build on.
+
+- Earlier scratch detail is now represented in maintained sections.
