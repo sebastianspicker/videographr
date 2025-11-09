@@ -3,10 +3,10 @@
 A working tree for videographr with an evolving implementation history.
 
 ## Overview
-videographr keeps setup, verification, and known limitations in one place.
+videographr documents maintained build commands, known limits, and remaining work.
 
 ## Status
-Lifecycle stage: core-build-out. Earlier setup detail now lives in maintained guidance.
+Lifecycle stage: maintenance. Maintenance guidance now reflects the stable shape.
 
 ## Usage
 - Rewrote the release explanation around the maintained behavior.
@@ -22,3 +22,8 @@ Prefer narrow maintenance work over broad rewrites.
 - Turned the first capture sketch into something runnable.
 
 - The document now favors checked behavior over exploratory notes.
+
+## Reliability
+- Tightened provenance where the earlier behavior was brittle.
+
+- Earlier scratch detail is now represented in maintained sections.
