@@ -24,6 +24,6 @@ Prefer narrow maintenance work over broad rewrites.
 - The document now favors checked behavior over exploratory notes.
 
 ## Reliability
-- Tightened provenance where the earlier behavior was brittle.
+- Closed a concrete review edge found during maintenance work.
 
 - Earlier scratch detail is now represented in maintained sections.
