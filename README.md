@@ -27,3 +27,8 @@ Prefer narrow maintenance work over broad rewrites.
 - Closed a concrete review edge found during maintenance work.
 
 - Earlier scratch detail is now represented in maintained sections.
+
+## Development
+- Reduced surprise in the capture release checks.
+
+- The older setup fragments have been reduced to the useful parts.
