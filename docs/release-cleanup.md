@@ -2,12 +2,12 @@
 
 
 ## Context
-This page tracks maintenance decisions for release cleanup during revival work.
+This page keeps the current release cleanup guidance concise after earlier rough notes.
 
 ## Reliability
 - Tightened release where the earlier behavior was brittle.
 
-## Scratch Notes
+## Notes Folded Into Current Flow
 Early notes are still uneven and may be folded into clearer sections later.
 
 ## Usage
@@ -15,3 +15,8 @@ Early notes are still uneven and may be folded into clearer sections later.
 
 ## Caveats
 Some setup details still depend on the current local workflow and may change again.
+
+## Architecture
+- Moved release behind a narrower boundary.
+
+- Earlier scratch notes were compressed into the current guidance.
