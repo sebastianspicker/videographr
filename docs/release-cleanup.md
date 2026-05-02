@@ -5,7 +5,9 @@
 This page keeps the current release cleanup guidance concise after earlier rough notes.
 
 ## Reliability
-- Tightened release where the earlier behavior was brittle.
+- Removed one failure mode from the release path.
+
+- Earlier scratch notes were compressed into the current guidance.
 
 ## Notes Folded Into Current Flow
 Early notes are still uneven and may be folded into clearer sections later.
