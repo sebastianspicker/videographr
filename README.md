@@ -3,15 +3,15 @@
 A working tree for videographr with an evolving implementation history.
 
 ## Overview
-videographr documents maintained build commands, known limits, and remaining work.
+videographr records the stable project shape and the work still worth checking.
 
 ## Status
-Lifecycle stage: publication. Earlier setup detail now lives in maintained guidance.
+Lifecycle stage: publication. Maintenance guidance now reflects the stable shape.
 
 ## Usage
-- Made the provenance assumptions easier to check later.
+- Merged scattered provenance guidance into the docs.
 
-- The older setup fragments have been reduced to the useful parts.
+- The document now favors checked behavior over exploratory notes.
 
 ## Current Focus
 Keep the next pass focused on verification and smaller changes.

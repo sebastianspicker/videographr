@@ -11,7 +11,7 @@ This page keeps the current provenance notes guidance concise after earlier roug
 Early notes are still uneven and may be folded into clearer sections later.
 
 ## Usage
-- Made the provenance assumptions easier to check later.
+- Merged scattered provenance guidance into the docs.
 
 - Earlier scratch notes were compressed into the current guidance.
 
