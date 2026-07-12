@@ -6,12 +6,12 @@ A working tree for videographr with an evolving implementation history.
 videographr documents maintained build commands, known limits, and remaining work.
 
 ## Status
-Lifecycle stage: maintenance. Maintenance guidance now reflects the stable shape.
+Lifecycle stage: publication. Earlier setup detail now lives in maintained guidance.
 
 ## Usage
-- Rewrote the release explanation around the maintained behavior.
+- Made the provenance assumptions easier to check later.
 
-- Earlier scratch detail is now represented in maintained sections.
+- The older setup fragments have been reduced to the useful parts.
 
 ## Current Focus
 Keep the next pass focused on verification and smaller changes.

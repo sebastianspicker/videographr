@@ -2,16 +2,18 @@
 
 
 ## Context
-This page tracks maintenance decisions for provenance notes during revival work.
+This page keeps the current provenance notes guidance concise after earlier rough notes.
 
 ## Reliability
 - Tightened provenance where the earlier behavior was brittle.
 
-## Scratch Notes
+## Notes Folded Into Current Flow
 Early notes are still uneven and may be folded into clearer sections later.
 
 ## Usage
-- Rewrote the provenance explanation around the maintained behavior.
+- Made the provenance assumptions easier to check later.
+
+- Earlier scratch notes were compressed into the current guidance.
 
 ## Caveats
 Some setup details still depend on the current local workflow and may change again.
