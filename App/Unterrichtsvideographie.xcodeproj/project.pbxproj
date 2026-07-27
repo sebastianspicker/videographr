@@ -1,0 +1,665 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E02BE2F74F604D3FB8A8AF49 /* VisionClassroomAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49551A8FD3C24FC099B69B62 /* VisionClassroomAnalyzer.swift */; };
+		B20000000000000000000001 /* VisionPeopleObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* VisionPeopleObservation.swift */; };
+		19C1D2C6C482454BB2A3FF11 /* UnterrichtsvideographieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F00CA048E044F839F591E36 /* UnterrichtsvideographieApp.swift */; };
+		F3C37036F0E246D782327D52 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CD2791E65549EFB33B43B2 /* RootTabView.swift */; };
+		C60000000000000000000001 /* NativeTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C60000000000000000000002 /* NativeTheme.swift */; };
+		B6E9DD2C0470426DB52011B0 /* AppSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4BB85670084E1A8C3CE021 /* AppSessionModel.swift */; };
+		B10000000000000000000001 /* BuildIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* BuildIdentity.swift */; };
+		F20000000000000000000001 /* AppSessionModel+ExportSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000002 /* AppSessionModel+ExportSupport.swift */; };
+		B20000000000000000000003 /* AppSessionModel+MediaInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000004 /* AppSessionModel+MediaInspector.swift */; };
+		F20000000000000000000005 /* AppSessionModel+Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000006 /* AppSessionModel+Recording.swift */; };
+		B20000000000000000000007 /* AppSessionModel+RecordingRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000008 /* AppSessionModel+RecordingRecovery.swift */; };
+		F20000000000000000000007 /* AppSessionModel+Export.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000008 /* AppSessionModel+Export.swift */; };
+		F20000000000000000000009 /* AppSessionModel+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000000000000000000000A /* AppSessionModel+Persistence.swift */; };
+		F2000000000000000000000B /* AppSessionModel+RecordingAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000000000000000000000C /* AppSessionModel+RecordingAttachment.swift */; };
+		D6E753001548451C8D25B42A /* MotionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733E46B1A35B4C8B8182F7CB /* MotionService.swift */; };
+		822CE454DD44477ABE7F9B7C /* FrameSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB49510114C404088588E45 /* FrameSampler.swift */; };
+		213D8C9F6A2A44FB96B6FA3C /* CameraSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0959A88EA50D4CCDB04E209D /* CameraSessionModel.swift */; };
+		C30000000000000000000001 /* CameraSessionModel+Lifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000002 /* CameraSessionModel+Lifecycle.swift */; };
+		C30000000000000000000003 /* CameraSessionModel+RecordingEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000004 /* CameraSessionModel+RecordingEvents.swift */; };
+		C30000000000000000000005 /* CameraSessionModel+RecordingRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000006 /* CameraSessionModel+RecordingRecovery.swift */; };
+		C30000000000000000000007 /* CameraSessionModel+Guidance.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000008 /* CameraSessionModel+Guidance.swift */; };
+		D50000000000000000000013 /* CameraSessionModel+GuidanceCoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000014 /* CameraSessionModel+GuidanceCoding.swift */; };
+		C30000000000000000000009 /* CameraSessionModel+RuntimeSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000000000000000000000A /* CameraSessionModel+RuntimeSupport.swift */; };
+		C3000000000000000000000B /* CameraSessionModel+LiveControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000000000000000000000C /* CameraSessionModel+LiveControl.swift */; };
+		F20000000000000000000003 /* CaptureSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000004 /* CaptureSessionController.swift */; };
+		C40000000000000000000001 /* CaptureSessionController+Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40000000000000000000002 /* CaptureSessionController+Audio.swift */; };
+		C40000000000000000000003 /* CaptureSessionController+Capacity.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40000000000000000000004 /* CaptureSessionController+Capacity.swift */; };
+		C40000000000000000000005 /* CaptureSessionController+Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40000000000000000000006 /* CaptureSessionController+Configuration.swift */; };
+		C40000000000000000000007 /* CaptureSessionController+Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40000000000000000000008 /* CaptureSessionController+Recording.swift */; };
+		3FE9D30074ED46338A7358B4 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC63B0127CA443491350E12 /* CameraPreviewView.swift */; };
+		92806ED3D2F94FE797A64197 /* LiveGuidanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B488891DAAED4E9B816C1B50 /* LiveGuidanceView.swift */; };
+		D50000000000000000000001 /* LiveGuidanceView+Evidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000002 /* LiveGuidanceView+Evidence.swift */; };
+		D50000000000000000000003 /* LiveGuidanceView+Presentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000004 /* LiveGuidanceView+Presentation.swift */; };
+		D50000000000000000000005 /* LiveGuidanceView+Preview.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000006 /* LiveGuidanceView+Preview.swift */; };
+		D50000000000000000000007 /* LiveGuidanceView+Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000008 /* LiveGuidanceView+Recording.swift */; };
+		D50000000000000000000009 /* LiveGuidanceView+SpokenAudioCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5000000000000000000000A /* LiveGuidanceView+SpokenAudioCheck.swift */; };
+		D5000000000000000000000B /* LiveGuidanceView+SpokenAudioCheckPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5000000000000000000000C /* LiveGuidanceView+SpokenAudioCheckPresentation.swift */; };
+		D5000000000000000000000D /* LiveGuidanceView+SpokenAudioCheckRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5000000000000000000000E /* LiveGuidanceView+SpokenAudioCheckRecording.swift */; };
+		D5000000000000000000000F /* LiveGuidanceView+SpokenAudioCheckStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000010 /* LiveGuidanceView+SpokenAudioCheckStorage.swift */; };
+		EE61C4CAF97F4F5FB297D7ED /* LearnRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CED726539E24BE784030D68 /* LearnRootView.swift */; };
+		B5007726E4BC4571B2339AED /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B96B7E9F0B411C80136746 /* SetupView.swift */; };
+		F10000000000000000000001 /* SetupView+FormState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000002 /* SetupView+FormState.swift */; };
+		17AA7375ECA346B7803CDD96 /* ReflectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDECC799734445AB773C773 /* ReflectView.swift */; };
+		D50000000000000000000011 /* ReflectView+Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000012 /* ReflectView+Content.swift */; };
+		ECDEB2883D9F458887D53FDF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2F803C960F5746C5875B94AC /* Assets.xcassets */; };
+		47E1F033EB38487FADDCC749 /* GuidanceEngine in Frameworks */ = {isa = PBXBuildFile; productRef = EFB4890CB54747488FC7A733 /* GuidanceEngine */; };
+		F6C0986CA4704B468D29775B /* LearnContent in Frameworks */ = {isa = PBXBuildFile; productRef = 9E971A4E08B54DC39E7887A3 /* LearnContent */; };
+		09AAFDFB258040C5977E1002 /* SessionCore in Frameworks */ = {isa = PBXBuildFile; productRef = F28C8D8333E849D99BBD72E5 /* SessionCore */; };
+		A10000000000000000000001 /* VideographrE2EScreenshots.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* VideographrE2EScreenshots.swift */; };
+		B20000000000000000000005 /* VideographrE2EScreenshots+Evidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000006 /* VideographrE2EScreenshots+Evidence.swift */; };
+		E10000000000000000000001 /* ProvenanceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000002 /* ProvenanceBar.swift */; };
+		E10000000000000000000003 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000004 /* AboutView.swift */; };
+		E10000000000000000000005 /* SetupView+SessionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000006 /* SetupView+SessionForm.swift */; };
+		E10000000000000000000007 /* SetupView+ConsentMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000008 /* SetupView+ConsentMode.swift */; };
+		E10000000000000000000009 /* SetupView+SessionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000000000000000000000A /* SetupView+SessionsList.swift */; };
+		E1000000000000000000000B /* LiveGuidanceView+Chrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000000000000000000000C /* LiveGuidanceView+Chrome.swift */; };
+		E1000000000000000000000D /* LiveGuidanceView+Authorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000000000000000000000E /* LiveGuidanceView+Authorization.swift */; };
+		E1000000000000000000000F /* ReflectView+Export.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000010 /* ReflectView+Export.swift */; };
+		E10000000000000000000011 /* ReflectView+Playback.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000012 /* ReflectView+Playback.swift */; };
+		E10000000000000000000013 /* FieldInstrumentComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000014 /* FieldInstrumentComponents.swift */; };
+		E10000000000000000000015 /* FieldInstrumentTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000016 /* FieldInstrumentTabBar.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A10000000000000000000007 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C3C93E6BFA24452B655F2D0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5B17D6145698478492242CB4;
+			remoteInfo = Unterrichtsvideographie;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		49551A8FD3C24FC099B69B62 /* VisionClassroomAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionClassroomAnalyzer.swift; sourceTree = "<group>"; };
+		B20000000000000000000002 /* VisionPeopleObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPeopleObservation.swift; sourceTree = "<group>"; };
+		EEA4598008934D319CB064CF /* Unterrichtsvideographie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unterrichtsvideographie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F00CA048E044F839F591E36 /* UnterrichtsvideographieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnterrichtsvideographieApp.swift; sourceTree = "<group>"; };
+		A1CD2791E65549EFB33B43B2 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
+		C60000000000000000000002 /* NativeTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTheme.swift; sourceTree = "<group>"; };
+		7C4BB85670084E1A8C3CE021 /* AppSessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSessionModel.swift; sourceTree = "<group>"; };
+		B10000000000000000000002 /* BuildIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildIdentity.swift; sourceTree = "<group>"; };
+		F20000000000000000000002 /* AppSessionModel+ExportSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSessionModel+ExportSupport.swift"; sourceTree = "<group>"; };
+		B20000000000000000000004 /* AppSessionModel+MediaInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSessionModel+MediaInspector.swift"; sourceTree = "<group>"; };
+		F20000000000000000000006 /* AppSessionModel+Recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSessionModel+Recording.swift"; sourceTree = "<group>"; };
+		B20000000000000000000008 /* AppSessionModel+RecordingRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSessionModel+RecordingRecovery.swift"; sourceTree = "<group>"; };
+		F20000000000000000000008 /* AppSessionModel+Export.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSessionModel+Export.swift"; sourceTree = "<group>"; };
+		F2000000000000000000000A /* AppSessionModel+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSessionModel+Persistence.swift"; sourceTree = "<group>"; };
+		F2000000000000000000000C /* AppSessionModel+RecordingAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSessionModel+RecordingAttachment.swift"; sourceTree = "<group>"; };
+		733E46B1A35B4C8B8182F7CB /* MotionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionService.swift; sourceTree = "<group>"; };
+		3DB49510114C404088588E45 /* FrameSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameSampler.swift; sourceTree = "<group>"; };
+		0959A88EA50D4CCDB04E209D /* CameraSessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSessionModel.swift; sourceTree = "<group>"; };
+		C30000000000000000000002 /* CameraSessionModel+Lifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraSessionModel+Lifecycle.swift"; sourceTree = "<group>"; };
+		C30000000000000000000004 /* CameraSessionModel+RecordingEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraSessionModel+RecordingEvents.swift"; sourceTree = "<group>"; };
+		C30000000000000000000006 /* CameraSessionModel+RecordingRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraSessionModel+RecordingRecovery.swift"; sourceTree = "<group>"; };
+		C30000000000000000000008 /* CameraSessionModel+Guidance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraSessionModel+Guidance.swift"; sourceTree = "<group>"; };
+		D50000000000000000000014 /* CameraSessionModel+GuidanceCoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraSessionModel+GuidanceCoding.swift"; sourceTree = "<group>"; };
+		C3000000000000000000000A /* CameraSessionModel+RuntimeSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraSessionModel+RuntimeSupport.swift"; sourceTree = "<group>"; };
+		C3000000000000000000000C /* CameraSessionModel+LiveControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraSessionModel+LiveControl.swift"; sourceTree = "<group>"; };
+		F20000000000000000000004 /* CaptureSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSessionController.swift; sourceTree = "<group>"; };
+		C40000000000000000000002 /* CaptureSessionController+Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureSessionController+Audio.swift"; sourceTree = "<group>"; };
+		C40000000000000000000004 /* CaptureSessionController+Capacity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureSessionController+Capacity.swift"; sourceTree = "<group>"; };
+		C40000000000000000000006 /* CaptureSessionController+Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureSessionController+Configuration.swift"; sourceTree = "<group>"; };
+		C40000000000000000000008 /* CaptureSessionController+Recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureSessionController+Recording.swift"; sourceTree = "<group>"; };
+		4EC63B0127CA443491350E12 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
+		B488891DAAED4E9B816C1B50 /* LiveGuidanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveGuidanceView.swift; sourceTree = "<group>"; };
+		D50000000000000000000002 /* LiveGuidanceView+Evidence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+Evidence.swift"; sourceTree = "<group>"; };
+		D50000000000000000000004 /* LiveGuidanceView+Presentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+Presentation.swift"; sourceTree = "<group>"; };
+		D50000000000000000000006 /* LiveGuidanceView+Preview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+Preview.swift"; sourceTree = "<group>"; };
+		D50000000000000000000008 /* LiveGuidanceView+Recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+Recording.swift"; sourceTree = "<group>"; };
+		D5000000000000000000000A /* LiveGuidanceView+SpokenAudioCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+SpokenAudioCheck.swift"; sourceTree = "<group>"; };
+		D5000000000000000000000C /* LiveGuidanceView+SpokenAudioCheckPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+SpokenAudioCheckPresentation.swift"; sourceTree = "<group>"; };
+		D5000000000000000000000E /* LiveGuidanceView+SpokenAudioCheckRecording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+SpokenAudioCheckRecording.swift"; sourceTree = "<group>"; };
+		D50000000000000000000010 /* LiveGuidanceView+SpokenAudioCheckStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+SpokenAudioCheckStorage.swift"; sourceTree = "<group>"; };
+		2CED726539E24BE784030D68 /* LearnRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnRootView.swift; sourceTree = "<group>"; };
+		C4B96B7E9F0B411C80136746 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		F10000000000000000000002 /* SetupView+FormState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+FormState.swift"; sourceTree = "<group>"; };
+		FFDECC799734445AB773C773 /* ReflectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReflectView.swift; sourceTree = "<group>"; };
+		D50000000000000000000012 /* ReflectView+Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReflectView+Content.swift"; sourceTree = "<group>"; };
+		2F803C960F5746C5875B94AC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D353BCCEDE0D47AABECF5A5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000000000000000000002 /* VideographrE2EScreenshots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideographrE2EScreenshots.swift; sourceTree = "<group>"; };
+		B20000000000000000000006 /* VideographrE2EScreenshots+Evidence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideographrE2EScreenshots+Evidence.swift"; sourceTree = "<group>"; };
+		A10000000000000000000003 /* VideographrUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VideographrUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E10000000000000000000002 /* ProvenanceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProvenanceBar.swift"; sourceTree = "<group>"; };
+		E10000000000000000000004 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AboutView.swift"; sourceTree = "<group>"; };
+		E10000000000000000000006 /* SetupView+SessionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+SessionForm.swift"; sourceTree = "<group>"; };
+		E10000000000000000000008 /* SetupView+ConsentMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+ConsentMode.swift"; sourceTree = "<group>"; };
+		E1000000000000000000000A /* SetupView+SessionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+SessionsList.swift"; sourceTree = "<group>"; };
+		E1000000000000000000000C /* LiveGuidanceView+Chrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+Chrome.swift"; sourceTree = "<group>"; };
+		E1000000000000000000000E /* LiveGuidanceView+Authorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+Authorization.swift"; sourceTree = "<group>"; };
+		E10000000000000000000010 /* ReflectView+Export.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReflectView+Export.swift"; sourceTree = "<group>"; };
+		E10000000000000000000012 /* ReflectView+Playback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReflectView+Playback.swift"; sourceTree = "<group>"; };
+		E10000000000000000000014 /* FieldInstrumentComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FieldInstrumentComponents.swift"; sourceTree = "<group>"; };
+		E10000000000000000000016 /* FieldInstrumentTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FieldInstrumentTabBar.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		680AFC50FF40407182439E8B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				47E1F033EB38487FADDCC749 /* GuidanceEngine in Frameworks */,
+				F6C0986CA4704B468D29775B /* LearnContent in Frameworks */,
+				09AAFDFB258040C5977E1002 /* SessionCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		825AEE822785421F964E96DF = {
+			isa = PBXGroup;
+			children = (
+				C75ABC63C0FF42EFAB118110 /* Unterrichtsvideographie */,
+				A10000000000000000000005 /* VideographrUITests */,
+				4866AE2BB5FF43F2A8CED030 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4866AE2BB5FF43F2A8CED030 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EEA4598008934D319CB064CF /* Unterrichtsvideographie.app */,
+				A10000000000000000000003 /* VideographrUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C75ABC63C0FF42EFAB118110 /* Unterrichtsvideographie */ = {
+			isa = PBXGroup;
+			children = (
+				2F00CA048E044F839F591E36 /* UnterrichtsvideographieApp.swift */,
+				A1CD2791E65549EFB33B43B2 /* RootTabView.swift */,
+				C60000000000000000000002 /* NativeTheme.swift */,
+				E10000000000000000000020 /* Design */,
+				E10000000000000000000021 /* Info */,
+				7C4BB85670084E1A8C3CE021 /* AppSessionModel.swift */,
+				F20000000000000000000002 /* AppSessionModel+ExportSupport.swift */,
+				B20000000000000000000004 /* AppSessionModel+MediaInspector.swift */,
+				F20000000000000000000006 /* AppSessionModel+Recording.swift */,
+				B20000000000000000000008 /* AppSessionModel+RecordingRecovery.swift */,
+				F20000000000000000000008 /* AppSessionModel+Export.swift */,
+				F2000000000000000000000A /* AppSessionModel+Persistence.swift */,
+				F2000000000000000000000C /* AppSessionModel+RecordingAttachment.swift */,
+				B10000000000000000000002 /* BuildIdentity.swift */,
+				1CB41204F367427785C15B3C /* Live */,
+				7586B0B0466E48C99F53F266 /* Learn */,
+				FC430C2D0D974CD18FFF5B3F /* Setup */,
+				D9CA947DC0B948AAB5F30A75 /* Reflect */,
+				2F803C960F5746C5875B94AC /* Assets.xcassets */,
+				D353BCCEDE0D47AABECF5A5D /* Info.plist */,
+			);
+			path = Unterrichtsvideographie;
+			sourceTree = "<group>";
+		};
+		1CB41204F367427785C15B3C /* Live */ = {
+			isa = PBXGroup;
+			children = (
+				49551A8FD3C24FC099B69B62 /* VisionClassroomAnalyzer.swift */,
+				B20000000000000000000002 /* VisionPeopleObservation.swift */,
+				733E46B1A35B4C8B8182F7CB /* MotionService.swift */,
+				3DB49510114C404088588E45 /* FrameSampler.swift */,
+				0959A88EA50D4CCDB04E209D /* CameraSessionModel.swift */,
+				C30000000000000000000002 /* CameraSessionModel+Lifecycle.swift */,
+				C30000000000000000000004 /* CameraSessionModel+RecordingEvents.swift */,
+				C30000000000000000000006 /* CameraSessionModel+RecordingRecovery.swift */,
+				C30000000000000000000008 /* CameraSessionModel+Guidance.swift */,
+				D50000000000000000000014 /* CameraSessionModel+GuidanceCoding.swift */,
+				C3000000000000000000000A /* CameraSessionModel+RuntimeSupport.swift */,
+				C3000000000000000000000C /* CameraSessionModel+LiveControl.swift */,
+				F20000000000000000000004 /* CaptureSessionController.swift */,
+				C40000000000000000000002 /* CaptureSessionController+Audio.swift */,
+				C40000000000000000000004 /* CaptureSessionController+Capacity.swift */,
+				C40000000000000000000006 /* CaptureSessionController+Configuration.swift */,
+				C40000000000000000000008 /* CaptureSessionController+Recording.swift */,
+				4EC63B0127CA443491350E12 /* CameraPreviewView.swift */,
+				B488891DAAED4E9B816C1B50 /* LiveGuidanceView.swift */,
+				E1000000000000000000000C /* LiveGuidanceView+Chrome.swift */,
+				E1000000000000000000000E /* LiveGuidanceView+Authorization.swift */,
+				D50000000000000000000002 /* LiveGuidanceView+Evidence.swift */,
+				D50000000000000000000004 /* LiveGuidanceView+Presentation.swift */,
+				D50000000000000000000006 /* LiveGuidanceView+Preview.swift */,
+				D50000000000000000000008 /* LiveGuidanceView+Recording.swift */,
+				D5000000000000000000000A /* LiveGuidanceView+SpokenAudioCheck.swift */,
+				D5000000000000000000000C /* LiveGuidanceView+SpokenAudioCheckPresentation.swift */,
+				D5000000000000000000000E /* LiveGuidanceView+SpokenAudioCheckRecording.swift */,
+				D50000000000000000000010 /* LiveGuidanceView+SpokenAudioCheckStorage.swift */,
+			);
+			path = Live;
+			sourceTree = "<group>";
+		};
+		7586B0B0466E48C99F53F266 /* Learn */ = {
+			isa = PBXGroup;
+			children = (
+				2CED726539E24BE784030D68 /* LearnRootView.swift */,
+			);
+			path = Learn;
+			sourceTree = "<group>";
+		};
+		FC430C2D0D974CD18FFF5B3F /* Setup */ = {
+			isa = PBXGroup;
+			children = (
+				C4B96B7E9F0B411C80136746 /* SetupView.swift */,
+				F10000000000000000000002 /* SetupView+FormState.swift */,
+				E10000000000000000000006 /* SetupView+SessionForm.swift */,
+				E10000000000000000000008 /* SetupView+ConsentMode.swift */,
+				E1000000000000000000000A /* SetupView+SessionsList.swift */,
+			);
+			path = Setup;
+			sourceTree = "<group>";
+		};
+		D9CA947DC0B948AAB5F30A75 /* Reflect */ = {
+			isa = PBXGroup;
+			children = (
+				FFDECC799734445AB773C773 /* ReflectView.swift */,
+				D50000000000000000000012 /* ReflectView+Content.swift */,
+				E10000000000000000000010 /* ReflectView+Export.swift */,
+				E10000000000000000000012 /* ReflectView+Playback.swift */,
+			);
+			path = Reflect;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000005 /* VideographrUITests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000002 /* VideographrE2EScreenshots.swift */,
+				B20000000000000000000006 /* VideographrE2EScreenshots+Evidence.swift */,
+			);
+			path = VideographrUITests;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000020 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				E10000000000000000000002 /* ProvenanceBar.swift */,
+				E10000000000000000000016 /* FieldInstrumentTabBar.swift */,
+				E10000000000000000000014 /* FieldInstrumentComponents.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000021 /* Info */ = {
+			isa = PBXGroup;
+			children = (
+				E10000000000000000000004 /* AboutView.swift */,
+			);
+			path = Info;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5B17D6145698478492242CB4 /* Unterrichtsvideographie */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DD4207164DE6431FBCFA3322 /* Build configuration list for PBXNativeTarget "Unterrichtsvideographie" */;
+			buildPhases = (
+				04D8D8A8673D453F88D5FD91 /* Sources */,
+				680AFC50FF40407182439E8B /* Frameworks */,
+				4898399C6BE0455D8B116714 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Unterrichtsvideographie;
+			packageProductDependencies = (
+				EFB4890CB54747488FC7A733 /* GuidanceEngine */,
+				9E971A4E08B54DC39E7887A3 /* LearnContent */,
+				F28C8D8333E849D99BBD72E5 /* SessionCore */,
+			);
+			productName = Unterrichtsvideographie;
+			productReference = EEA4598008934D319CB064CF /* Unterrichtsvideographie.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A10000000000000000000006 /* VideographrUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1000000000000000000000A /* Build configuration list for PBXNativeTarget "VideographrUITests" */;
+			buildPhases = (
+				A10000000000000000000008 /* Sources */,
+				A10000000000000000000004 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A10000000000000000000009 /* PBXTargetDependency */,
+			);
+			name = VideographrUITests;
+			productName = VideographrUITests;
+			productReference = A10000000000000000000003 /* VideographrUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3C3C93E6BFA24452B655F2D0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					5B17D6145698478492242CB4 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					A10000000000000000000006 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 5B17D6145698478492242CB4;
+					};
+				};
+			};
+			buildConfigurationList = C3C9DD0EE32248B382AF461B /* Build configuration list for PBXProject "Unterrichtsvideographie" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = de;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				de,
+				Base,
+			);
+			mainGroup = 825AEE822785421F964E96DF;
+			packageReferences = (
+				A49D709592214B05ABC256E2 /* XCLocalSwiftPackageReference "../" */,
+			);
+			productRefGroup = 4866AE2BB5FF43F2A8CED030 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5B17D6145698478492242CB4 /* Unterrichtsvideographie */,
+				A10000000000000000000006 /* VideographrUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4898399C6BE0455D8B116714 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ECDEB2883D9F458887D53FDF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		04D8D8A8673D453F88D5FD91 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E02BE2F74F604D3FB8A8AF49 /* VisionClassroomAnalyzer.swift in Sources */,
+				B20000000000000000000001 /* VisionPeopleObservation.swift in Sources */,
+				19C1D2C6C482454BB2A3FF11 /* UnterrichtsvideographieApp.swift in Sources */,
+				F3C37036F0E246D782327D52 /* RootTabView.swift in Sources */,
+				C60000000000000000000001 /* NativeTheme.swift in Sources */,
+				E10000000000000000000015 /* FieldInstrumentTabBar.swift in Sources */,
+				E10000000000000000000013 /* FieldInstrumentComponents.swift in Sources */,
+				E10000000000000000000001 /* ProvenanceBar.swift in Sources */,
+				E10000000000000000000003 /* AboutView.swift in Sources */,
+				E10000000000000000000005 /* SetupView+SessionForm.swift in Sources */,
+				E10000000000000000000007 /* SetupView+ConsentMode.swift in Sources */,
+				E10000000000000000000009 /* SetupView+SessionsList.swift in Sources */,
+				E1000000000000000000000B /* LiveGuidanceView+Chrome.swift in Sources */,
+				E1000000000000000000000D /* LiveGuidanceView+Authorization.swift in Sources */,
+				E1000000000000000000000F /* ReflectView+Export.swift in Sources */,
+				E10000000000000000000011 /* ReflectView+Playback.swift in Sources */,
+				B6E9DD2C0470426DB52011B0 /* AppSessionModel.swift in Sources */,
+				F20000000000000000000001 /* AppSessionModel+ExportSupport.swift in Sources */,
+				B20000000000000000000003 /* AppSessionModel+MediaInspector.swift in Sources */,
+				F20000000000000000000005 /* AppSessionModel+Recording.swift in Sources */,
+				B20000000000000000000007 /* AppSessionModel+RecordingRecovery.swift in Sources */,
+				F20000000000000000000007 /* AppSessionModel+Export.swift in Sources */,
+				F20000000000000000000009 /* AppSessionModel+Persistence.swift in Sources */,
+				F2000000000000000000000B /* AppSessionModel+RecordingAttachment.swift in Sources */,
+				B10000000000000000000001 /* BuildIdentity.swift in Sources */,
+				D6E753001548451C8D25B42A /* MotionService.swift in Sources */,
+				822CE454DD44477ABE7F9B7C /* FrameSampler.swift in Sources */,
+				213D8C9F6A2A44FB96B6FA3C /* CameraSessionModel.swift in Sources */,
+				C30000000000000000000001 /* CameraSessionModel+Lifecycle.swift in Sources */,
+				C30000000000000000000003 /* CameraSessionModel+RecordingEvents.swift in Sources */,
+				C30000000000000000000005 /* CameraSessionModel+RecordingRecovery.swift in Sources */,
+				C30000000000000000000007 /* CameraSessionModel+Guidance.swift in Sources */,
+				D50000000000000000000013 /* CameraSessionModel+GuidanceCoding.swift in Sources */,
+				C30000000000000000000009 /* CameraSessionModel+RuntimeSupport.swift in Sources */,
+				C3000000000000000000000B /* CameraSessionModel+LiveControl.swift in Sources */,
+				F20000000000000000000003 /* CaptureSessionController.swift in Sources */,
+				C40000000000000000000001 /* CaptureSessionController+Audio.swift in Sources */,
+				C40000000000000000000003 /* CaptureSessionController+Capacity.swift in Sources */,
+				C40000000000000000000005 /* CaptureSessionController+Configuration.swift in Sources */,
+				C40000000000000000000007 /* CaptureSessionController+Recording.swift in Sources */,
+				3FE9D30074ED46338A7358B4 /* CameraPreviewView.swift in Sources */,
+				92806ED3D2F94FE797A64197 /* LiveGuidanceView.swift in Sources */,
+				D50000000000000000000001 /* LiveGuidanceView+Evidence.swift in Sources */,
+				D50000000000000000000003 /* LiveGuidanceView+Presentation.swift in Sources */,
+				D50000000000000000000005 /* LiveGuidanceView+Preview.swift in Sources */,
+				D50000000000000000000007 /* LiveGuidanceView+Recording.swift in Sources */,
+				D50000000000000000000009 /* LiveGuidanceView+SpokenAudioCheck.swift in Sources */,
+				D5000000000000000000000B /* LiveGuidanceView+SpokenAudioCheckPresentation.swift in Sources */,
+				D5000000000000000000000D /* LiveGuidanceView+SpokenAudioCheckRecording.swift in Sources */,
+				D5000000000000000000000F /* LiveGuidanceView+SpokenAudioCheckStorage.swift in Sources */,
+				EE61C4CAF97F4F5FB297D7ED /* LearnRootView.swift in Sources */,
+				B5007726E4BC4571B2339AED /* SetupView.swift in Sources */,
+				F10000000000000000000001 /* SetupView+FormState.swift in Sources */,
+				17AA7375ECA346B7803CDD96 /* ReflectView.swift in Sources */,
+				D50000000000000000000011 /* ReflectView+Content.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000008 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* VideographrE2EScreenshots.swift in Sources */,
+				B20000000000000000000005 /* VideographrE2EScreenshots+Evidence.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A10000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5B17D6145698478492242CB4 /* Unterrichtsvideographie */;
+			targetProxy = A10000000000000000000007 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		CBF7A75DA51446E78E720058 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_DYNAMIC_NO_PIC = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+			};
+			name = Debug;
+		};
+		46E6096E06FF4EFBA6F928E6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E1A5DAEAD67149D789AFBCE7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Unterrichtsvideographie/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.videographie.Unterrichtsvideographie;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		61C55499C1DB45B3A129DC68 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Unterrichtsvideographie/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.videographie.Unterrichtsvideographie;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A1000000000000000000000B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.videographie.VideographrUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Unterrichtsvideographie;
+			};
+			name = Debug;
+		};
+		A1000000000000000000000C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.videographie.VideographrUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Unterrichtsvideographie;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C3C9DD0EE32248B382AF461B /* Build configuration list for PBXProject "Unterrichtsvideographie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CBF7A75DA51446E78E720058 /* Debug */,
+				46E6096E06FF4EFBA6F928E6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DD4207164DE6431FBCFA3322 /* Build configuration list for PBXNativeTarget "Unterrichtsvideographie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1A5DAEAD67149D789AFBCE7 /* Debug */,
+				61C55499C1DB45B3A129DC68 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1000000000000000000000A /* Build configuration list for PBXNativeTarget "VideographrUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000000000000000000000B /* Debug */,
+				A1000000000000000000000C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A49D709592214B05ABC256E2 /* XCLocalSwiftPackageReference "../" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EFB4890CB54747488FC7A733 /* GuidanceEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A49D709592214B05ABC256E2 /* XCLocalSwiftPackageReference "../" */;
+			productName = GuidanceEngine;
+		};
+		9E971A4E08B54DC39E7887A3 /* LearnContent */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A49D709592214B05ABC256E2 /* XCLocalSwiftPackageReference "../" */;
+			productName = LearnContent;
+		};
+		F28C8D8333E849D99BBD72E5 /* SessionCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A49D709592214B05ABC256E2 /* XCLocalSwiftPackageReference "../" */;
+			productName = SessionCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 3C3C93E6BFA24452B655F2D0 /* Project object */;
+}

@@ -1,0 +1,15 @@
+# Normalize text; keep runtime screenshots as binary.
+* text=auto eol=lf
+*.swift text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.plist text eol=lf
+*.pbxproj text eol=lf
+RELEASE_VERSION text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.mp4 binary
