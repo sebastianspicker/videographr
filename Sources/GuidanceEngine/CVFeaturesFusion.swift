@@ -1,0 +1,287 @@
+import Foundation
+
+
+// MARK: - Pure fusion helpers for experimental rule inputs
+
+/// Fuses luminance-heuristic board score with multi-cue CV board detection for guidance.
+public enum CVFeatureFusion {
+    /// Multi-cue board quality from CV fields alone (no frame heuristics).
+    /// Weights: rectangle confidence + aspect + geometry + edge support.
+    public static func multiCueBoardQuality(from cv: CVFeatures) -> Double {
+        guard cv.analysisSucceeded else { return 0 }
+        let conf = cv.boardConfidence
+        let aspect = cv.boardAspectQuality
+        let geom = cv.boardGeometryQuality
+        let edge = cv.boardEdgeSupport
+        let secondary = cv.secondaryWritingSurfaceSupport
+        // If only raw confidence is set (legacy callers), fall back to confidence.
+        if hasRawBoardConfidenceOnly(aspect: aspect, geometry: geom, edge: edge, secondary: secondary) {
+            return conf
+        }
+        let raw = 0.36 * conf + 0.20 * aspect + 0.20 * geom + 0.14 * edge + 0.10 * secondary
+        return min(1, max(0, raw))
+    }
+
+    /// Effective board score for placement (max of heuristic and multi-cue CV when CV ok).
+    public static func effectiveBoardScore(frame: FrameMetrics, cv: CVFeatures) -> Double {
+        if cv.analysisSucceeded && (cv.boardConfidence > 0 || cv.multiCueBoardQuality > 0) {
+            return max(frame.boardRegionScore, multiCueBoardQuality(from: cv))
+        }
+        return frame.boardRegionScore
+    }
+
+    public static func effectiveBoardCenter(frame: FrameMetrics, cv: CVFeatures) -> (x: Double, y: Double) {
+        if cv.analysisSucceeded, let rect = cv.boardRect, multiCueBoardQuality(from: cv) >= 0.40 {
+            return (rect.centerX, rect.centerY)
+        }
+        if cv.analysisSucceeded, let rect = cv.boardRect, cv.boardConfidence >= 0.45 {
+            return (rect.centerX, rect.centerY)
+        }
+        return (frame.boardCenterX, frame.boardCenterY)
+    }
+
+    /// Spatial usefulness of actors for teaching–learning capture (not mere count).
+    /// Prefers moderate coverage, mid-band occupancy, and centered placement.
+    public static func peopleSpatialUsefulness(from cv: CVFeatures) -> Double {
+        guard cv.analysisSucceeded, cv.hasPeople || cv.personCoverage > 0 else { return 0 }
+        let countSignal = min(1.0, Double(max(cv.personCount, cv.faceCount)) / 4.0)
+        let scaleScore = personCoverageScaleScore(cv.personCoverage)
+        let midBand = cv.personMidBandOccupancy
+        let centroidY = cv.personCentroidY ?? 0.5
+        // Prefer people in lower-mid (under board): ~0.45…0.75
+        let verticalPlacement = 1.0 - min(1.0, abs(centroidY - 0.58) / 0.45)
+        let centroidX = cv.personCentroidX ?? 0.5
+        let horizontalPlacement = 1.0 - min(1.0, abs(centroidX - 0.5) / 0.55)
+
+        let raw = 0.22 * countSignal
+            + 0.28 * scaleScore
+            + 0.28 * midBand
+            + 0.12 * verticalPlacement
+            + 0.10 * horizontalPlacement
+        return min(1, max(0, raw))
+    }
+
+    private static func personCoverageScaleScore(_ coverage: Double) -> Double {
+        let breakpoints: [(upper: Double, score: (Double) -> Double)] = [
+            (0.02, { $0 / 0.02 * 0.4 }),
+            (0.35, { 0.5 + 0.5 * min(1, ($0 - 0.02) / 0.15) }),
+            (0.55, { 0.85 - ($0 - 0.35) * 1.5 })
+        ]
+        if let breakpoint = breakpoints.first(where: { coverage <= $0.upper }) {
+            return breakpoint.score(coverage)
+        }
+        return max(0.1, 0.55 - (coverage - 0.55))
+    }
+
+    /// Person–board co-presence: both present and spatially compatible for Lehr-Lern-Geschehen.
+    /// Uses stored `personBoardCoPresence` when set; otherwise derives from rects/centroids.
+    public static func coPresenceScore(from cv: CVFeatures) -> Double {
+        if cv.personBoardCoPresence > 0 {
+            return cv.personBoardCoPresence
+        }
+        return deriveCoPresence(from: cv)
+    }
+
+    /// Derive co-presence from board rect + people placement (pure geometry).
+    public static func deriveCoPresence(from cv: CVFeatures) -> Double {
+        guard cv.analysisSucceeded else { return 0 }
+        let boardOK = hasBoardCue(cv)
+        let peopleOK = hasPeopleCue(cv)
+        if let fallback = coPresencePrerequisite(boardOK: boardOK, peopleOK: peopleOK) { return fallback }
+        guard let board = cv.boardRect else { return 0.35 }
+        // Prefer people below the board (teaching front) and horizontally overlapping.
+        let cy = cv.personCentroidY ?? 0.65
+        let cx = cv.personCentroidX ?? 0.5
+        let boardBottom = board.y + board.height
+        let belowBoard = lowerBoardAlignment(cy, boardBottom: boardBottom)
+        let horizontalOverlap = horizontalBoardOverlap(cx, board: board)
+        let midBand = cv.personMidBandOccupancy
+        let multi = multiCueBoardQuality(from: cv)
+        let raw = 0.30 * multi
+            + 0.25 * belowBoard
+            + 0.20 * horizontalOverlap
+            + 0.15 * midBand
+            + 0.10 * min(1, cv.personCoverage * 4)
+        return min(1, max(0, raw))
+    }
+
+    private static func coPresencePrerequisite(boardOK: Bool, peopleOK: Bool) -> Double? {
+        guard boardOK && peopleOK else { return boardOK || peopleOK ? 0.08 : 0 }
+        return nil
+    }
+
+    private static func hasBoardCue(_ cv: CVFeatures) -> Bool {
+        cv.boardConfidence >= 0.35 || cv.multiCueBoardQuality >= 0.35
+    }
+
+    private static func hasPeopleCue(_ cv: CVFeatures) -> Bool {
+        cv.hasPeople || cv.personCoverage >= 0.02
+    }
+
+    private static func hasRawBoardConfidenceOnly(
+        aspect: Double,
+        geometry: Double,
+        edge: Double,
+        secondary: Double
+    ) -> Bool {
+        aspect <= 0 && geometry <= 0 && edge <= 0 && secondary <= 0
+    }
+
+    private static func lowerBoardAlignment(_ personY: Double, boardBottom: Double) -> Double {
+        personY >= boardBottom - 0.05 ? 1 : max(0, 1 - (boardBottom - personY) / 0.4)
+    }
+
+    private static func horizontalBoardOverlap(_ personX: Double, board: ImageNormalizedRect) -> Double {
+        let left = board.x
+        let right = board.x + board.width
+        guard personX < left || personX > right else { return 1 }
+        return max(0, 1 - min(abs(personX - left), abs(personX - right)) / 0.4)
+    }
+
+    /// Aspect quality for a candidate board rectangle (classroom boards are typically wide).
+    public static func boardAspectQuality(for rect: ImageNormalizedRect) -> Double {
+        let ar = rect.aspectRatio
+        let bands: [(upper: Double, score: (Double) -> Double)] = [
+            (0.6, { max(0, $0 / 0.6 * 0.25) }),
+            (1.0, { 0.25 + ($0 - 0.6) / 0.4 * 0.35 }),
+            (3.5, { 0.6 + min(0.4, (min($0, 2.5) - 1.0) / 1.5 * 0.4) }),
+            (5.0, { max(0.2, 1.0 - ($0 - 3.5) / 3.0) })
+        ]
+        if let band = bands.first(where: { ar <= $0.upper }) { return band.score(ar) }
+        return 0.15
+    }
+
+    /// Geometry quality: size and vertical placement typical of classroom boards.
+    public static func boardGeometryQuality(for rect: ImageNormalizedRect) -> Double {
+        let area = rect.area
+        // Prefer ~8%…45% of frame.
+        let sizeScore: Double
+        if area < 0.04 {
+            sizeScore = area / 0.04 * 0.45
+        } else if area <= 0.45 {
+            sizeScore = 0.55 + 0.45 * min(1, (area - 0.04) / 0.2)
+        } else if area <= 0.7 {
+            sizeScore = max(0.2, 1.0 - (area - 0.45) / 0.5)
+        } else {
+            sizeScore = 0.15
+        }
+        // Prefer centerY in upper-mid (~0.2…0.45).
+        let cy = rect.centerY
+        let verticalScore = 1.0 - min(1.0, abs(cy - 0.32) / 0.45)
+        return min(1, max(0, 0.55 * sizeScore + 0.45 * verticalScore))
+    }
+
+    /// Compute person mid-band occupancy from a list of person rects (top-left origin).
+    public static func midBandOccupancy(personRects: [ImageNormalizedRect], midY0: Double = 0.25, midY1: Double = 0.78) -> Double {
+        guard !personRects.isEmpty else { return 0 }
+        var total = 0.0
+        var inBand = 0.0
+        for r in personRects {
+            let a = max(1e-9, r.area)
+            total += a
+            let y0 = max(r.y, midY0)
+            let y1 = min(r.y + r.height, midY1)
+            let overlapH = max(0, y1 - y0)
+            let frac = overlapH / max(1e-9, r.height)
+            inBand += a * frac
+        }
+        return min(1, inBand / total)
+    }
+
+    /// Centroid of person rects weighted by area.
+    public static func peopleCentroid(personRects: [ImageNormalizedRect]) -> (x: Double, y: Double)? {
+        guard !personRects.isEmpty else { return nil }
+        var sx = 0.0, sy = 0.0, w = 0.0
+        for r in personRects {
+            let a = max(1e-9, r.area)
+            sx += r.centerX * a
+            sy += r.centerY * a
+            w += a
+        }
+        guard w > 0 else { return nil }
+        return (sx / w, sy / w)
+    }
+
+    /// Geometric co-presence from board + person rects (for Vision adapter).
+    public static func coPresence(
+        board: ImageNormalizedRect?,
+        boardConfidence: Double,
+        personRects: [ImageNormalizedRect],
+        personCoverage: Double
+    ) -> Double {
+        if let fallback = unavailableCoPresence(
+            board: board,
+            boardConfidence: boardConfidence,
+            personRects: personRects,
+            personCoverage: personCoverage
+        ) { return fallback }
+        guard let board else { return 0 }
+        return geometricCoPresence(
+            board: board,
+            boardConfidence: boardConfidence,
+            personRects: personRects,
+            personCoverage: personCoverage
+        )
+    }
+
+    private static func unavailableCoPresence(
+        board: ImageNormalizedRect?,
+        boardConfidence: Double,
+        personRects: [ImageNormalizedRect],
+        personCoverage: Double
+    ) -> Double? {
+        if lacksBoardCue(board, confidence: boardConfidence) { return noBoardFallback(personRects) }
+        return lacksPeopleCue(personRects, coverage: personCoverage) ? 0.05 : nil
+    }
+
+    private static func lacksBoardCue(_ board: ImageNormalizedRect?, confidence: Double) -> Bool {
+        confidence < 0.3 || board == nil
+    }
+
+    private static func noBoardFallback(_ personRects: [ImageNormalizedRect]) -> Double {
+        personRects.isEmpty ? 0 : 0.05
+    }
+
+    private static func lacksPeopleCue(_ personRects: [ImageNormalizedRect], coverage: Double) -> Bool {
+        personRects.isEmpty && coverage <= 0
+    }
+
+    private static func geometricCoPresence(
+        board: ImageNormalizedRect,
+        boardConfidence: Double,
+        personRects: [ImageNormalizedRect],
+        personCoverage: Double
+    ) -> Double {
+        let mid = midBandOccupancy(personRects: personRects)
+        let centroid = peopleCentroid(personRects: personRects)
+        let cy = centroid?.y ?? 0.65
+        let cx = centroid?.x ?? 0.5
+        let boardBottom = board.y + board.height
+        let belowBoard = cy >= boardBottom - 0.08 ? 1.0 : max(0, 1.0 - abs(boardBottom - cy) / 0.5)
+        let hOverlap: Double = {
+            let left = board.x
+            let right = board.x + board.width
+            if cx >= left && cx <= right { return 1.0 }
+            let dist = min(abs(cx - left), abs(cx - right))
+            return max(0, 1.0 - dist / 0.45)
+        }()
+        // Soft IoU-like: expand board downward as interaction band.
+        let interactionBand = ImageNormalizedRect(
+            x: board.x,
+            y: board.y,
+            width: board.width,
+            height: min(1 - board.y, board.height + 0.45)
+        )
+        var maxIoU = 0.0
+        for p in personRects {
+            maxIoU = max(maxIoU, interactionBand.iou(with: p))
+        }
+        let raw = 0.28 * min(1, boardConfidence)
+            + 0.22 * belowBoard
+            + 0.18 * hOverlap
+            + 0.18 * mid
+            + 0.14 * min(1, maxIoU * 3 + personCoverage * 2)
+        return min(1, max(0, raw))
+    }
+
+}
