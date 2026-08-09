@@ -55,6 +55,9 @@ struct LiveGuidanceView: View {
         GeometryReader { geo in
             let isWide = geo.size.width >= 900
             let inspectorWidth = min(420, max(360, geo.size.width * 0.29))
+            let compactPreviewHeight = geo.size.width > geo.size.height
+                ? min(geo.size.height * 0.42, 48)
+                : min(geo.size.height * 0.42, 180)
             Group {
                 if isWide {
                     VStack(spacing: 0) {
@@ -84,7 +87,7 @@ struct LiveGuidanceView: View {
                                 formatLabel: liveFormatLabel
                             )
                             previewPane
-                                .frame(height: geo.size.height * 0.42)
+                                .frame(height: compactPreviewHeight)
                             if inspectorIsVisible {
                                 guidancePane
                                     .frame(maxHeight: .infinity)

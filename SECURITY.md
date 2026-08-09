@@ -65,10 +65,11 @@ state and is not part of the shared package.
 
 Do not disclose security-sensitive details in a public issue or pull request.
 
-Before this repository becomes public, maintainers must publish and verify a
-monitored private security contact. No such contact is present in the current
-source candidate. After publication, maintainers must enable GitHub private
-vulnerability reporting and verify the repository's Report a vulnerability flow.
+Use the repository's GitHub **Report a vulnerability** flow for a private report.
+Read-only API verification on 2026-08-09 confirmed that private vulnerability
+reporting is enabled. That check did not prove notification delivery, named triage
+ownership, acknowledgement, or response time. Maintainers must complete a synthetic
+submission and acknowledgement test before treating the route as monitored.
 
 A report should include:
 

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Statische, interaktive Demonstration des lokalen Videographr-Arbeitsablaufs mit synthetischen Daten.">
+  <title>Videographr · Statische Demo</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="demo.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#demo-content">Zum Inhalt</a>
+  <div class="demo-shell" data-theme="day">
+    <header class="demo-header">
+      <a class="wordmark" href="../../" aria-label="Videographr Repository">Videographr</a>
+      <div class="demo-disclosure" role="status">
+        <strong>Statische Demo</strong>
+        <span>Synthetische Daten · keine Kamera, Aufnahme, Speicherung oder Weitergabe</span>
+      </div>
+      <a class="repo-link" href="https://github.com/sebastianspicker/videographr">Quellcode</a>
+    </header>
+
+    <main id="demo-content" tabindex="-1">
+      <section class="view active" data-view="setup" aria-labelledby="setup-title">
+        <div class="provenance"><span>LOKALER ENTWURF</span><span>sess · demo7b01</span><span>1 aktiver Scope</span></div>
+        <div class="view-heading">
+          <div><p class="eyebrow">Neue Sitzung</p><h1 id="setup-title">Aufnahme vorbereiten</h1></div>
+          <p class="plan">Geplant · 45 Min. · Plenum</p>
+        </div>
+        <div class="setup-grid">
+          <div class="stack">
+            <section class="panel" aria-labelledby="session-heading">
+              <div class="section-heading"><h2 id="session-heading">Sitzung</h2><span class="sim-label">Synthetische Beispieldaten</span></div>
+              <div class="form-grid">
+                <label>Titel<input id="session-title" value="Demo Mathematik 7b"></label>
+                <label>Fach<input value="Mathematik"></label>
+                <label class="wide">Lernziel<input value="Lineare Funktionen vergleichen"></label>
+              </div>
+            </section>
+            <section class="panel" aria-labelledby="consent-heading">
+              <div class="section-heading"><h2 id="consent-heading">Zweckgebundene Einwilligung</h2><span class="status positive">1 aktiv</span></div>
+              <p class="muted">Die Demo bildet Scopes ab. Sie speichert keine Einwilligung und verarbeitet keine Personendaten.</p>
+              <div class="scope-list">
+                <label class="scope"><input type="checkbox" checked data-scope="collection"><span><strong>Lokale Erhebung</strong><small>Ein kontinuierlicher Take auf dem Gerät</small></span></label>
+                <label class="scope"><input type="checkbox" data-scope="reflection"><span><strong>Lokale Reflexion</strong><small>Notizen mit Zeitbezug</small></span></label>
+                <label class="scope"><input type="checkbox" data-scope="secondary"><span><strong>Sekundärnutzung</strong><small>Erforderlich für Studienpakete</small></span></label>
+                <label class="scope"><input type="checkbox" data-scope="sharing"><span><strong>Externe Weitergabe</strong><small>Separat zu autorisieren</small></span></label>
+              </div>
+              <button class="button primary simulated" data-action="save-consent">Einwilligung speichern <span>SIMULIERT</span></button>
+            </section>
+          </div>
+          <aside class="panel readiness" aria-labelledby="readiness-heading">
+            <div class="section-heading"><h2 id="readiness-heading">Startbedingungen</h2><span class="status warning">Demo</span></div>
+            <ul class="check-list">
+              <li class="met"><span>✓</span><div><strong>Sitzungskontext</strong><small>Zweck und Lernziel sind angegeben.</small></div></li>
+              <li id="consent-check" class="met"><span>✓</span><div><strong>Einwilligung</strong><small>Erhebung ist autorisiert.</small></div></li>
+              <li><span>○</span><div><strong>Geräteprüfung</strong><small>Nur in der iOS-App verfügbar.</small></div></li>
+            </ul>
+            <div class="notice warning"><strong>Noch nicht aufnahmebereit</strong><p>Diese Web-Demo kann keine Geräte- oder Ressourcenprüfung durchführen.</p></div>
+            <button class="button secondary simulated" data-action="save-session">Entwurf speichern <span>SIMULIERT</span></button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view live-view" data-view="live" aria-labelledby="live-title" hidden>
+        <div class="provenance night"><span>EVIDENCE-SAFE</span><span>sess · demo7b01</span><span id="record-state">BEREIT · NICHT AUFNEHMEND</span></div>
+        <div class="live-layout">
+          <div class="preview-panel">
+            <div class="live-toolbar"><div><p class="eyebrow">Technische Beobachtung</p><h1 id="live-title">Live & Aufnahme</h1></div><span class="status dark">SIMULATOR</span></div>
+            <div class="camera-placeholder" aria-label="Synthetische Kameravorschau">
+              <div class="frame-guide"></div>
+              <div class="preview-copy"><strong>Keine Kameravorschau</strong><span>Statische Web-Demo</span></div>
+              <span class="format">1920 × 1080 · synthetisch</span>
+            </div>
+            <div class="capture-dock">
+              <button class="record-button simulated" data-action="record" aria-describedby="record-help"><span class="record-dot"></span>Aufnahme starten <em>SIMULIERT</em></button>
+              <p id="record-help">Der Klick startet keine Aufnahme und greift nicht auf Kamera oder Mikrofon zu.</p>
+            </div>
+          </div>
+          <aside class="instrument-panel">
+            <div class="section-heading"><h2>Aufnahme prüfen</h2><span class="status dark">Direkte Signale</span></div>
+            <div class="observation-list">
+              <div><span>Bild verfügbar</span><strong>○ Nicht prüfbar</strong></div>
+              <div><span>Belichtung</span><strong>○ Synthetisch</strong></div>
+              <div><span>Kameraruhe</span><strong>○ Synthetisch</strong></div>
+              <div><span>Audiopegel</span><strong>○ Nicht verfügbar</strong></div>
+            </div>
+            <p class="boundary">Diese Werte beschreiben Aufnahmebedingungen, nicht Unterrichtsqualität.</p>
+            <div id="record-result" class="notice night-notice" aria-live="polite"><strong>Demo-Modus</strong><p>Die Web-Demo bleibt im Leerlauf.</p></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" data-view="reflect" aria-labelledby="reflect-title" hidden>
+        <div class="provenance"><span>LOKALE REFLEXION</span><span>sess · demo7b01</span><span>kein Medium</span></div>
+        <div class="view-heading"><div><p class="eyebrow">Menschliche Einordnung</p><h1 id="reflect-title">Reflektieren</h1></div><span class="status neutral">ENTWURF</span></div>
+        <div class="reflect-grid">
+          <section class="media-empty panel">
+            <div class="media-mark">▶</div><h2>Kein Medium verknüpft</h2><p>Die Web-Demo lädt keine Dateien und spielt kein Video ab.</p>
+            <button class="button secondary simulated" data-action="import">Video auswählen <span>SIMULIERT</span></button>
+          </section>
+          <section class="panel analysis-panel" aria-labelledby="laf-heading">
+            <p class="eyebrow">Lesson Analysis Framework</p><h2 id="laf-heading">Was zeigt sich in Bezug auf das Lernziel?</h2>
+            <p class="muted">Strukturhilfe für die eigene Analyse, keine automatische Bewertung.</p>
+            <label class="textarea-label">Eigene Beobachtung<textarea id="reflection-note" rows="7">Am synthetischen Tafelbild werden zwei lineare Funktionen verglichen.</textarea></label>
+            <div class="action-row"><span id="note-count">1 / 4 Antworten</span><button class="button primary simulated" data-action="save-note">Entwurf speichern <span>SIMULIERT</span></button></div>
+          </section>
+          <aside class="panel export-panel">
+            <p class="eyebrow">Evidenz & Export</p><h2>Study package v3</h2><p class="mono">sha256 · membership exact · no video payload</p>
+            <p>Das reale Paket enthält Metadaten, Beobachtungen und Annotationen, aber keine Videodatei.</p>
+            <div id="export-gate" class="notice warning"><strong>Export gesperrt</strong><p>Sekundärnutzung und externe Weitergabe fehlen.</p></div>
+            <button class="button secondary simulated" data-action="export">Paket prüfen <span>SIMULIERT</span></button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" data-view="learn" aria-labelledby="learn-title" hidden>
+        <div class="view-heading"><div><p class="eyebrow">Lokaler Referenzkatalog</p><h1 id="learn-title">Lernen</h1><p>Methode, Technik und externe Geräte für Unterrichtsvideographien mit Videographr.</p></div></div>
+        <div class="catalogue" id="catalogue-list">
+          <button class="topic" data-topic="method"><span class="topic-index">01</span><span><strong>Methode: Unterrichtsvideographie</strong><small>Zweck, Planung und Evidenzgrenzen</small></span><span aria-hidden="true">→</span></button>
+          <button class="topic" data-topic="technique"><span class="topic-index">02</span><span><strong>Aufnahmetechnik</strong><small>Position, Ton und kontinuierliche Takes</small></span><span aria-hidden="true">→</span></button>
+          <button class="topic" data-topic="devices"><span class="topic-index">03</span><span><strong>Externe Geräte</strong><small>Stative, Mikrofone und lokale Speicherung</small></span><span aria-hidden="true">→</span></button>
+        </div>
+        <article class="panel topic-detail" id="topic-detail" hidden tabindex="-1"><button class="text-button" data-action="back-catalogue">← Katalog</button><p class="eyebrow">Methode</p><h2>Unterrichtsvideographie</h2><p>Eine Aufnahme wird aus einem dokumentierten Zweck, einem vorher festgelegten Beobachtungsrahmen und einer gültigen Einwilligung geplant.</p><p>Technische Signale helfen bei der Aufnahme. Sie bewerten weder Unterricht noch Lernen und ersetzen keine menschliche Auswertung.</p></article>
+      </section>
+
+      <section class="view" data-view="info" aria-labelledby="info-title" hidden>
+        <div class="view-heading"><div><p class="eyebrow">Wissenschaftliche Alpha</p><h1 id="info-title">Videographr</h1><p>Lokale Alpha-Software für kontinuierliche Videoaufnahme und evidenzverknüpfte Reflexion in der Lehrkräftebildung.</p></div></div>
+        <div class="info-grid">
+          <section class="panel"><h2>Implementierter Ablauf</h2><p>Setup mit zweckgebundener Einwilligung → technische Aufnahmehinweise → lokale Reflexion mit selbst gesetzten Zeitmarken → Metadatenexport.</p></section>
+          <section class="panel"><h2>Evidenzgrenze</h2><p>Kein validiertes Kodierinstrument, kein Wirksamkeitsnachweis, keine automatische Bewertung von Unterricht, Lernen, Aufmerksamkeit oder Beteiligung.</p></section>
+          <section class="panel"><h2>Plattform & Datenschutz</h2><p>Die reale App arbeitet lokal auf iOS und iPadOS. Diese Demo enthält ausschließlich synthetische Fixture-Daten und hat keine Datei-, Kamera-, Mikrofon-, Netzwerk- oder Speicherfunktion.</p></section>
+          <section class="panel"><h2>Nicht enthalten</h2><p>Kein Portal-Upload, keine Konten, keine Multi-Cam-Synchronisation, kein Videoschnitt und kein Videoexport im Studienpaket.</p></section>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tab-bar" aria-label="Demo-Bereiche">
+      <button class="tab active" data-tab="setup" aria-current="page"><span aria-hidden="true">▤</span><strong>Setup</strong></button>
+      <button class="tab" data-tab="live"><span aria-hidden="true">◉</span><strong>Live</strong></button>
+      <button class="tab" data-tab="reflect"><span aria-hidden="true">▱</span><strong>Reflektieren</strong></button>
+      <button class="tab" data-tab="learn"><span aria-hidden="true">▥</span><strong>Lernen</strong></button>
+      <button class="tab" data-tab="info"><span aria-hidden="true">ⓘ</span><strong>Info</strong></button>
+    </nav>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </div>
+</body>
+</html>
