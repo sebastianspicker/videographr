@@ -97,6 +97,12 @@ playground.xcworkspace
 *.mobileprovision
 Secrets.xcconfig
 **/secrets/
+/.repowise/
+/.mcp.json
+/AUDIT_LEDGER.md
+/logs/
+/wip/
+/work-in-progress/
 
 # Local classroom media, exports, and capture data
 *.mp4
