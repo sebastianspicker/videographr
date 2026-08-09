@@ -105,6 +105,7 @@ Secrets.xcconfig
 /work-in-progress/
 
 # Local classroom media, exports, and capture data
+/docs/agent/
 *.mp4
 *.mov
 *.m4a
