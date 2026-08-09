@@ -42,7 +42,6 @@ public struct BuildProvenance: Codable, Equatable, Sendable {
         ))
     }
 }
-
 public struct CaptureTakeManifest: Codable, Equatable, Identifiable, Sendable {
     public struct Values: Sendable {
         public var id = UUID()
@@ -235,4 +234,3 @@ public struct StudyExportProjection: Equatable, Sendable {
         )
     }
 }
-

@@ -14,7 +14,6 @@ public enum PlacementQualityLevel: String, Equatable, Sendable, CaseIterable {
         }
     }
 }
-
 public struct PlacementDimension: Equatable, Identifiable, Sendable {
     public var id: String
     public var labelDE: String
@@ -28,4 +27,3 @@ public struct PlacementDimension: Equatable, Identifiable, Sendable {
         self.detailDE = detailDE
     }
 }
-

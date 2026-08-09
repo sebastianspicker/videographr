@@ -11,7 +11,6 @@ public enum GuidanceOperatingMode: Equatable, Sendable {
         return false
     }
 }
-
 /// A direct, non-pedagogical measurement reported by the capture pipeline.
 public struct CaptureObservabilityDimension: Equatable, Identifiable, Sendable {
     public enum Status: String, Equatable, Sendable {
@@ -215,4 +214,3 @@ public struct ExperimentalHypothesisSet: Equatable, Sendable {
         ExperimentalHypothesisSet(hypotheses: (coding.ipnDimensions + coding.timssActivities + coding.gtiDimensions).map(ExperimentalHypothesis.init))
     }
 }
-
