@@ -175,6 +175,7 @@ final class CameraSessionModel: NSObject, ObservableObject {
     internal var lastPersistedObservationAt: CFTimeInterval = 0
     internal let observerStorage = CaptureObserverStorage()
     internal var simulatorTimer: Timer?
+    internal var simulatorTick = 0
     internal var simAudioPhase = 0
     internal var lifecycleGeneration = 0
     internal var liveIsActive = false

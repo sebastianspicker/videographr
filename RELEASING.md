@@ -52,15 +52,17 @@ passing tour.
 
 ## 4. Verify repository settings
 
-Before publication:
+Before tagging or publishing a prerelease:
 
 1. Configure branch protection and required checks on the default branch.
-2. Verify a monitored private security and conduct contact.
-3. Confirm repository visibility and public metadata.
-4. Verify issue templates, contribution guidance, and reporting links in the
+2. Confirm repository visibility and public metadata.
+3. Confirm GitHub private vulnerability reporting remains enabled, then verify a
+   synthetic submission, notification delivery, named triage ownership, and
+   acknowledgement through the Report a vulnerability flow.
+4. Verify a separate monitored private conduct route if conduct reports must not
+   use the vulnerability-reporting flow.
+5. Verify issue templates, contribution guidance, and reporting links in the
    rendered repository.
-5. After public visibility, enable GitHub private vulnerability reporting and
-   verify the Report a vulnerability flow.
 
 These settings cannot be verified from a local worktree.
 
