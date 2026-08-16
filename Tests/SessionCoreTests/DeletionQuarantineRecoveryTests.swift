@@ -103,6 +103,30 @@ extension SessionCoreTests {
     func testSessionStoreReconciliationLeavesAmbiguousInvalidAndLinkedQuarantinesUntouched() throws {
         try sessionStoreReconciliationLeavesAmbiguousInvalidAndLinkedQuarantinesAssertions()
     }
+
+    func testDeletionQuarantineIdentityMapsThreeCanonicalIDsAndRejectsInvalidForms() throws {
+        let store = testSessionStore(rootDirectory: testTemporaryDirectory(named: "uv-store-quarantine-triple-identity"))
+        let transactionID = UUID()
+        let sessionID = UUID()
+        let mediaID = UUID()
+
+        let fileName = store.deletionQuarantineFileName(
+            sessionID: sessionID,
+            transactionID: transactionID,
+            mediaID: mediaID
+        )
+        let identity = try XCTUnwrap(store.deletionQuarantineIdentity(for: fileName))
+
+        XCTAssertEqual(identity.transactionID, transactionID)
+        XCTAssertEqual(identity.sessionID, sessionID)
+        XCTAssertEqual(identity.mediaID, mediaID)
+
+        let noncanonicalFileName = ".deleting-\(transactionID.uuidString.uppercased())-\(sessionID.uuidString)-\(mediaID.uuidString).mp4"
+        XCTAssertNil(store.deletionQuarantineIdentity(for: noncanonicalFileName))
+
+        let malformedFileName = ".deleting-\(transactionID.uuidString)-\(sessionID.uuidString)-not-a-uuid.mp4"
+        XCTAssertNil(store.deletionQuarantineIdentity(for: malformedFileName))
+    }
 }
 
 private let sessionStoreReconciliationLeavesAmbiguousInvalidAndLinkedQuarantinesAssertions: @Sendable () throws -> Void = {

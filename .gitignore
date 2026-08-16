@@ -49,7 +49,10 @@ playground.xcworkspace
 .vscode/
 .cursor/
 .claude/
-.codacy/
+/.codacy/*
+!/.codacy/codacy.config.json
+!/.codacy/codacy.yaml
+!/.codacy/codacy.yml
 .codex/
 .agent/
 .agents/

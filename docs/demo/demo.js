@@ -11,6 +11,14 @@ function showToast(message) {
   toastTimer = window.setTimeout(() => { toast.hidden = true; }, 3600);
 }
 
+function renderNotice(container, headline, message) {
+  const title = document.createElement('strong');
+  title.textContent = headline;
+  const detail = document.createElement('p');
+  detail.textContent = message;
+  container.replaceChildren(title, detail);
+}
+
 function openView(name, updateHash = true) {
   const next = views.find((view) => view.dataset.view === name) || views[0];
   views.forEach((view) => {
@@ -37,7 +45,11 @@ document.querySelectorAll('[data-action]').forEach((button) => {
   button.addEventListener('click', () => {
     const action = button.dataset.action;
     if (action === 'record') {
-      document.querySelector('#record-result').innerHTML = '<strong>Demo-Modus: Aufnahme nicht verfügbar</strong><p>Es wurde nichts aufgezeichnet. Der Zustand bleibt „nicht aufnehmend“.</p>';
+      renderNotice(
+        document.querySelector('#record-result'),
+        'Demo-Modus: Aufnahme nicht verfügbar',
+        'Es wurde nichts aufgezeichnet. Der Zustand bleibt „nicht aufnehmend“.',
+      );
       showToast('Simuliert: Keine Kamera oder Aufnahme wurde gestartet.');
     } else if (action === 'save-consent') {
       showToast('Simuliert: Die Scope-Auswahl bleibt nur bis zum Neuladen dieser Seite erhalten.');
@@ -72,9 +84,15 @@ document.querySelectorAll('[data-scope]').forEach((input) => {
     const sharing = document.querySelector('[data-scope="sharing"]').checked;
     const gate = document.querySelector('#export-gate');
     gate.classList.toggle('warning', !(secondary && sharing));
-    gate.innerHTML = secondary && sharing
-      ? '<strong>Scopes vollständig</strong><p>Eine echte App könnte nun ein Metadatenpaket vorbereiten. Diese Demo erzeugt keine Datei.</p>'
-      : '<strong>Export gesperrt</strong><p>Sekundärnutzung und externe Weitergabe fehlen.</p>';
+    if (secondary && sharing) {
+      renderNotice(
+        gate,
+        'Scopes vollständig',
+        'Eine echte App könnte nun ein Metadatenpaket vorbereiten. Diese Demo erzeugt keine Datei.',
+      );
+    } else {
+      renderNotice(gate, 'Export gesperrt', 'Sekundärnutzung und externe Weitergabe fehlen.');
+    }
   });
 });
 
