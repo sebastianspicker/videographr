@@ -1,6 +1,18 @@
 import Foundation
 import GuidanceEngine
 
+struct StrictUUIDTriple {
+    let transactionID: UUID
+    let sessionID: UUID
+    let mediaID: UUID
+}
+
+private struct StrictUUIDTripleTexts {
+    let transactionID: String
+    let sessionID: String
+    let mediaID: String
+}
+
 extension SessionStore {
     func fileURL(for id: UUID) -> URL {
         rootDirectory.appendingPathComponent("\(id.uuidString).json")
@@ -42,11 +54,15 @@ extension SessionStore {
         return (identifiers[0], identifiers[1])
     }
 
-    func strictUUIDTriple(from body: String) -> (UUID, UUID, UUID)? {
-        guard let (first, second, third) = strictUUIDTripleTexts(from: body) else { return nil }
-        let texts = [first, second, third]
-        guard let identifiers = canonicalUUIDs(from: texts) else { return nil }
-        return (identifiers[0], identifiers[1], identifiers[2])
+    func strictUUIDTriple(from body: String) -> StrictUUIDTriple? {
+        guard let texts = strictUUIDTripleTexts(from: body) else { return nil }
+        let textValues = [texts.transactionID, texts.sessionID, texts.mediaID]
+        guard let identifiers = canonicalUUIDs(from: textValues) else { return nil }
+        return StrictUUIDTriple(
+            transactionID: identifiers[0],
+            sessionID: identifiers[1],
+            mediaID: identifiers[2]
+        )
     }
 
     func UUIDTextsAreCanonical(_ texts: [String], identifiers: [UUID]) -> Bool {
@@ -68,17 +84,17 @@ extension SessionStore {
         return (String(body[..<separator]), String(body[body.index(after: separator)...]))
     }
 
-    private func strictUUIDTripleTexts(from body: String) -> (String, String, String)? {
+    private func strictUUIDTripleTexts(from body: String) -> StrictUUIDTripleTexts? {
         let hasExpectedWidth = [body.utf8.count == 110, body.count == 110].allSatisfy({ $0 })
         guard hasExpectedWidth else { return nil }
         let firstSeparator = body.index(body.startIndex, offsetBy: 36)
         let secondSeparator = body.index(body.startIndex, offsetBy: 73)
         let hasSeparators = [body[firstSeparator] == "-", body[secondSeparator] == "-"].allSatisfy({ $0 })
         guard hasSeparators else { return nil }
-        return (
-            String(body[..<firstSeparator]),
-            String(body[body.index(after: firstSeparator)..<secondSeparator]),
-            String(body[body.index(after: secondSeparator)...])
+        return StrictUUIDTripleTexts(
+            transactionID: String(body[..<firstSeparator]),
+            sessionID: String(body[body.index(after: firstSeparator)..<secondSeparator]),
+            mediaID: String(body[body.index(after: secondSeparator)...])
         )
     }
 

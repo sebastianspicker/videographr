@@ -39,10 +39,12 @@ the project in public spaces (e.g. using an official project account).
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behaviour should be
-reported through the private maintainer contact listed on the GitHub repository.
-If no private route is visible, do not publish sensitive details. A monitored
-private contact is required before the repository becomes public. All complaints
-will be reviewed and investigated promptly and fairly.
+reported through a monitored private conduct route named on the GitHub repository.
+No separate conduct route was verified during the 2026-08-09 release review. Do
+not publish sensitive details while that operational route is unavailable.
+Maintainers must provision and test it before representing private conduct
+reporting as available. Submitted complaints will be reviewed and investigated
+promptly and fairly.
 
 ## Attribution
 

@@ -188,9 +188,9 @@ extension SessionStore {
             .dropLast(Self.movieExtension.count))
         guard let identities = strictUUIDTriple(from: body) else { return nil }
         return DeletionQuarantineIdentity(
-            sessionID: identities.1,
-            transactionID: identities.0,
-            mediaID: identities.2
+            sessionID: identities.sessionID,
+            transactionID: identities.transactionID,
+            mediaID: identities.mediaID
         )
     }
 

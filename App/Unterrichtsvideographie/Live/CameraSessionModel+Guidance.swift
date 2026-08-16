@@ -42,6 +42,7 @@ extension CameraSessionModel {
         isSessionRunning = true
         simulatorTimer?.invalidate()
         simulatorTimer = nil
+        simulatorTick = 0
         applySimulatorFrame(FrameAnalyzer.syntheticClassroom())
         cvFeatures = .fixtureClassroomPresent()
         audioSample = makeAudioSample { values in
@@ -55,12 +56,11 @@ extension CameraSessionModel {
     }
 
     private func scheduleSimulatorUpdates(generation: Int) {
-        var tick = 0
         simulatorTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: true) { [weak self] _ in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 guard let self, self.liveIsActive, self.lifecycleGeneration == generation else { return }
-                tick += 1
-                self.applySimulatorTick(tick)
+                self.simulatorTick += 1
+                self.applySimulatorTick(self.simulatorTick)
             }
         }
     }

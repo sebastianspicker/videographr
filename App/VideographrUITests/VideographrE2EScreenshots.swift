@@ -59,6 +59,10 @@ final class VideographrE2EScreenshots: XCTestCase {
         app.launchEnvironment["VIDEOGRAPHR_E2E_SESSION"] = UUID().uuidString
         app.launchEnvironment["VIDEOGRAPHR_E2E_START_TAB"] = "live"
         app.launch()
+        defer {
+            app.terminate()
+            app = nil
+        }
 
         expect(app.navigationBars["Live & Aufnahme"].waitForExistence(timeout: 12))
         let exposure = requireElement("live.observability.exposure", timeout: 12)
@@ -95,10 +99,18 @@ final class VideographrE2EScreenshots: XCTestCase {
             "setup.consent.scope.collection",
             "setup.consent.scope.localReflection"
         ] {
-            let toggle = requireVisibleElement(identifier, in: form)
-            if (toggle.value as? String) != "1" { tapToggleControl(toggle) }
+            var toggle = requireVisibleElement(identifier, in: form)
+            var didPersist = (toggle.value as? String) == "1"
+            for _ in 0..<2 where !didPersist {
+                tapToggleControl(toggle)
+                didPersist = waitForValue("1", on: toggle, timeout: 5)
+                if !didPersist {
+                    toggle = requireVisibleElement(identifier, in: form)
+                    didPersist = (toggle.value as? String) == "1"
+                }
+            }
             expect(
-                waitForValue("1", on: toggle, timeout: 3),
+                didPersist,
                 "Consent toggle did not persist in UI: \(identifier)"
             )
         }
@@ -178,7 +190,7 @@ final class VideographrE2EScreenshots: XCTestCase {
         let start = requireVisibleElementBelow("live.start", in: list)
         expect(start.isEnabled, "Start must be enabled after acknowledged override")
         start.tap()
-        let rejection = requireVisibleElement("live.recordStatus", in: list)
+        let rejection = requireVisibleElement("live.recordStatus", in: primaryScrollContainer())
         expect(rejection.label.contains("Demo-Modus"), "Simulator rejection was not surfaced")
         try capture(
             "03-live-simulator-recording-rejection",

@@ -11,16 +11,43 @@ SHOT_DIR="${E2E_SCREENSHOT_DIR:-$ROOT/docs/screenshots/e2e}"
 SHOT_PARENT="$(dirname "$SHOT_DIR")"
 DEVICE_NAME="${E2E_DEVICE:-iPhone 17 Pro}"
 DERIVED="${E2E_DERIVED:-$ROOT/.derived-e2e}"
+ARTIFACT_DIR="${E2E_ARTIFACT_DIR:-}"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/videographr-e2e.XXXXXX")"
 RESULT_BUNDLE="$WORK_DIR/result.xcresult"
+REGRESSION_RESULT_BUNDLE="$WORK_DIR/regressions.xcresult"
 EXPORTED_ATTACHMENTS="$WORK_DIR/attachments"
 STAGING_DIR="$WORK_DIR/staging"
+BUILD_LOG="$WORK_DIR/build.log"
+REGRESSION_LOG="$WORK_DIR/regressions.log"
+TOUR_LOG="$WORK_DIR/tour.log"
 PUBLISH_DIR=""
 BACKUP_DIR=""
+
+preserve_artifacts() {
+  [[ -n "$ARTIFACT_DIR" ]] || return 0
+
+  mkdir -p "$ARTIFACT_DIR"
+  for artifact in \
+    "$BUILD_LOG" \
+    "$REGRESSION_LOG" \
+    "$TOUR_LOG" \
+    "$REGRESSION_RESULT_BUNDLE" \
+    "$RESULT_BUNDLE"
+  do
+    if [[ -e "$artifact" || -L "$artifact" ]]; then
+      cp -R -- "$artifact" "$ARTIFACT_DIR/"
+    fi
+  done
+  if [[ -d "$STAGING_DIR" ]]; then
+    mkdir -p "$ARTIFACT_DIR/screenshots"
+    cp -R "$STAGING_DIR/." "$ARTIFACT_DIR/screenshots/"
+  fi
+}
 
 cleanup() {
   exit_status=$?
   trap - EXIT
+  preserve_artifacts
   rm -rf -- "$WORK_DIR"
   if [[ -n "$PUBLISH_DIR" ]]; then
     rm -rf -- "$PUBLISH_DIR"
@@ -65,7 +92,8 @@ xcodebuild \
   -scheme "$SCHEME" \
   -destination "platform=iOS Simulator,id=$UDID" \
   -derivedDataPath "$DERIVED" \
-  build-for-testing
+  build-for-testing \
+  2>&1 | tee "$BUILD_LOG"
 
 APP_BUNDLE="$DERIVED/Build/Products/Debug-iphonesimulator/Unterrichtsvideographie.app"
 echo "==> Install clean app container + privacy grants"
@@ -73,6 +101,18 @@ xcrun simctl uninstall "$UDID" "$BUNDLE_ID" 2>/dev/null || true
 xcrun simctl install "$UDID" "$APP_BUNDLE"
 xcrun simctl privacy "$UDID" grant camera "$BUNDLE_ID"
 xcrun simctl privacy "$UDID" grant microphone "$BUNDLE_ID"
+
+echo "==> Focused Setup and compact Live regressions"
+xcodebuild \
+  -project "$PROJECT" \
+  -scheme "$SCHEME" \
+  -destination "platform=iOS Simulator,id=$UDID" \
+  -derivedDataPath "$DERIVED" \
+  -only-testing:VideographrUITests/VideographrE2EScreenshots/testE2E_setupTraversalHandlesVirtualizedFields \
+  -only-testing:VideographrUITests/VideographrE2EScreenshots/testLiveCompactContract \
+  -resultBundlePath "$REGRESSION_RESULT_BUNDLE" \
+  test-without-building \
+  2>&1 | tee "$REGRESSION_LOG"
 
 echo "==> Assertion-backed XCUITest tour → staging"
 xcodebuild \
@@ -82,7 +122,8 @@ xcodebuild \
   -derivedDataPath "$DERIVED" \
   -only-testing:VideographrUITests/VideographrE2EScreenshots/testE2E_coreFunctionsScreenshotTour \
   -resultBundlePath "$RESULT_BUNDLE" \
-  test-without-building
+  test-without-building \
+  2>&1 | tee "$TOUR_LOG"
 
 echo "==> Export and verify retained XCTest attachments"
 xcrun xcresulttool export attachments \
