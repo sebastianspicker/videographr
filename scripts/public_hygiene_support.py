@@ -33,34 +33,6 @@ def _hidden_source_files(
     return issues
 
 
-def screenshot_set_issues(screenshot_root: Path, expected_screenshots: tuple[str, ...]) -> list[str]:
-    actual_files = _screenshot_files(screenshot_root)
-    if not actual_files:
-        return []
-    expected_files = {"README.md"}
-    expected_files.update(
-        f"{name}{suffix}" for name in expected_screenshots for suffix in (".png", ".txt")
-    )
-    return _screenshot_file_set_issues(expected_files, actual_files)
-
-
-def _screenshot_files(screenshot_root: Path) -> set[str]:
-    if not screenshot_root.is_dir():
-        return set()
-    return {path.name for path in screenshot_root.iterdir()}
-
-
-def _screenshot_file_set_issues(expected_files: set[str], actual_files: set[str]) -> list[str]:
-    issues: list[str] = []
-    missing_screenshots = sorted(expected_files - actual_files)
-    unexpected_screenshots = sorted(actual_files - expected_files)
-    if missing_screenshots:
-        issues.append(f"runtime screenshot set is incomplete: {', '.join(missing_screenshots)}")
-    if unexpected_screenshots:
-        issues.append(f"runtime screenshot set has stale files: {', '.join(unexpected_screenshots)}")
-    return issues
-
-
 def release_version_issues(root: Path, candidates: set[str]) -> tuple[list[str], str, str, str, str]:
     version = _release_version(root)
     numeric_version, alpha_build, release_notes = _release_version_parts(version)

@@ -189,9 +189,8 @@ extension SessionStore {
         values.role = .otherImported
         values.relativePath = "pending.mp4"
         values.originalFileName = sourceURL.lastPathComponent
-        let provisional = SessionMediaAsset(values)
-        values.id = provisional.id
-        values.relativePath = "\(provisional.id.uuidString).mp4"
+        values.id = importedMediaIDFactory()
+        values.relativePath = "\(values.id.uuidString).mp4"
         let finalized = SessionMediaAsset(values)
         try validateMediaAsset(finalized, sessionID: sessionID)
         return finalized

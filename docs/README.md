@@ -12,7 +12,6 @@ human-validation, and effectiveness evidence.
 | [Evaluation guide](EVALUATION.md) | Safe evaluation procedure and reporting language |
 | [Research gap inventory](RESEARCH_GAP_INVENTORY.md) | Implemented controls and validation still required |
 | [Annotated bibliography](references/unterrichtsvideographie.md) | Non-systematic background notes requiring subject review |
-| [Screenshot policy](screenshots/README.md) | Capture, validation, and publication contract |
 | [Release notes](releases/0.1.0-alpha.1.md) | Contents and limits of the local alpha candidate |
 | [Release status](../RELEASE_STATUS.md) | Dated local checks and external blockers |
 | [Release procedure](../RELEASING.md) | Source-prerelease validation and publication steps |

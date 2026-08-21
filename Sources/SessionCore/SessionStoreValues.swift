@@ -6,6 +6,7 @@ extension SessionStore {
         var policyVerificationHook: ((URL) throws -> Void)?
         var importSourceOpenedHook: (() throws -> Void)?
         var persistenceFaultHook: ((PersistenceFaultPoint) throws -> Void)?
+        var importedMediaIDFactory: (() -> UUID)?
     }
 
     convenience init(_ values: Values) {
@@ -13,5 +14,8 @@ extension SessionStore {
         policyVerificationHook = values.policyVerificationHook
         importSourceOpenedHook = values.importSourceOpenedHook
         persistenceFaultHook = values.persistenceFaultHook
+        if let importedMediaIDFactory = values.importedMediaIDFactory {
+            self.importedMediaIDFactory = importedMediaIDFactory
+        }
     }
 }

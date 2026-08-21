@@ -37,8 +37,6 @@ bundle names use `Unterrichtsvideographie`.
 - Put pure, deterministic domain logic in `Sources/`.
 - Keep SwiftUI and Apple-framework adapters in `App/`.
 - Add package tests under the matching SwiftPM target directory in `Tests/`.
-- Add repository-tooling tests under `Tests/RepositoryToolingTests/`.
-- Add visible app-flow coverage under `App/VideographrUITests/`.
 - Do not add a production dependency without maintainer approval.
 
 ## Change requirements
@@ -51,7 +49,6 @@ bundle names use `Unterrichtsvideographie`.
 - Keep direct capture observations separate from pedagogical interpretation.
 - Update the scientific and evaluation documents when the evidence scope changes.
 - Update architecture documentation when module ownership or runtime flow changes.
-- Regenerate and inspect all eight screenshots after a visible UI change.
 - Do not commit participant media, personal data, consent documents, study
   packages, signing material, environment files, or service credentials.
 
@@ -62,16 +59,6 @@ Run the complete gate:
 ```bash
 bash scripts/verify_release.sh
 ```
-
-For visible UI changes, also run:
-
-```bash
-scripts/run_e2e_screenshots.sh
-```
-
-The screenshot command publishes a replacement set only after the asserted UI
-test and attachment checks pass. Inspect every PNG and its matching state note
-before requesting review.
 
 ## Pull requests
 

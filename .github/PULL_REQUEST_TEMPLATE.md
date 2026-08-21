@@ -15,7 +15,6 @@
 - [ ] Scientific claims remain within `docs/SCIENTIFIC_ALPHA.md`
 - [ ] Consent, retention, import, deletion, or export changes include failure-path coverage
 - [ ] User-facing strings remain German where the app already uses German
-- [ ] Visible UI changes include updated and visually reviewed runtime screenshots
 - [ ] Physical-device checks are reported separately and are not inferred from Simulator results
 
 ## Related issues

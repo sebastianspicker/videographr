@@ -69,5 +69,5 @@ reflection or educational outcomes.
 | Human validated | Not available. |
 | Effectiveness tested | Not available. |
 
-The dated [release status](../RELEASE_STATUS.md) records the checks exercised for
-the current worktree.
+The [release status](../RELEASE_STATUS.md) records the remaining candidate and
+external-validation gates.

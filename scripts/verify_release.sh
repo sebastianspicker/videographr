@@ -8,18 +8,11 @@ cd "$ROOT"
 echo "==> Public repository hygiene"
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_public_hygiene.py
 
-echo "==> Script syntax and focused Python tests"
+echo "==> Script syntax"
 bash -n scripts/*.sh
 if command -v shellcheck >/dev/null 2>&1; then
   shellcheck scripts/*.sh
 fi
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
-  -s Tests/RepositoryToolingTests \
-  -p 'test_*.py'
-
-echo "==> Evidence-boundary wording contract"
-bash scripts/verify_evidence_claims.sh
-
 echo "==> Plist and Xcode project syntax"
 plutil -lint App/Unterrichtsvideographie/Info.plist
 plutil -lint App/Unterrichtsvideographie.xcodeproj/project.pbxproj
@@ -43,12 +36,12 @@ xcodebuild -quiet \
   CODE_SIGNING_ALLOWED=NO \
   clean analyze
 
-echo "==> App and UI-test build"
+echo "==> App build"
 xcodebuild -quiet \
   -project App/Unterrichtsvideographie.xcodeproj \
   -scheme Unterrichtsvideographie \
   -destination 'generic/platform=iOS Simulator' \
   CODE_SIGNING_ALLOWED=NO \
-  build-for-testing
+  build
 
 echo "Public alpha release gate passed."

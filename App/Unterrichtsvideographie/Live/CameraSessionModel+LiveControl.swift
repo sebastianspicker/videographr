@@ -46,12 +46,6 @@ extension CameraSessionModel {
         windowedCoding = .empty()
         lastPersistedSnapshotAt = 0
         motion.start()
-        #if DEBUG && targetEnvironment(simulator)
-        if ProcessInfo.processInfo.environment["VIDEOGRAPHR_E2E_SESSION"] != nil {
-            startSimulatorFallback(reason: "Stabile Simulatorvorschau für UI-Prüfung.", generation: generation)
-            return
-        }
-        #endif
         requestMicThenVideo(generation: generation)
     }
 

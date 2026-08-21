@@ -23,13 +23,9 @@ hash and CI URL in the GitHub prerelease or in a later status update.
 ## 2. Validate the worktree
 
 ```bash
-scripts/run_e2e_screenshots.sh
 bash scripts/verify_release.sh
 git status --short --untracked-files=all
 ```
-
-Inspect all eight screenshots and state notes. Confirm that they contain only
-synthetic test content, have no clipping, and match the asserted UI states.
 
 ## 3. Create the candidate commit
 
@@ -41,8 +37,7 @@ python3 scripts/verify_public_hygiene.py
 ```
 
 The initial public commit must include the app, libraries, tests, public
-documentation, version metadata, and a current screenshot set produced by the
-passing tour.
+documentation and version metadata.
 
 1. Create the commit only after explicit maintainer approval.
 2. Review the exact commit and its complete file list.

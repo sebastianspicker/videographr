@@ -38,8 +38,6 @@ build `1`; the proposed GitHub prerelease tag is `v0.1.0-alpha.1`.
 - Recording-state and guidance-activity chips use distinct labels.
 - Public writing-policy checks no longer interpret Swift operators or web URL paths as formatting
   and machine-specific paths.
-- The screenshot tour locates off-viewport SwiftUI form fields by geometry before its final
-  hittability assertion.
 - Late AVFoundation callbacks can no longer finalize, fail, or remove a newer recording transaction.
 - Capture callback timeouts now preserve an honest completion-unknown state until a late result or
   relaunch reconciliation resolves ownership.
@@ -50,8 +48,6 @@ build `1`; the proposed GitHub prerelease tag is `v0.1.0-alpha.1`.
 - Simulator recording attempts are rejected before recording storage is prepared, and late capture
   errors cannot displace the active synthetic fallback.
 - Learn-topic paragraphs and line breaks remain visible after Markdown rendering.
-- Xcode 26 attachment-name decoration is normalized without weakening the exact eight-screenshot
-  evidence contract.
 - The app target shares audio-sample construction across capture and Simulator guidance paths, so
   the signing-disabled Release analysis compiles both paths.
 

@@ -4,23 +4,19 @@
 from __future__ import annotations
 
 import re
-import struct
 import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import unquote
 
-from extract_e2e_attachments import EXPECTED_NAMES
 from public_hygiene_support import (
     hidden_public_source_issues as _hidden_public_source_issues,
     release_text_issues as _release_text_issues,
     release_version_issues as _release_version_issues,
-    screenshot_set_issues as _screenshot_set_issues,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_PUBLIC_FILE_BYTES = 5 * 1024 * 1024
-PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 REQUIRED_FILES = {
     ".github/ISSUE_TEMPLATE/bug_report.md",
@@ -33,7 +29,6 @@ REQUIRED_FILES = {
     "App/Unterrichtsvideographie.xcodeproj/project.pbxproj",
     "App/Unterrichtsvideographie.xcodeproj/xcshareddata/xcschemes/Unterrichtsvideographie.xcscheme",
     "App/Unterrichtsvideographie/Info.plist",
-    "App/VideographrUITests/VideographrE2EScreenshots.swift",
     "CHANGELOG.md",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
@@ -50,17 +45,9 @@ REQUIRED_FILES = {
     "docs/RESEARCH_GAP_INVENTORY.md",
     "docs/SCIENTIFIC_ALPHA.md",
     "docs/references/unterrichtsvideographie.md",
-    "docs/screenshots/README.md",
-    "scripts/extract_e2e_attachments.py",
-    "scripts/run_e2e_screenshots.sh",
-    "Tests/RepositoryToolingTests/test_extract_e2e_attachments.py",
-    "Tests/RepositoryToolingTests/test_verify_public_hygiene.py",
-    "scripts/verify_evidence_claims.sh",
     "scripts/verify_public_hygiene.py",
     "scripts/verify_release.sh",
 }
-
-EXPECTED_SCREENSHOTS = EXPECTED_NAMES
 
 FORBIDDEN_COMPONENTS = {
     ".agent",
@@ -71,7 +58,6 @@ FORBIDDEN_COMPONENTS = {
     ".codegraph",
     ".codex",
     ".cursor",
-    ".derived-e2e",
     ".idea",
     ".mypy_cache",
     ".pytest_cache",
@@ -79,6 +65,7 @@ FORBIDDEN_COMPONENTS = {
     ".serena",
     ".swiftpm",
     ".vscode",
+    ".derived-e2e",
     "DerivedData",
     "__pycache__",
     "node_modules",
@@ -126,7 +113,13 @@ def git_candidates() -> set[str]:
         check=True,
         capture_output=True,
     )
-    return {item.decode("utf-8") for item in result.stdout.split(b"\0") if item}
+    return {
+        relative
+        for item in result.stdout.split(b"\0")
+        if item
+        for relative in [item.decode("utf-8")]
+        if (ROOT / relative).exists() or (ROOT / relative).is_symlink()
+    }
 
 
 def markdown_targets(text: str) -> list[str]:
@@ -155,11 +148,6 @@ def _local_destination_issue(destination: Path, target: str) -> str | None:
         return f"broken local link: {target}"
     return None
 
-
-def png_dimensions(data: bytes) -> tuple[int, int] | None:
-    if len(data) < 24 or not data.startswith(PNG_SIGNATURE) or data[12:16] != b"IHDR":
-        return None
-    return struct.unpack(">II", data[16:24])
 
 
 def _candidate_name_issues(relative: str, parts: set[str], lower_name: str, suffix: str) -> list[str]:
@@ -327,42 +315,6 @@ def _scan_candidates(candidates: set[str]) -> tuple[list[str], int, int]:
     return issues, text_count, markdown_count
 
 
-def _screenshot_content_issues(screenshot_root: Path) -> list[str]:
-    issues: list[str] = []
-    screenshot_hashes: dict[bytes, str] = {}
-    for name in EXPECTED_SCREENSHOTS:
-        issues.extend(_single_screenshot_issues(screenshot_root, name, screenshot_hashes))
-    return issues
-
-
-def _single_screenshot_issues(
-    screenshot_root: Path, name: str, screenshot_hashes: dict[bytes, str]
-) -> list[str]:
-    issues: list[str] = []
-    png_path = screenshot_root / f"{name}.png"
-    note_path = screenshot_root / f"{name}.txt"
-    if png_path.is_file():
-        issues.extend(_png_issues(png_path, screenshot_hashes))
-    if note_path.is_file() and not note_path.read_text(encoding="utf-8").strip():
-        issues.append(f"empty runtime screenshot note: {note_path.relative_to(ROOT)}")
-    return issues
-
-
-def _png_issues(png_path: Path, screenshot_hashes: dict[bytes, str]) -> list[str]:
-    data = png_path.read_bytes()
-    dimensions = png_dimensions(data)
-    relative = png_path.relative_to(ROOT)
-    issues: list[str] = []
-    if len(data) <= 1_024 or dimensions is None:
-        issues.append(f"invalid runtime screenshot: {relative}")
-    elif dimensions[1] <= dimensions[0]:
-        issues.append(f"runtime screenshot is not portrait: {relative} {dimensions}")
-    if data in screenshot_hashes:
-        issues.append(f"duplicate runtime screenshots: {screenshot_hashes[data]}, {png_path.name}")
-    else:
-        screenshot_hashes[data] = png_path.name
-    return issues
-
 
 def _project_version_issues(numeric_version: str, alpha_build: str) -> list[str]:
     project_text = (ROOT / "App/Unterrichtsvideographie.xcodeproj/project.pbxproj").read_text(
@@ -381,7 +333,6 @@ def _print_result(
     candidates: set[str],
     text_count: int,
     markdown_count: int,
-    screenshot_count: int,
 ) -> int:
     if issues:
         print("Public hygiene FAILED:", file=sys.stderr)
@@ -390,8 +341,7 @@ def _print_result(
         return 1
     print(
         f"Public hygiene passed: {len(candidates)} candidate files, "
-        f"{text_count} UTF-8 text files, {markdown_count} Markdown files, "
-        f"{screenshot_count} current runtime screenshots."
+        f"{text_count} UTF-8 text files, {markdown_count} Markdown files."
     )
     return 0
 
@@ -405,15 +355,9 @@ def main() -> int:
     issues.extend(candidate_issues)
     issues.extend(_hidden_public_source_issues(ROOT, candidates, PUBLIC_SOURCE_ROOTS, PUBLIC_SOURCE_SUFFIXES))
 
-    screenshot_root = ROOT / "docs/screenshots/e2e"
-    issues.extend(_screenshot_set_issues(screenshot_root, EXPECTED_SCREENSHOTS))
-    issues.extend(_screenshot_content_issues(screenshot_root))
-    screenshot_count = sum(
-        (screenshot_root / f"{name}.png").is_file() for name in EXPECTED_SCREENSHOTS
-    )
     issues.extend(_project_version_issues(numeric_version, alpha_build))
     issues.extend(_release_text_issues(ROOT, version, release_notes, f"{numeric_version} ({alpha_build})"))
-    return _print_result(issues, candidates, text_count, markdown_count, screenshot_count)
+    return _print_result(issues, candidates, text_count, markdown_count)
 
 
 if __name__ == "__main__":

@@ -55,8 +55,6 @@
 		47E1F033EB38487FADDCC749 /* GuidanceEngine in Frameworks */ = {isa = PBXBuildFile; productRef = EFB4890CB54747488FC7A733 /* GuidanceEngine */; };
 		F6C0986CA4704B468D29775B /* LearnContent in Frameworks */ = {isa = PBXBuildFile; productRef = 9E971A4E08B54DC39E7887A3 /* LearnContent */; };
 		09AAFDFB258040C5977E1002 /* SessionCore in Frameworks */ = {isa = PBXBuildFile; productRef = F28C8D8333E849D99BBD72E5 /* SessionCore */; };
-		A10000000000000000000001 /* VideographrE2EScreenshots.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* VideographrE2EScreenshots.swift */; };
-		B20000000000000000000005 /* VideographrE2EScreenshots+Evidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000006 /* VideographrE2EScreenshots+Evidence.swift */; };
 		E10000000000000000000001 /* ProvenanceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000002 /* ProvenanceBar.swift */; };
 		E10000000000000000000003 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000004 /* AboutView.swift */; };
 		E10000000000000000000005 /* SetupView+SessionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000006 /* SetupView+SessionForm.swift */; };
@@ -70,15 +68,6 @@
 		E10000000000000000000015 /* FieldInstrumentTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000016 /* FieldInstrumentTabBar.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		A10000000000000000000007 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 3C3C93E6BFA24452B655F2D0 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 5B17D6145698478492242CB4;
-			remoteInfo = Unterrichtsvideographie;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		49551A8FD3C24FC099B69B62 /* VisionClassroomAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionClassroomAnalyzer.swift; sourceTree = "<group>"; };
@@ -128,9 +117,6 @@
 		D50000000000000000000012 /* ReflectView+Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReflectView+Content.swift"; sourceTree = "<group>"; };
 		2F803C960F5746C5875B94AC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D353BCCEDE0D47AABECF5A5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A10000000000000000000002 /* VideographrE2EScreenshots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideographrE2EScreenshots.swift; sourceTree = "<group>"; };
-		B20000000000000000000006 /* VideographrE2EScreenshots+Evidence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideographrE2EScreenshots+Evidence.swift"; sourceTree = "<group>"; };
-		A10000000000000000000003 /* VideographrUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VideographrUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E10000000000000000000002 /* ProvenanceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProvenanceBar.swift"; sourceTree = "<group>"; };
 		E10000000000000000000004 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AboutView.swift"; sourceTree = "<group>"; };
 		E10000000000000000000006 /* SetupView+SessionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+SessionForm.swift"; sourceTree = "<group>"; };
@@ -155,13 +141,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A10000000000000000000004 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -169,7 +148,6 @@
 			isa = PBXGroup;
 			children = (
 				C75ABC63C0FF42EFAB118110 /* Unterrichtsvideographie */,
-				A10000000000000000000005 /* VideographrUITests */,
 				4866AE2BB5FF43F2A8CED030 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -178,7 +156,6 @@
 			isa = PBXGroup;
 			children = (
 				EEA4598008934D319CB064CF /* Unterrichtsvideographie.app */,
-				A10000000000000000000003 /* VideographrUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -277,15 +254,6 @@
 			path = Reflect;
 			sourceTree = "<group>";
 		};
-		A10000000000000000000005 /* VideographrUITests */ = {
-			isa = PBXGroup;
-			children = (
-				A10000000000000000000002 /* VideographrE2EScreenshots.swift */,
-				B20000000000000000000006 /* VideographrE2EScreenshots+Evidence.swift */,
-			);
-			path = VideographrUITests;
-			sourceTree = "<group>";
-		};
 		E10000000000000000000020 /* Design */ = {
 			isa = PBXGroup;
 			children = (
@@ -329,23 +297,6 @@
 			productReference = EEA4598008934D319CB064CF /* Unterrichtsvideographie.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A10000000000000000000006 /* VideographrUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A1000000000000000000000A /* Build configuration list for PBXNativeTarget "VideographrUITests" */;
-			buildPhases = (
-				A10000000000000000000008 /* Sources */,
-				A10000000000000000000004 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				A10000000000000000000009 /* PBXTargetDependency */,
-			);
-			name = VideographrUITests;
-			productName = VideographrUITests;
-			productReference = A10000000000000000000003 /* VideographrUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -358,10 +309,6 @@
 				TargetAttributes = {
 					5B17D6145698478492242CB4 = {
 						CreatedOnToolsVersion = 16.0;
-					};
-					A10000000000000000000006 = {
-						CreatedOnToolsVersion = 16.0;
-						TestTargetID = 5B17D6145698478492242CB4;
 					};
 				};
 			};
@@ -383,7 +330,6 @@
 			projectRoot = "";
 			targets = (
 				5B17D6145698478492242CB4 /* Unterrichtsvideographie */,
-				A10000000000000000000006 /* VideographrUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -462,24 +408,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A10000000000000000000008 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A10000000000000000000001 /* VideographrE2EScreenshots.swift in Sources */,
-				B20000000000000000000005 /* VideographrE2EScreenshots+Evidence.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		A10000000000000000000009 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 5B17D6145698478492242CB4 /* Unterrichtsvideographie */;
-			targetProxy = A10000000000000000000007 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		CBF7A75DA51446E78E720058 /* Debug */ = {
@@ -564,46 +494,6 @@
 			};
 			name = Release;
 		};
-		A1000000000000000000000B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = de.videographie.VideographrUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Unterrichtsvideographie;
-			};
-			name = Debug;
-		};
-		A1000000000000000000000C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = de.videographie.VideographrUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Unterrichtsvideographie;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -621,15 +511,6 @@
 			buildConfigurations = (
 				E1A5DAEAD67149D789AFBCE7 /* Debug */,
 				61C55499C1DB45B3A129DC68 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		A1000000000000000000000A /* Build configuration list for PBXNativeTarget "VideographrUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A1000000000000000000000B /* Debug */,
-				A1000000000000000000000C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -34,7 +34,6 @@ compliance, pedagogical validity, or educational effectiveness.
 |---|---|
 | Strict Swift tests | Deterministic domain contracts |
 | Generic Simulator build | Compile integration |
-| Simulator screenshot tour | Eight asserted visible states using synthetic inputs |
 | Physical iPhone or iPad run | Device-specific capture, permissions, protection, interruptions, and endurance |
 | Staged adult pilot | Technical thresholds and failure rates under declared conditions |
 | Human-rater study | Reliability and construct evidence for a declared coding procedure |
@@ -55,9 +54,6 @@ speech-intelligibility, learning, or teaching-quality measures.
 
 ```bash
 bash scripts/verify_release.sh
-scripts/run_e2e_screenshots.sh
 ```
 
-Set `E2E_DEVICE` to an installed Simulator name when the default `iPhone 17 Pro`
-is unavailable. These commands do not replace physical-device or human-validation
-work.
+This command does not replace physical-device or human-validation work.

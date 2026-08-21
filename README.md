@@ -64,9 +64,9 @@ release gates.
 ## Requirements
 
 - macOS 14 or newer for the Swift package
-- Xcode with an iOS 17 or newer SDK for the app and Simulator workflows
+- Xcode with an iOS 17 or newer SDK for the app build
 - Swift 5.9 or newer
-- Python 3.10 or newer for repository and screenshot checks
+- Python 3.10 or newer for repository hygiene checks
 - ShellCheck for optional shell-script linting
 
 The project has no third-party Swift package dependencies.
@@ -106,17 +106,6 @@ User-entered configuration is stored with each local session.
 | Capture | Operator pseudonym, readiness decision, override reason when applicable, runtime status, and take lifecycle |
 | Export | Authorized content scopes, package membership, digests, provenance, and share-attempt state |
 
-The screenshot workflow accepts three optional environment variables:
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `E2E_DEVICE` | `iPhone 17 Pro` | Installed Simulator device name |
-| `E2E_DERIVED` | `.derived-e2e` | Xcode Derived Data directory |
-| `E2E_SCREENSHOT_DIR` | `docs/screenshots/e2e` | Published screenshot directory |
-
-`VIDEOGRAPHR_E2E_SESSION` and `VIDEOGRAPHR_E2E_START_TAB` are set by the UI
-test harness. They are not runtime configuration for normal builds.
-
 ## Usage
 
 1. Open Setup and create or select a session.
@@ -132,33 +121,19 @@ test harness. They are not runtime configuration for normal builds.
 Learn contains the German-language reference catalogue. Info describes the
 implemented evidence boundary and platform behavior.
 
-## Screenshots
-
-The assertion-backed Simulator workflow publishes eight screenshots and matching
-state notes only after the complete tour passes. No current screenshot set is
-published because the current-candidate tour is not passing. See the
-[screenshot policy](docs/screenshots/README.md) and
-[release status](RELEASE_STATUS.md).
-
-Simulator images do not demonstrate physical camera, microphone,
-file-protection, interruption, or long-recording behavior.
-
 ## Repository structure
 
 | Path | Contents |
 |---|---|
 | `App/Unterrichtsvideographie/` | SwiftUI app, lifecycle, Apple-framework adapters, resources, and property list |
-| `App/Unterrichtsvideographie.xcodeproj/` | iOS app and UI-test project configuration |
-| `App/VideographrUITests/` | Assertion-backed Simulator UI and screenshot test |
+| `App/Unterrichtsvideographie.xcodeproj/` | iOS app project configuration |
 | `Sources/GuidanceEngine/` | Pure capture-observation and evidence-boundary logic |
 | `Sources/SessionCore/` | Session, consent, persistence, recording, reflection, import, and export domain logic |
 | `Sources/LearnContent/` | German-language reference catalogue |
-| `Tests/GuidanceEngineTests/` | Guidance, capture observation, evidence-boundary, and research-mode package tests |
-| `Tests/SessionCoreTests/` | Session, consent, storage, media, recovery, and export package tests |
-| `Tests/LearnContentTests/` | Reference-catalogue package tests |
-| `Tests/RepositoryToolingTests/` | Python tests for repository and screenshot tooling |
-| `scripts/` | Release, repository-hygiene, evidence, and screenshot checks |
-| `docs/` | Architecture, evaluation, research scope, references, screenshots, and release notes |
+| `Tests/GuidanceEngineTests/` | Direct guidance and evidence-boundary contracts |
+| `Tests/SessionCoreTests/` | Consent, storage, and study-package safety contracts |
+| `scripts/` | Release and repository-hygiene checks |
+| `docs/` | Architecture, evaluation, research scope, references, and release notes |
 | `.github/workflows/ci.yml` | macOS CI job that runs the release gate |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for component boundaries and
@@ -178,12 +153,6 @@ swift test --disable-sandbox \
   -Xswiftc -warnings-as-errors
 ```
 
-For visible UI changes, run the screenshot workflow and inspect all eight images:
-
-```bash
-scripts/run_e2e_screenshots.sh
-```
-
 The CI workflow runs on pushes to `main` and `alpha/**`, pull requests targeting
 `main`, and manual dispatch.
 
@@ -197,21 +166,13 @@ bash scripts/verify_release.sh
 
 The gate runs:
 
-- repository and screenshot-set hygiene checks
+- repository hygiene checks
 - Bash syntax checks and ShellCheck when installed
-- Python tests under `Tests/RepositoryToolingTests/`
-- focused evidence-boundary tests
 - property-list and Xcode project syntax checks
 - Swift tests with complete concurrency checking and warnings as errors
 - a release Swift package build
 - Xcode Release analysis for a generic iOS Simulator
-- an app and UI-test build for a generic iOS Simulator
-
-Run only the evidence-boundary contract with:
-
-```bash
-bash scripts/verify_evidence_claims.sh
-```
+- an app build for a generic iOS Simulator
 
 ## Deployment and operation
 
@@ -227,15 +188,10 @@ The application does not upload them.
 
 - If SwiftPM reports a sandbox denial, use the documented
   `--disable-sandbox` commands.
-- If the screenshot workflow cannot find `iPhone 17 Pro`, list installed devices
-  with `xcrun simctl list devices available` and set `E2E_DEVICE` to an exact name.
 - Simulator warnings about camera, microphone, or motion hardware are expected.
   Simulator recording is intentionally rejected.
 - Physical-device signing errors require a local Apple Developer team and signing
   configuration.
-- If repository checks report an incomplete screenshot set, rerun
-  `scripts/run_e2e_screenshots.sh`. The required set is eight PNG files, eight
-  matching state-note files, and the manifest.
 
 ## Security considerations
 

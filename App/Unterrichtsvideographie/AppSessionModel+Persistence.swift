@@ -215,23 +215,10 @@ static func makeBuildProvenance(algorithmVersion: String) -> BuildProvenance {
 }
 
 static var currentOperatorAuthenticationMethod: String {
-    #if DEBUG
-    if ProcessInfo.processInfo.environment["VIDEOGRAPHR_E2E_SESSION"] != nil {
-        return "debugE2EBypass"
-    }
-    #endif
     return "deviceOwnerAuthentication"
 }
 
 static func defaultStore() -> SessionStore {
-    if let rawID = ProcessInfo.processInfo.environment["VIDEOGRAPHR_E2E_SESSION"],
-       let runID = UUID(uuidString: rawID)
-    {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("VideographrE2E", isDirectory: true)
-            .appendingPathComponent(runID.uuidString, isDirectory: true)
-        return SessionStore(rootDirectory: root)
-    }
     return SessionStore()
 }
 

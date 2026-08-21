@@ -18,14 +18,6 @@ extension CameraSessionModel {
 #if targetEnvironment(simulator)
         prepareSimulatorFallback(reason: reason)
 
-        #if DEBUG
-        // E2E needs one stable fallback snapshot: periodic observable updates otherwise rebuild the
-        // List while the test is asserting the simulator recording-rejection state.
-        if ProcessInfo.processInfo.environment["VIDEOGRAPHR_E2E_SESSION"] != nil {
-            return
-        }
-        #endif
-
         scheduleSimulatorUpdates(generation: generation)
 #else
         usingSimulatorFallback = false

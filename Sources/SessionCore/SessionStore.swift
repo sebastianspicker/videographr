@@ -288,6 +288,8 @@ public final class SessionStore: @unchecked Sendable {
     var importSourceOpenedHook: (() throws -> Void)?
     /// Test-only seam for failure paths that otherwise depend on filesystem timing.
     var persistenceFaultHook: ((PersistenceFaultPoint) throws -> Void)?
+    /// Test-only seam for deterministic occupied-import-destination checks.
+    var importedMediaIDFactory: () -> UUID
     /// Queue-confined ID index avoids re-decoding the entire JSONL file for every long-take append.
     var observationIDsBySession: [UUID: Set<UUID>] = [:]
     var codingSnapshotIDsBySession: [UUID: Set<UUID>] = [:]
@@ -310,6 +312,7 @@ public final class SessionStore: @unchecked Sendable {
         self.policyVerificationHook = nil
         self.importSourceOpenedHook = nil
         self.persistenceFaultHook = nil
+        self.importedMediaIDFactory = { UUID() }
         let rootAttributes = try? FileManager.default.attributesOfItem(atPath: self.rootDirectory.path)
         let rootType = rootAttributes?[.type] as? FileAttributeType
         if rootType != .typeSymbolicLink {

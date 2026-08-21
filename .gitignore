@@ -47,12 +47,10 @@ playground.xcworkspace
 # Editors, local analyzers, and developer-tool state
 .idea/
 .vscode/
+/.mcp.json
 .cursor/
 .claude/
-/.codacy/*
-!/.codacy/codacy.config.json
-!/.codacy/codacy.yaml
-!/.codacy/codacy.yml
+/.codacy/
 .codex/
 .agent/
 .agents/
@@ -167,3 +165,16 @@ target/
 xcuserdata/
 *.db-wal
 *.db-shm
+
+# Generated test and coverage output (local only)
+/coverage/
+/htmlcov/
+/.coverage
+/.coverage.*
+/.pytest_cache/
+/test-results/
+/playwright-report/
+/blob-report/
+/coverage.xml
+/junit.xml
+/junit-*.xml

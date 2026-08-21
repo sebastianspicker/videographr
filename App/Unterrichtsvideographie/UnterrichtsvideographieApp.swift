@@ -71,19 +71,10 @@ private final class OperatorAccessController: ObservableObject {
 
     func authenticate() {
     guard !isUnlocked, !authenticationInFlight else { return }
-    if grantsE2EAccess() {
-        unlockForE2E()
-        return
-    }
     let context = LAContext()
     context.localizedCancelTitle = "Abbrechen"
     guard canAuthenticate(with: context) else { return }
     beginAuthentication(with: context)
-}
-
-private func unlockForE2E() {
-    isUnlocked = true
-    message = "Debug-E2E-Zugriff"
 }
 
 private func canAuthenticate(with context: LAContext) -> Bool {
@@ -123,13 +114,6 @@ private func completeAuthentication(success: Bool, error: Error?, requestGenerat
         : "Authentifizierung fehlgeschlagen: \(error?.localizedDescription ?? "Unbekannter Fehler")"
 }
 
-    private func grantsE2EAccess() -> Bool {
-        #if DEBUG
-        ProcessInfo.processInfo.environment["VIDEOGRAPHR_E2E_SESSION"] != nil
-        #else
-        false
-        #endif
-    }
 }
 
 private struct OperatorAccessGate: View {

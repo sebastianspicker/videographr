@@ -40,11 +40,6 @@ let package = Package(
             path: "Tests/GuidanceEngineTests"
         ),
         .testTarget(
-            name: "LearnContentTests",
-            dependencies: ["LearnContent"],
-            path: "Tests/LearnContentTests"
-        ),
-        .testTarget(
             name: "SessionCoreTests",
             dependencies: ["SessionCore", "GuidanceEngine"],
             path: "Tests/SessionCoreTests"

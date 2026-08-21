@@ -11,14 +11,11 @@
 | `LearnContent` | German-language recording reference catalogue |
 
 The Xcode project at `App/Unterrichtsvideographie.xcodeproj` contains the iOS
-application and `VideographrUITests`. The app target links the three libraries and
+application. The app target links the three libraries and
 owns integration with SwiftUI, AVFoundation, Vision, Core Motion,
 LocalAuthentication, UIKit, and the file system.
 
-Swift package tests follow their target directories under `Tests/`. Repository
-tooling tests are Python `unittest` modules under
-`Tests/RepositoryToolingTests/`. UI tests remain beside the Xcode app project at
-`App/VideographrUITests/`.
+Swift package tests follow their target directories under `Tests/`.
 
 ## App structure
 
@@ -111,8 +108,7 @@ storage pressure, and device policy still requires physical-device testing.
 ## Verification boundaries
 
 Swift package tests cover pure transformations and persistence contracts. Generic
-Simulator builds cover compile integration. The XCUITest tour covers eight visible
-synthetic states.
+Simulator builds cover compile integration.
 
 Those checks do not validate real camera formats, microphone quality, audio-route
 changes, interruptions, thermal limits, lock-state protection, or long-take media

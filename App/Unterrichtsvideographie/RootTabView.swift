@@ -8,15 +8,7 @@ struct RootTabView: View {
     @State private var selection: FieldInstrumentTabBar.Tab
 
     init() {
-        #if DEBUG
-        let initial: FieldInstrumentTabBar.Tab =
-            ProcessInfo.processInfo.environment["VIDEOGRAPHR_E2E_START_TAB"] == "live"
-            ? .live
-            : .setup
-        #else
-        let initial: FieldInstrumentTabBar.Tab = .setup
-        #endif
-        _selection = State(initialValue: initial)
+        _selection = State(initialValue: .setup)
     }
 
     private var isNight: Bool { selection == .live }
