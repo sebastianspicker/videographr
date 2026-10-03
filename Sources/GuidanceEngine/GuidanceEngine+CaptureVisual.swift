@@ -1,31 +1,6 @@
 import Foundation
 
 extension GuidanceEngine {
-    func interactionZoneTips(
-        _ orientation: OrientationSample,
-        frame: FrameMetrics,
-        cv: CVFeatures
-    ) -> [GuidanceTip] {
-        let score = PlacementAssessment.interactionZoneScore(frame: frame, orientation: orientation, cv: cv)
-        if score < config.interactionZoneCriticalScore {
-            return [GuidanceTip((
-                id: "interaction-critical",
-                category: .interaction,
-                severity: .critical,
-                message: "Lehr-Lern-Zone kaum abgedeckt (Score \(percent(score))). Das Video würde vor allem Leerraum zeigen.",
-                actionHint: "Standort näher an Tafel/Lehrperson (typisch 3–6 m, raumabhängig), seitlich-frontal; Zoom so, dass Interaktion die Bildmitte füllt."
-            ))]
-        }
-        guard score < config.interactionZoneMinScore else { return [] }
-        return [GuidanceTip((
-            id: "interaction-warning",
-            category: .interaction,
-            severity: .warning,
-            message: "Interaktionsraum nur schwach im Bild (Score \(percent(score))).",
-            actionHint: "1–2 Schritte näher oder leicht zoomen; Decke/Boden reduzieren, bis SuS- und Lehrpersonenhandlungen klar lesbar sind."
-        ))]
-    }
-
     func backlightTips(_ frame: FrameMetrics) -> [GuidanceTip] {
         backlightSeverityTips(frame) + windowSideTips(frame)
     }
@@ -129,10 +104,10 @@ extension GuidanceEngine {
         guard frame.boardRegionScore < config.boardMinScore else { return [] }
         return [GuidanceTip((
             id: "low-structure",
-            category: .interaction,
+            category: .composition,
             severity: .info,
-            message: "Wenig Kantenstruktur im Bild - oft zu unscharf, zu weit oder leere Fläche.",
-            actionHint: "Scharf stellen, näher an die Interaktionszone, Schreibfläche ins Bild holen."
+            message: "Wenig Kantenstruktur im Bild - häufig unscharf, zu weit oder eine leere Fläche.",
+            actionHint: "Scharf stellen, Abstand und Bildausschnitt prüfen, dann Messwert erneut beobachten."
         ))]
     }
 

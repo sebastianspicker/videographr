@@ -1,45 +1,60 @@
 import SwiftUI
 
-/// Primary shell: Setup → Live → Reflect → Learn → Info with custom Field Instrument tab chrome.
-///
-/// Day atelier for prep/reflection tabs; night instrument when Live is selected.
-/// System UITabBar is hidden so chrome can recolor with the active surface.
+/// Session-centered navigation with a full-width capture surface on iPad.
 struct RootTabView: View {
+    @EnvironmentObject private var appStore: AppStore
     @State private var selection: FieldInstrumentTabBar.Tab
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    init() {
-        _selection = State(initialValue: .setup)
+    init(selection: FieldInstrumentTabBar.Tab = .setup) {
+        _selection = State(initialValue: selection)
     }
-
-    private var isNight: Bool { selection == .live }
 
     var body: some View {
         VStack(spacing: 0) {
-            ZStack {
-                tabContent
+            if selection != .live {
+                ScientificSessionHeader(session: appStore.session, selection: $selection)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            FieldInstrumentTabBar(
-                selection: $selection,
-                role: isNight ? .night : .day
-            )
+            tabContent.frame(maxWidth: .infinity, maxHeight: .infinity)
+            if horizontalSizeClass != .regular {
+                FieldInstrumentTabBar(selection: $selection, role: .night)
+            }
         }
-        .background((isNight ? NativeTheme.nightCanvas : NativeTheme.dayCanvas).ignoresSafeArea())
-        .preferredColorScheme(isNight ? .dark : .light)
-        .tint(isNight ? NativeTheme.recordAccent : NativeTheme.accent)
-        .animation(.easeInOut(duration: 0.2), value: isNight)
+        .background(NativeTheme.nightCanvas.ignoresSafeArea())
+        .foregroundStyle(NativeTheme.nightInk)
+        .preferredColorScheme(.dark)
+        .tint(NativeTheme.accent)
     }
 
     @ViewBuilder
     private var tabContent: some View {
+        switch appStore.bootstrapState {
+        case .loading:
+            ProgressView("Lokale Sitzungen werden wiederhergestellt…")
+                .accessibilityIdentifier("app.loadingSessions")
+        case let .failed(message):
+            ContentUnavailableView {
+                Label("Sitzungen konnten nicht geöffnet werden", systemImage: "exclamationmark.triangle")
+            } description: {
+                Text(message)
+            } actions: {
+                Button("Erneut versuchen") { Task { await appStore.bootstrap() } }
+                    .accessibilityIdentifier("app.retryLoadingSessions")
+            }
+        case .ready:
+            readyTabContent
+        }
+    }
+
+    @ViewBuilder
+    private var readyTabContent: some View {
         switch selection {
         case .setup:
-            SetupView()
+            SetupView(onContinue: { selection = .live })
         case .live:
             LiveGuidanceView(onExit: { selection = .setup })
         case .reflect:
-            ReflectView()
+            ReflectView(onEditSession: { selection = .setup }, isReflectionSelected: { selection == .reflect })
         case .learn:
             LearnRootView()
         case .info:
@@ -49,6 +64,25 @@ struct RootTabView: View {
 }
 
 #Preview {
+    let appStore = AppStore()
     RootTabView()
-        .environmentObject(AppSessionModel())
+        .environmentObject(appStore)
+        .environmentObject(LiveStore(appStore: appStore))
+}
+
+#Preview("Live compact accessibility", traits: .fixedLayout(width: 390, height: 844)) {
+    let appStore = AppStore()
+    RootTabView(selection: .live)
+        .environmentObject(appStore)
+        .environmentObject(LiveStore(appStore: appStore))
+        .environment(\.horizontalSizeClass, .compact)
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Live iPad scientific monitor", traits: .fixedLayout(width: 1_024, height: 768)) {
+    let appStore = AppStore()
+    RootTabView(selection: .live)
+        .environmentObject(appStore)
+        .environmentObject(LiveStore(appStore: appStore))
+        .environment(\.horizontalSizeClass, .regular)
 }

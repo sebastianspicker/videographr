@@ -30,7 +30,7 @@ public enum CVFeatureFusion {
         return frame.boardRegionScore
     }
 
-    public static func effectiveBoardCenter(frame: FrameMetrics, cv: CVFeatures) -> (x: Double, y: Double) {
+    static func effectiveBoardCenter(frame: FrameMetrics, cv: CVFeatures) -> (x: Double, y: Double) {
         if cv.analysisSucceeded, let rect = cv.boardRect, multiCueBoardQuality(from: cv) >= 0.40 {
             return (rect.centerX, rect.centerY)
         }
@@ -83,7 +83,7 @@ public enum CVFeatureFusion {
     }
 
     /// Derive co-presence from board rect + people placement (pure geometry).
-    public static func deriveCoPresence(from cv: CVFeatures) -> Double {
+    static func deriveCoPresence(from cv: CVFeatures) -> Double {
         guard cv.analysisSucceeded else { return 0 }
         let boardOK = hasBoardCue(cv)
         let peopleOK = hasPeopleCue(cv)

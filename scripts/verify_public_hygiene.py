@@ -9,7 +9,10 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
-from public_hygiene_support import (
+# Keep the hygiene check from leaving bytecode caches in the scanned tree.
+sys.dont_write_bytecode = True
+
+from public_hygiene_support import (  # noqa: E402
     hidden_public_source_issues as _hidden_public_source_issues,
     release_text_issues as _release_text_issues,
     release_version_issues as _release_version_issues,
@@ -72,6 +75,16 @@ FORBIDDEN_COMPONENTS = {
     "xcuserdata",
 }
 
+FORBIDDEN_FILE_NAMES = {
+    ".cursorrules",
+    "agent.md",
+    "agents.md",
+    "claude.md",
+    "codex.md",
+    "copilot-instructions.md",
+    "gemini.md",
+}
+
 SECRET_SUFFIXES = {
     ".cer",
     ".crt",
@@ -103,7 +116,7 @@ TEXT_SUFFIXES = {
     ".yml",
 }
 PUBLIC_SOURCE_ROOTS = ("App", "Sources", "Tests", "docs", "scripts", ".github")
-PUBLIC_SOURCE_SUFFIXES = TEXT_SUFFIXES | {".png"}
+PUBLIC_SOURCE_SUFFIXES = TEXT_SUFFIXES | {".png", ".webp"}
 
 
 def git_candidates() -> set[str]:
@@ -153,6 +166,7 @@ def _local_destination_issue(destination: Path, target: str) -> str | None:
 def _candidate_name_issues(relative: str, parts: set[str], lower_name: str, suffix: str) -> list[str]:
     checks = (
         (bool(parts & FORBIDDEN_COMPONENTS), f"generated/local tool path is public: {relative}"),
+        (_is_agent_artifact(lower_name), f"agent/development-assistant artifact is public: {relative}"),
         (bool(parts & {"mockups", "_mockups"}), f"non-runtime design artifact is public: {relative}"),
         (lower_name in {".ds_store", "thumbs.db", "desktop.ini"}, f"filesystem metadata is public: {relative}"),
         (_is_environment_file(lower_name), f"environment file is public: {relative}"),
@@ -167,10 +181,28 @@ def _is_environment_file(lower_name: str) -> bool:
     return lower_name == ".env" or lower_name.startswith(".env.")
 
 
+def _is_agent_artifact(lower_name: str) -> bool:
+    if lower_name in FORBIDDEN_FILE_NAMES:
+        return True
+    return bool(
+        re.fullmatch(
+            r"(?:agent[-_](?:context|instructions|memory|notes|output|report)|"
+            r"ai[-_](?:audit|notes|report|summary)|instructions-for-agent)(?:[-_.].*)?",
+            lower_name,
+        )
+    )
+
+
 def _is_working_document(relative: str, lower_name: str, suffix: str) -> bool:
     if suffix not in {".md", ".txt"} or relative == "RELEASE_STATUS.md":
         return False
-    return bool(re.search(r"(?:^|[_-])(audit|ledger|plan|remediation)(?:[_-]|\.)", lower_name))
+    return bool(
+        re.search(
+            r"(?:^|[_-])(?:audit|devlog|handoff|handover|implementation[-_]notes|"
+            r"ledger|plan|progress|remediation|scratchpad|worklog)(?:[_-]|\.)",
+            lower_name,
+        )
+    )
 
 
 def _candidate_file_issues(path: Path, relative: str) -> tuple[list[str], int | None]:

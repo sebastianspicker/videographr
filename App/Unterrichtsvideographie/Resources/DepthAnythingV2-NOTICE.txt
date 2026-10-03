@@ -1,0 +1,9 @@
+Optional model: Depth Anything V2 Small, Core ML Float16 conversion by Apple.
+Model authors: Lihe Yang, Bingyi Kang, Zilong Huang, Zhen Zhao, Xiaogang Xu,
+Jiashi Feng, Hengshuang Zhao, and the Depth Anything V2 contributors.
+Upstream: https://github.com/DepthAnything/Depth-Anything-V2
+Conversion: https://huggingface.co/apple/coreml-depth-anything-v2-small
+Pinned revision: cfef6f6f2a70783dedc0bfae40cecbc2052285d3
+License: Apache License 2.0, supplied in DepthAnythingV2-LICENSE.txt.
+The upstream model files are unchanged. Videographr supplies its own frame
+sampling, relative-depth normalization, Gaussian geometry and rendering code.

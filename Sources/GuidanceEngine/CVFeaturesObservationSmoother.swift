@@ -81,7 +81,6 @@ public struct CVObservationSmoother: Equatable, Sendable {
         guard sampleCount >= 2 else {
             output.personBoardCoPresence = coPresence
             output.observationStability = 0.55
-            output.interactionDensity = CVFeatureFusion.interactionDensity(from: output)
             output.personCoverageDelta = 0
             return output
         }
@@ -92,7 +91,6 @@ public struct CVObservationSmoother: Equatable, Sendable {
         output.boardGeometryQuality = aBlend(features.boardGeometryQuality, toward: last?.boardGeometryQuality ?? features.boardGeometryQuality)
         output.boardEdgeSupport = aBlend(features.boardEdgeSupport, toward: last?.boardEdgeSupport ?? features.boardEdgeSupport)
         output.observationStability = min(1, max(0, 1 - (sqrt(varianceBoard) + sqrt(variancePeople)) * 3.5))
-        output.interactionDensity = CVFeatureFusion.interactionDensity(from: output)
         output.personCoverageDelta = coverageDelta(for: output)
         return output
     }

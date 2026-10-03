@@ -53,7 +53,7 @@ public struct ImageNormalizedRect: Equatable, Sendable {
 /// - **Board / writing surface:** multi-cue confidence (rectangle + aspect + geometry + edge support + text density)
 /// - **Actors / people:** counts plus spatial usefulness (coverage, mid-band occupancy, centroid placement)
 /// - **Interaction structure:** person–board co-presence for Lehr-Lern-Geschehen
-/// - **Layout structure:** horizontal/vertical spread, clusteredness, layout pattern (scene beyond placement)
+/// - **Spatial geometry:** horizontal/vertical spread and clusteredness, without a scene label
 /// - Stability: multi-observation temporal stability (fusion quality over short window)
 public struct CVFeatures: Equatable, Sendable {
     public var source: CVFeatureSource
@@ -90,14 +90,10 @@ public struct CVFeatures: Equatable, Sendable {
     public var personClusteredness: Double
     /// Estimated spatial cluster count (group structure).
     public var estimatedClusterCount: Int
-    /// Classified classroom layout pattern (scene structure beyond placement).
-    public var layoutPattern: ClassroomLayoutPattern
     /// Face/person scale as proximity proxy (closer teaching shot). 0...1
     public var faceScaleScore: Double
     /// OCR/text density on writing surface (structure only). 0...1
     public var boardTextDensity: Double
-    /// Interaction density: multi-person mid-band activity proxy (0...1).
-    public var interactionDensity: Double
     /// Temporal change in person coverage vs recent observation (0 stable … 1 large change).
     public var personCoverageDelta: Double
     /// Secondary writing surface / multi-board corroboration (side board, screen). 0...1
@@ -128,10 +124,8 @@ public struct CVFeatures: Equatable, Sendable {
         public var personVerticalSpread = 0.0
         public var personClusteredness = 0.0
         public var estimatedClusterCount = 0
-        public var layoutPattern: ClassroomLayoutPattern = .unknown
         public var faceScaleScore = 0.0
         public var boardTextDensity = 0.0
-        public var interactionDensity = 0.0
         public var personCoverageDelta = 0.0
         public var secondaryWritingSurfaceSupport = 0.0
         public var actorScaleVariance = 0.0
@@ -160,10 +154,8 @@ public struct CVFeatures: Equatable, Sendable {
         personVerticalSpread = min(1, max(0, values.personVerticalSpread))
         personClusteredness = min(1, max(0, values.personClusteredness))
         estimatedClusterCount = max(0, values.estimatedClusterCount)
-        layoutPattern = values.layoutPattern
         faceScaleScore = min(1, max(0, values.faceScaleScore))
         boardTextDensity = min(1, max(0, values.boardTextDensity))
-        interactionDensity = min(1, max(0, values.interactionDensity))
         personCoverageDelta = min(1, max(0, values.personCoverageDelta))
         secondaryWritingSurfaceSupport = min(1, max(0, values.secondaryWritingSurfaceSupport))
         actorScaleVariance = min(1, max(0, values.actorScaleVariance))

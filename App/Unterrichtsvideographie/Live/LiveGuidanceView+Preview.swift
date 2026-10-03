@@ -1,41 +1,55 @@
 import SwiftUI
 
 extension LiveGuidanceView {
+    var previewIsUnavailable: Bool {
+        liveStore.usingSimulatorFallback || liveStore.privacyCoverIsVisible
+    }
+
+    var accessiblePreviewUnavailableState: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(previewUnavailableTitle, systemImage: "video.slash")
+                .font(.headline)
+            Text(previewUnavailableDetail).font(.caption)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.black)
+        .accessibilityIdentifier("live.previewUnavailable")
+    }
     var previewPane: some View {
         ZStack(alignment: .topLeading) {
             previewImage
             privacyCover
-            previewGrid
+            previewSourceStatus
         }
         .background(Color.black)
     }
 
     @ViewBuilder private var previewImage: some View {
-        if model.usingSimulatorFallback {
-            LinearGradient(
-                colors: [NativeTheme.elevatedSurface, Color.black],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .overlay { simulatorPreview }
+        if liveStore.usingSimulatorFallback {
+            Color.black
+            .overlay { simulatorPreviewUnavailableState }
         } else {
-            CameraPreviewView(session: model.session)
+            CameraPreviewView(session: liveStore.session)
         }
     }
 
-    private var simulatorPreview: some View {
+    /// Simulator values may exercise the direct-signal UI, but never stand in
+    /// for a real camera image or recorded take.
+    private var simulatorPreviewUnavailableState: some View {
         VStack(spacing: 8) {
-            Image(systemName: model.isRecording ? "record.circle" : "video.fill")
+            Image(systemName: "video.slash")
                 .font(.system(size: 40))
-                .foregroundStyle(model.isRecording ? NativeTheme.recordAccent : NativeTheme.nightInk)
-            Text(model.isRecording ? "Demo-Aufnahme läuft" : "Demo-Vorschau")
+                .foregroundStyle(NativeTheme.nightInk)
+            Text("Keine Kameravorschau im Simulator")
                 .font(.headline)
                 .accessibilityIdentifier("live.preview")
             Text("Simulator")
                 .font(.caption2)
                 .accessibilityIdentifier("live.captureMode")
                 .accessibilityValue("simulator")
-            Text(model.lastError ?? "Synthetisches Klassenzimmer")
+            Text(liveStore.lastError ?? "Direkte Bildsignale können hier nur als Testwerte vorliegen.")
                 .font(.caption)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
@@ -44,37 +58,78 @@ extension LiveGuidanceView {
     }
 
     @ViewBuilder private var privacyCover: some View {
-        if model.privacyCoverIsVisible {
+        if liveStore.privacyCoverIsVisible {
             Color.black
                 .overlay {
-                    Label("Vorschau pausiert", systemImage: "eye.slash.fill")
-                        .font(.headline)
-                        .foregroundStyle(.white)
+                    VStack(spacing: 8) {
+                        Label(previewUnavailableTitle, systemImage: "eye.slash.fill")
+                            .font(.headline)
+                        Text(previewUnavailableDetail)
+                            .font(.caption)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(NativeTheme.nightInkSecondary)
+                            .padding(.horizontal, 28)
+                    }
+                    .foregroundStyle(.white)
                 }
                 .accessibilityLabel("Vorschau pausiert, bis ein neues Kamerabild vorliegt")
                 .accessibilityIdentifier("live.privacyCover")
         }
     }
 
-    private var previewGrid: some View {
-        GeometryReader { proxy in
-            Path { path in
-                let width = proxy.size.width
-                let height = proxy.size.height
-                for fraction in [1.0 / 3.0, 2.0 / 3.0] {
-                    path.move(to: CGPoint(x: width * fraction, y: 0))
-                    path.addLine(to: CGPoint(x: width * fraction, y: height))
-                    path.move(to: CGPoint(x: 0, y: height * fraction))
-                    path.addLine(to: CGPoint(x: width, y: height * fraction))
+    @ViewBuilder private var previewSourceStatus: some View {
+        if !previewIsUnavailable && !dynamicTypeSize.isAccessibilitySize {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(liveStore.isRecording ? "AUFNAHME LÄUFT" : "VORSCHAU")
+                        .font(.caption.weight(.semibold))
+                    if !liveStore.isRecording {
+                        Text("Noch keine Aufnahme").font(.caption)
+                    }
                 }
+                .padding(8).background(Color.black.opacity(0.8))
+                Spacer(minLength: 12)
+                Text(liveFormatLabel)
+                    .font(.caption.monospacedDigit())
+                    .padding(8).background(Color.black.opacity(0.8))
             }
-            .stroke(model.isRecording ? NativeTheme.recordAccent.opacity(0.55) : NativeTheme.nightInk.opacity(0.3), lineWidth: model.isRecording ? 2 : 1)
+            .foregroundStyle(NativeTheme.nightInk)
+            .padding(12)
         }
-        .allowsHitTesting(false)
+    }
+
+    private var previewUnavailableTitle: String {
+        #if targetEnvironment(simulator)
+        return "Keine Kameravorschau im Simulator"
+        #else
+        if liveStore.authorizationStatus == .denied || liveStore.authorizationStatus == .restricted {
+            return "Kamerazugriff nicht verfügbar"
+        }
+        if liveStore.microphoneAuthorizationStatus == .denied || liveStore.microphoneAuthorizationStatus == .restricted {
+            return "Mikrofonzugriff nicht verfügbar"
+        }
+        return "Warte auf ein aktuelles Kamerabild"
+        #endif
+    }
+
+    private var previewUnavailableDetail: String {
+        #if targetEnvironment(simulator)
+        return "Eine Aufnahme benötigt ein aktuelles Kamerabild auf einem unterstützten Gerät."
+        #else
+        if let lastError = liveStore.lastError, !lastError.isEmpty { return lastError }
+        if liveStore.authorizationStatus == .denied || liveStore.authorizationStatus == .restricted {
+            return "Erlaube den Kamerazugriff in den Einstellungen und versuche die Kamera anschließend erneut."
+        }
+        if liveStore.microphoneAuthorizationStatus == .denied || liveStore.microphoneAuthorizationStatus == .restricted {
+            return "Erlaube den Mikrofonzugriff in den Einstellungen und versuche die Kamera anschließend erneut."
+        }
+        return "Aufnahme bleibt blockiert, bis ein aktuelles direktes Bildsignal vorliegt."
+        #endif
     }
 
     var audioStatusText: String {
-        switch filming.audio.status {
+        if liveStore.privacyCoverIsVisible || liveStore.usingSimulatorFallback { return "nicht verfügbar" }
+        return switch filming.audio.status {
         case .silent: "stumm"
         case .low: "niedrig"
         case .good: "gut"
@@ -85,14 +140,12 @@ extension LiveGuidanceView {
     }
 
     var recordingStateAccessibilityValue: String {
-        if model.isFinalizingRecording { return "finalizing" }
-        if model.isStartingRecording { return "starting" }
-        return model.isRecording ? "recording" : "idle"
+        if liveStore.isFinalizingRecording { return "finalizing" }
+        if liveStore.isStartingRecording { return "starting" }
+        return liveStore.isRecording ? "recording" : "idle"
     }
 
     var evidenceSafeGuidancePane: some View {
         liveGuidanceEvidencePane(maximumDimensions: 4, prioritizedDimensionID: "exposure")
     }
-
-    var guidancePane: some View { evidenceSafeGuidancePane }
 }

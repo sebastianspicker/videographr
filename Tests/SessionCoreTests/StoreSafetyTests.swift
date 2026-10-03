@@ -1,8 +1,41 @@
 import XCTest
 @testable import SessionCore
 import GuidanceEngine
+#if canImport(Darwin)
+import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#endif
 
 final class StoreSafetyTests: XCTestCase {
+    func testRecordingReconciliationPreservesLinkedImportsAndReportsRealOrphans() throws {
+        let root = try makeRoot()
+        let store = SessionStore(rootDirectory: root)
+        var target = session(title: "Synthetic imported video")
+        try store.save(target)
+        let source = root.appendingPathComponent("synthetic-source.mp4")
+        let bytes = Data("synthetic media bytes".utf8)
+        try bytes.write(to: source)
+        let asset = try store.importMedia(from: source, into: target.id)
+        target.mediaAssets = [asset]
+        try store.save(target)
+        try store.commitImportedMedia(asset, toSession: target.id)
+        let recordings = root.appendingPathComponent("Recordings")
+        let orphanName = "\(UUID().uuidString).mp4"
+        try bytes.write(to: recordings.appendingPathComponent(orphanName))
+
+        let reopened = SessionStore(rootDirectory: root)
+        let report = try reopened.reconcileRecordingArtifacts()
+        XCTAssertEqual(report.diagnostics, [RecordingArtifactDiagnostic(
+            fileName: orphanName, reason: .sessionMetadataMissing
+        )])
+        let restored = try XCTUnwrap(reopened.load(id: target.id))
+        XCTAssertEqual(restored.mediaAssets.map(\.id), [asset.id])
+        XCTAssertNil(restored.recordingRelativePath)
+        XCTAssertEqual(try Data(contentsOf: recordings.appendingPathComponent(asset.relativePath)), bytes)
+        XCTAssertEqual(try Data(contentsOf: recordings.appendingPathComponent(orphanName)), bytes)
+    }
+
     private enum ExpectedFailure: Error {
         case injected
     }
@@ -48,6 +81,13 @@ final class StoreSafetyTests: XCTestCase {
         let directorySource = root.appendingPathComponent(".directory.mp4")
         try FileManager.default.createDirectory(at: directorySource, withIntermediateDirectories: false)
         XCTAssertThrowsError(try store.importMedia(from: directorySource, into: UUID())) { error in
+            XCTAssertEqual(error as? SessionStoreError, .importedMediaSourceIsNotRegularFile)
+        }
+
+        let fifoSource = root.appendingPathComponent(".fifo.mp4")
+        let fifoResult = fifoSource.path.withCString { mkfifo($0, mode_t(0o600)) }
+        XCTAssertEqual(fifoResult, 0)
+        XCTAssertThrowsError(try store.importMedia(from: fifoSource, into: UUID())) { error in
             XCTAssertEqual(error as? SessionStoreError, .importedMediaSourceIsNotRegularFile)
         }
 
@@ -141,6 +181,87 @@ final class StoreSafetyTests: XCTestCase {
 
         XCTAssertEqual(try Data(contentsOf: occupiedDestination), expectedDestination)
         XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: recordings.path), [occupiedDestination.lastPathComponent])
+    }
+
+    func testPausedImportCopyDoesNotBlockMetadataMutationOnAsyncStore() async throws {
+        let root = try makeRoot()
+        let copyOpened = expectation(description: "import source opened")
+        let mutationCompleted = expectation(description: "metadata mutation completed")
+        let allowCopy = DispatchSemaphore(value: 0)
+        let store = SessionStore({
+            var values = SessionStore.Values()
+            values.rootDirectory = root
+            values.importSourceOpenedHook = {
+                copyOpened.fulfill()
+                allowCopy.wait()
+            }
+            return values
+        }())
+        let session = session(title: "before")
+        try store.save(session)
+        let source = root.appendingPathComponent(".concurrent-import.mp4")
+        try Data(repeating: 0x2A, count: 2 * 1_024 * 1_024).write(to: source)
+        let asyncStore = SessionStoreAsync(store: store)
+        let importTask = Task {
+            try await asyncStore.importMedia(from: source, into: session.id)
+        }
+        defer {
+            allowCopy.signal()
+            importTask.cancel()
+        }
+
+        await fulfillment(of: [copyOpened], timeout: 2)
+        let reconciliation = try await asyncStore.reconcilePersistenceArtifacts()
+        XCTAssertEqual(reconciliation.removedOrphanImportedFileNames, [])
+        let mutationTask = Task {
+            let updated = try await asyncStore.mutateSession(id: session.id) {
+                $0.title = "during import"
+            }
+            mutationCompleted.fulfill()
+            return updated
+        }
+        await fulfillment(of: [mutationCompleted], timeout: 2)
+        let updated = try await mutationTask.value
+        XCTAssertEqual(updated.title, "during import")
+
+        allowCopy.signal()
+        let asset = try await importTask.value
+        try await asyncStore.discardUncommittedImportedMedia(asset, from: session.id)
+    }
+
+    func testCancelledPausedImportRollsBackItsReservedArtifacts() async throws {
+        let root = try makeRoot()
+        let copyOpened = expectation(description: "cancelled import source opened")
+        let allowCopy = DispatchSemaphore(value: 0)
+        let store = SessionStore({
+            var values = SessionStore.Values()
+            values.rootDirectory = root
+            values.importSourceOpenedHook = {
+                copyOpened.fulfill()
+                allowCopy.wait()
+            }
+            return values
+        }())
+        let source = root.appendingPathComponent(".cancelled-import.mp4")
+        try Data(repeating: 0x17, count: 2 * 1_024 * 1_024).write(to: source)
+        let asyncStore = SessionStoreAsync(store: store)
+        let importTask = Task {
+            try await asyncStore.importMedia(from: source, into: UUID())
+        }
+        defer { allowCopy.signal() }
+
+        await fulfillment(of: [copyOpened], timeout: 2)
+        importTask.cancel()
+        allowCopy.signal()
+        do {
+            _ = try await importTask.value
+            XCTFail("Cancelled import unexpectedly completed")
+        } catch is CancellationError {
+            // Expected: the transaction-owned marker and staging file are rolled back below.
+        }
+
+        let recordings = root.appendingPathComponent("Recordings", isDirectory: true)
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: recordings.path), [])
     }
 
     func testRecordingTransactionOwnershipRejectsStaleCallbacks() {

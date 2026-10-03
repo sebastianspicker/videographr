@@ -5,8 +5,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+echo "==> Architecture boundaries"
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_architecture.py
+
 echo "==> Public repository hygiene"
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_public_hygiene.py
+
+echo "==> Static Pages demo"
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_demo.py
 
 echo "==> Script syntax"
 bash -n scripts/*.sh
@@ -26,6 +32,16 @@ echo "==> Release Swift build"
 swift build --disable-sandbox -c release \
   -Xswiftc -strict-concurrency=complete \
   -Xswiftc -warnings-as-errors
+
+echo "==> App unit tests"
+SIMULATOR_ID="$(PYTHONDONTWRITEBYTECODE=1 python3 scripts/select_simulator.py)"
+echo "Using iPhone simulator ${SIMULATOR_ID}"
+xcodebuild -quiet \
+  -project App/Unterrichtsvideographie.xcodeproj \
+  -scheme Unterrichtsvideographie \
+  -destination "platform=iOS Simulator,id=${SIMULATOR_ID}" \
+  CODE_SIGNING_ALLOWED=NO \
+  test
 
 echo "==> Xcode Release analysis"
 xcodebuild -quiet \

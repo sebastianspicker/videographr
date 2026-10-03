@@ -10,88 +10,51 @@ extension SetupView {
             && (!consentExpires || consentExpiry > Date())
     }
 
-    @ViewBuilder
     var scopedConsent: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            FieldSectionHeader(
-                title: "Freigaben & Betriebsmodus",
-                subtitle: "nur v2-Grants autorisieren Aufnahme und Export"
-            )
-
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 12) {
-                    consentPanel
-                    modePanel
-                }
-                VStack(alignment: .leading, spacing: 12) {
-                    consentPanel
-                    modePanel
-                }
-            }
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Dokumentierte Freigaben").font(.headline)
+            consentPanel
         }
     }
 
-    @ViewBuilder
-    var operatingMode: some View {
-        EmptyView()
-    }
-
     private var consentPanel: some View {
-        FieldPanel {
-            HStack {
-                Text("Aktive Scopes")
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                FieldStatusBadge(
-                    title: activeGrantCount > 0 ? "Gültig" : "Offen",
-                    tone: activeGrantCount > 0 ? .positive : .warning
-                )
-            }
-            Text("Frühere Bestätigungen bleiben als Altbestand sichtbar, autorisieren aber keine neue Aufnahme oder Weitergabe.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .padding(.top, 6)
-
-            VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 14) {
+            ScientificFormRow(label: "Dokument") {
                 TextField("Dokumentkennung", text: $consentDocumentIdentifier)
-                    .textInputAutocapitalization(.never)
-                    .textFieldStyle(.plain)
-                    .padding(10)
-                    .background(NativeTheme.dayCanvas, in: RoundedRectangle(cornerRadius: 8))
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                    .scientificInput()
                     .accessibilityIdentifier("setup.consent.document")
-                TextField("Dokumentversion", text: $consentDocumentVersion)
-                    .textFieldStyle(.plain)
-                    .padding(10)
-                    .background(NativeTheme.dayCanvas, in: RoundedRectangle(cornerRadius: 8))
-                    .accessibilityIdentifier("setup.consent.version")
-                TextField("Gruppenpseudonym", text: $participantGroupPseudonym)
-                    .textInputAutocapitalization(.never)
-                    .textFieldStyle(.plain)
-                    .padding(10)
-                    .background(NativeTheme.dayCanvas, in: RoundedRectangle(cornerRadius: 8))
-                    .accessibilityIdentifier("setup.consent.pseudonym")
+                    .focused($focusedField, equals: .document).submitLabel(.next)
             }
-            .padding(.top, 10)
-
-            FlowScopeToggles(
-                scopes: $consentScopes,
-                toggle: consentScopeToggle
-            )
-            .padding(.top, 12)
-
-            Text("Sekundärnutzung und externe Freigabe werden für jedes Forschungspaket getrennt geprüft.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .padding(.top, 8)
-
+            ScientificFormRow(label: "Version") {
+                TextField("Dokumentversion", text: $consentDocumentVersion)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                    .scientificInput()
+                    .accessibilityIdentifier("setup.consent.version")
+                    .focused($focusedField, equals: .version).submitLabel(.next)
+            }
+            ScientificFormRow(label: "Gruppenpseudonym") {
+                TextField("Gruppenpseudonym", text: $participantGroupPseudonym)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                    .scientificInput()
+                    .accessibilityIdentifier("setup.consent.pseudonym")
+                    .focused($focusedField, equals: .group).submitLabel(.done)
+            }
+            if let grant = appStore.session.consentGrants.last(where: { $0.withdrawnAt == nil }) {
+                ScientificFormRow(label: "Erteilt am") {
+                    Text(grant.grantedAt, style: .date)
+                        .foregroundStyle(NativeTheme.nightInkSecondary)
+                }
+            }
+            FlowScopeToggles(scopes: $consentScopes, toggle: consentScopeToggle)
+                .padding(.vertical, 4)
             Toggle("Ablaufdatum festlegen", isOn: $consentExpires)
-                .padding(.top, 8)
+                .toggleStyle(ScientificCheckboxStyle())
             if consentExpires {
                 DatePicker("Gültig bis", selection: $consentExpiry, in: Date()..., displayedComponents: .date)
             }
-
-            Button("Einwilligung speichern") {
-                appSession.updateConsentGrant(AppSessionModel.ConsentGrantDraft(
+            Button("Freigaben speichern") {
+                appStore.updateConsentGrant(ConsentGrantDraft(
                     scopes: consentScopes,
                     documentIdentifier: consentDocumentIdentifier,
                     documentVersion: consentDocumentVersion,
@@ -99,15 +62,24 @@ extension SetupView {
                     expiresAt: consentExpires ? consentExpiry : nil
                 ))
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(ScientificButtonStyle())
             .disabled(!canSaveConsentGrant)
             .accessibilityIdentifier("setup.consent.save")
-            .padding(.top, 10)
+            if !canSaveConsentGrant {
+                Text("Dokument, Version, Gruppenpseudonym und mindestens ein Zweck sind erforderlich. Ein Ablaufdatum muss in der Zukunft liegen.")
+                    .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
+            }
+            Text(appStore.session.canStartNewCapture
+                 ? "Erhebung und lokale Reflexion: aktive Freigaben dokumentiert."
+                 : "Für den Aufnahmestart fehlen aktive Freigaben für Erhebung oder lokale Reflexion.")
+                .font(.caption)
+                .foregroundStyle(appStore.session.canStartNewCapture ? NativeTheme.accent : NativeTheme.warning)
+            Text("Sekundärnutzung und externe Weitergabe werden beim Export gesondert geprüft. Frühere Bestätigungen ersetzen keine zweckgebundene Freigabe.")
+                .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
         }
-        .frame(maxWidth: .infinity, alignment: .top)
     }
 
-    private var modePanel: some View {
+    var modePanel: some View {
         FieldPanel {
             operatingModeContent
         }
@@ -121,12 +93,12 @@ extension SetupView {
                 .font(.subheadline.weight(.semibold))
             Spacer()
             FieldStatusBadge(
-                title: appSession.session.operatingMode == .evidenceSafe ? "Standard" : "Experiment",
-                tone: appSession.session.operatingMode == .evidenceSafe ? .positive : .warning
+                title: appStore.session.operatingMode == .evidenceSafe ? "Standard" : "Experiment",
+                tone: appStore.session.operatingMode == .evidenceSafe ? .positive : .warning
             )
         }
 
-        if appSession.session.operatingMode == .evidenceSafe {
+        if appStore.session.operatingMode == .evidenceSafe {
             Text("Evidence-safe")
                 .font(.body.weight(.semibold))
                 .padding(.top, 10)
@@ -142,12 +114,12 @@ extension SetupView {
                 .textInputAutocapitalization(.never)
                 .textFieldStyle(.plain)
                 .padding(10)
-                .background(NativeTheme.dayCanvas, in: RoundedRectangle(cornerRadius: 8))
+                .background(NativeTheme.nightElevated, in: RoundedRectangle(cornerRadius: 4))
                 .accessibilityIdentifier("setup.experimental.protocol")
             TextField("Aufsicht / Kontakt", text: $experimentalOversightReference)
                 .textFieldStyle(.plain)
                 .padding(10)
-                .background(NativeTheme.dayCanvas, in: RoundedRectangle(cornerRadius: 8))
+                .background(NativeTheme.nightElevated, in: RoundedRectangle(cornerRadius: 4))
                 .accessibilityIdentifier("setup.experimental.oversight")
                 .padding(.top, 6)
             DatePicker("Gültig bis", selection: $experimentalExpiry, in: Date()..., displayedComponents: .date)
@@ -156,20 +128,18 @@ extension SetupView {
                 .font(.caption)
                 .accessibilityIdentifier("setup.experimental.acknowledged")
                 .padding(.top, 4)
-            if !appSession.session.authorizes(.researchProcessing) {
+            if !appStore.session.authorizes(.researchProcessing) {
                 Label("Zusätzlich ist ein aktiver Freigabedatensatz für Forschungsverarbeitung erforderlich.", systemImage: "lock")
                     .font(.caption)
                     .foregroundStyle(NativeTheme.warning)
                     .padding(.top, 4)
             }
             Button("Experimentellen Modus aktivieren") {
-                appSession.session.experimentalProtocol = ResearchProtocolReference(
+                appStore.activateExperimentalMode(protocol: ResearchProtocolReference(
                     protocolIdentifier: experimentalProtocolIdentifier,
                     oversightReference: experimentalOversightReference,
                     expiresAt: experimentalExpiry
-                )
-                appSession.session.operatingMode = .experimentalResearch
-                appSession.markDirty()
+                ))
             }
             .disabled(!canActivateExperimentalMode)
             .accessibilityIdentifier("setup.mode.experimental")
@@ -183,15 +153,13 @@ extension SetupView {
                 .foregroundStyle(NativeTheme.dayInkTertiary)
                 .padding(.top, 4)
             Button("Zum evidenzsicheren Modus zurückkehren") {
-                appSession.session.operatingMode = .evidenceSafe
-                appSession.session.experimentalProtocol = nil
-                appSession.markDirty()
+                appStore.returnToEvidenceSafe()
             }
             .accessibilityIdentifier("setup.mode.evidenceSafe")
             .padding(.top, 8)
         }
 
-        Text("experimental · \(appSession.session.operatingMode == .evidenceSafe ? "aus" : "an") · \(appSession.session.experimentalProtocol?.protocolIdentifier ?? "kein Protokoll")")
+        Text("experimental · \(appStore.session.operatingMode == .evidenceSafe ? "aus" : "an") · \(appStore.session.experimentalProtocol?.protocolIdentifier ?? "kein Protokoll")")
             .font(.system(.caption2, design: .monospaced))
             .foregroundStyle(NativeTheme.dayInkTertiary)
             .padding(.top, 12)
@@ -217,23 +185,8 @@ private struct FlowScopeToggles<ToggleView: View>: View {
                 toggle(scope, title)
                     .font(.subheadline)
             }
-            HStack(spacing: 6) {
-                ForEach(items, id: \.0) { scope, title in
-                    FieldScopeChip(title: shortLabel(scope), isOn: scopes.contains(scope))
-                }
-            }
-            .padding(.top, 4)
-            .accessibilityHidden(true)
+
         }
     }
 
-    private func shortLabel(_ scope: ConsentScope) -> String {
-        switch scope {
-        case .collection: return "Erhebung"
-        case .localReflection: return "Lokale Reflexion"
-        case .researchProcessing: return "Forschung"
-        case .secondaryUse: return "Sekundärnutzung"
-        case .externalSharing: return "Externer Export"
-        }
-    }
 }

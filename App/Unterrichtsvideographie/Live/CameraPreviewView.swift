@@ -3,16 +3,19 @@ import AVFoundation
 
 /// SwiftUI bridge to `AVCaptureVideoPreviewLayer` for the Live camera pane.
 ///
-/// Keeps preview gravity at aspect-fill so composition overlays align with what operators see
-/// on device; the pure guidance engine still analyzes the raw sample buffer separately.
+/// Uses aspect fit so the operator can inspect the complete active camera image.
+/// The pure guidance engine still analyzes the raw sample buffer separately.
 struct CameraPreviewView: UIViewRepresentable {
-    /// Running capture session owned by `CameraSessionModel`.
+    /// Running capture session owned by `LiveStore`.
     let session: AVCaptureSession
 
     func makeUIView(context: Context) -> PreviewView {
         let view = PreviewView()
         view.videoPreviewLayer?.session = session
-        view.videoPreviewLayer?.videoGravity = .resizeAspectFill
+        view.videoPreviewLayer?.videoGravity = .resizeAspect
+        view.isAccessibilityElement = true
+        view.accessibilityLabel = "Live-Kameravorschau"
+        view.accessibilityHint = "Die technischen Aufnahmesignale stehen im Prüfbereich."
         return view
     }
 

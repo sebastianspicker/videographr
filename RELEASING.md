@@ -1,92 +1,69 @@
 # Releasing
 
-This procedure creates a source-only GitHub prerelease. It does not produce a
-signed IPA, TestFlight build, App Store submission, or authorization to collect
-classroom or minor data.
+This procedure publishes a source-only GitHub prerelease. It does not produce a
+signed IPA, a TestFlight build, an App Store submission, or authorization to
+collect classroom or minor data.
 
-## 1. Prepare the final candidate
+## Prepare and validate a candidate
 
-1. Confirm `RELEASE_VERSION` contains the intended prerelease version.
-2. Confirm the Xcode app target has the matching numeric marketing version and
-   build number.
-3. Finalize `CHANGELOG.md`, `RELEASE_STATUS.md`, and
-   `docs/releases/<version>.md`.
-4. Confirm the worktree contains no participant media, exports, credentials,
-   signing material, environment files, local tool state, or build output.
-
-For `v0.1.0-alpha.1`, the Git version is `0.1.0-alpha.1` and the numeric app
-bundle version is `0.1.0 (1)`.
-
-Do not place the candidate commit hash inside that same commit. Record the final
-hash and CI URL in the GitHub prerelease or in a later status update.
-
-## 2. Validate the worktree
+1. Set `RELEASE_VERSION` and align the Xcode marketing version and build number.
+2. Update `CHANGELOG.md`, `RELEASE_STATUS.md`, and the matching file in
+   `docs/releases/`.
+3. Review the full candidate surface for media, exports, credentials, signing
+   material, environment files, local tool state, and build output.
+4. Run the full gate on the exact candidate commit:
 
 ```bash
 bash scripts/verify_release.sh
 git status --short --untracked-files=all
+git diff HEAD --check
 ```
 
-## 3. Create the candidate commit
+This file is the single description of the gate; other documents link here.
+`scripts/verify_release.sh` runs, in order:
 
-List every file that will enter the commit:
+1. `scripts/verify_architecture.py`: SwiftPM dependency direction, no
+   experimental code in `GuidanceEngine`, no `FileManager` in
+   `SessionCore/Domain`, app code outside `Application/` reaching persistence only
+   through `AppStore`, and every app Swift file referenced in the Xcode project.
+2. `scripts/verify_public_hygiene.py` and `scripts/verify_demo.py`.
+3. Shell syntax (plus ShellCheck when installed) and `plutil` lint of the
+   Info.plist and Xcode project.
+4. Strict SwiftPM tests and a Release Swift build, both with complete concurrency
+   checking and warnings as errors. The package tests freeze the persisted and
+   exported formats (session JSON, journals, study-package manifest and members).
+5. Hardware-free Xcode app-unit tests on an iPhone Simulator, then
+   signing-disabled Xcode Release Simulator analysis and build.
 
-```bash
-git ls-files --cached --others --exclude-standard
-python3 scripts/verify_public_hygiene.py
-```
+The app-unit tests cover capture-event generation filtering, exact transaction
+filtering, idempotent stop emission, autosave ordering, bootstrap and import
+failures, persisted provenance strings, and first-attachment playback routing in a
+hosted SwiftUI view. There is no separate UI-test target, screenshot-baseline
+harness, physical-device validation, or scientific validation.
 
-The initial public commit must include the app, libraries, tests, public
-documentation and version metadata.
+The optional Gaussian perspective checks are not part of the gate. Run them
+manually when that feature changes:
+`python3 scripts/verify_gaussian_splats.py --require-model --require-metal`
+(see [Gaussian perspective](docs/GAUSSIAN_SPLATS.md)).
 
-1. Create the commit only after explicit maintainer approval.
-2. Review the exact commit and its complete file list.
-3. Push only after a second approval.
-4. Wait for CI on that exact commit.
-5. Do not edit release metadata between the successful CI run and tagging.
+## Review, tag, and publish
 
-## 4. Verify repository settings
+After explicit maintainer approval, review the exact staged file list, then
+commit. Push only after a separate approval, and wait for required CI on that
+immutable commit. Do not change release metadata between successful CI and
+tagging.
 
-Before tagging or publishing a prerelease:
-
-1. Configure branch protection and required checks on the default branch.
-2. Confirm repository visibility and public metadata.
-3. Confirm GitHub private vulnerability reporting remains enabled, then verify a
-   synthetic submission, notification delivery, named triage ownership, and
-   acknowledgement through the Report a vulnerability flow.
-4. Verify a separate monitored private conduct route if conduct reports must not
-   use the vulnerability-reporting flow.
-5. Verify issue templates, contribution guidance, and reporting links in the
-   rendered repository.
-
-These settings cannot be verified from a local worktree.
-
-## 5. Tag the CI-passed commit
-
-Confirm that `HEAD` is the exact commit that passed CI:
+Before publication, verify remote branch protection, required checks, repository
+visibility, rendered community-file links, private vulnerability reporting, and a
+separate monitored conduct-reporting route. These are external states that a
+local checkout cannot confirm.
 
 ```bash
 VERSION="$(tr -d '[:space:]' < RELEASE_VERSION)"
-git status --short
 git rev-parse HEAD
 git tag -s "v${VERSION}" -m "Videographr ${VERSION}"
 git show --stat "v${VERSION}"
-```
-
-If signed tags are unavailable, use an annotated unsigned tag only after
-documenting the exception. Do not move or recreate a published tag.
-
-Review the tag target, obtain explicit approval, and push the tag:
-
-```bash
 git push origin "v${VERSION}"
-git ls-remote --tags origin "refs/tags/v${VERSION}"
-```
-
-## 6. Publish the prerelease
-
-```bash
-VERSION="$(tr -d '[:space:]' < RELEASE_VERSION)"
 gh release create "v${VERSION}" \
   --prerelease \
   --title "Videographr ${VERSION}" \
@@ -94,14 +71,13 @@ gh release create "v${VERSION}" \
   --verify-tag
 ```
 
-`--verify-tag` requires the tag to exist on the remote. Do not attach a binary
-without a separate signing, privacy, device-validation, and distribution process.
-
-After publication, record the immutable commit, CI URL, tag, and release URL in a
-later status update if needed.
+Use an annotated unsigned tag only when signing is unavailable and you have
+recorded the exception. Never move or recreate a published tag, and never attach
+a binary without a separate signing, privacy, device-validation, and distribution
+process.
 
 ## Rollback
 
-Before publication, correct the candidate and rerun every gate. After publication,
-mark a faulty prerelease as superseded and prepare a new version. Do not rewrite
+Before publication, correct the candidate and rerun the gate. After publication,
+mark the faulty prerelease superseded and release a new version. Do not rewrite
 the published tag.

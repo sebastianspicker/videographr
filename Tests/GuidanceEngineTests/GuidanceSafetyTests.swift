@@ -2,6 +2,15 @@ import XCTest
 @testable import GuidanceEngine
 
 final class GuidanceSafetyTests: XCTestCase {
+    func testGuidanceResultExposesDirectObservabilityOnly() {
+        let result = GuidanceEngine().evaluate(GuidanceInput(.init(
+            orientation: .init(pitchDegrees: 0, rollDegrees: 0),
+            frame: FrameMetrics()
+        )))
+        let labels = Set(Mirror(reflecting: result).children.compactMap(\.label))
+        XCTAssertEqual(labels, ["tips", "overallSeverity", "isReadyToRecord", "placement", "observability"])
+    }
+
     func testDirectSignalFailureCannotEnableRecording() {
         var frame = FrameMetrics.Values()
         frame.averageLuminance = 0.48
@@ -30,5 +39,12 @@ final class GuidanceSafetyTests: XCTestCase {
         let result = GuidanceEngine().evaluate(input)
         XCTAssertFalse(result.placement.directSignalsPass)
         XCTAssertFalse(result.isReadyToRecord)
+    }
+
+    func testGuidancePublicTypesExcludeResearchSceneSemantics() {
+        XCTAssertFalse(GuidanceCategory.allCases.map(\.rawValue).contains("teachingScene"))
+        let labels = Set(Mirror(reflecting: CVFeatures.empty).children.compactMap(\.label))
+        XCTAssertFalse(labels.contains("layoutPattern"))
+        XCTAssertFalse(labels.contains("interactionDensity"))
     }
 }

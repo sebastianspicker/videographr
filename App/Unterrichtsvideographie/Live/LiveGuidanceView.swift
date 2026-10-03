@@ -5,20 +5,23 @@ import SessionCore
 
 /// Live filming surface: camera preview, readiness, prioritized tips, scene/coding panel, record controls.
 ///
-/// Combines `CameraSessionModel` (sensors + pure `GuidanceEngine`) with `FilmingGuidancePolicy`
+/// Presents the environment-injected `LiveStore` with `FilmingGuidancePolicy`.
 /// so continuous classroom takes keep mid-take critical signals without freezing guidance at pre-roll.
 struct LiveGuidanceView: View {
-    @EnvironmentObject var appSession: AppSessionModel
+    @EnvironmentObject var appStore: AppStore
+    @EnvironmentObject var liveStore: LiveStore
+    @Environment(\.dynamicTypeSize) var dynamicTypeSize
     @Environment(\.scenePhase) private var scenePhase
-    @StateObject var model = CameraSessionModel()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject var audioCheck = SpokenAudioCheckModel()
     /// User override to start recording despite non-critical readiness blockers (research ops).
     @State var forceRecord = false
     @State var overrideReason = ""
     @State var operatorPseudonym = ""
-    @State var activePreparedRecording: AppSessionModel.PreparedRecording?
-    @State var captureAuthorizationDeadlineTask: Task<Void, Never>?
-    @State var inspectorIsVisible = true
+    @State var inspectorIsVisible = false
+    /// This is set only after the capture owner reports an active take. It is
+    /// presentation state, never an input to the recording transaction.
+    @State var recordingStartedAt: Date?
 
     let filmingPolicy = FilmingGuidancePolicy()
     let onExit: () -> Void
@@ -29,22 +32,22 @@ struct LiveGuidanceView: View {
 
     /// Setup + visual + audio gate for the red record button.
     var readiness: SessionReadiness {
-        appSession.evaluateReadiness(visual: model.guidance, audio: model.audioSample)
+        appStore.evaluateReadiness(visual: liveStore.guidance, audio: liveStore.audioSample)
     }
 
     /// Live pre-roll + mid-take guidance (always re-evaluated from sensors).
     var filming: FilmingGuidanceSnapshot {
         filmingPolicy.evaluate(
-            visual: model.guidance,
-            audioSample: model.audioSample,
-            isRecording: model.isRecording
+            visual: liveStore.guidance,
+            audioSample: liveStore.audioSample,
+            isRecording: liveStore.isRecording
         )
     }
 
     var requiresOverride: Bool {
         !readiness.canRecord
-            || model.runtimeStatus.hasResourceWarning
-            || !model.runtimeStatus.spokenAudioCheckCompleted
+            || liveStore.runtimeStatus.hasResourceWarning
+            || !liveStore.runtimeStatus.spokenAudioCheckCompleted
     }
 
     var overrideIsValid: Bool {
@@ -53,190 +56,109 @@ struct LiveGuidanceView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let isWide = geo.size.width >= 900
-            let inspectorWidth = min(420, max(360, geo.size.width * 0.29))
-            let compactPreviewHeight = geo.size.width > geo.size.height
-                ? min(geo.size.height * 0.42, 48)
-                : min(geo.size.height * 0.42, 180)
-            Group {
-                if isWide {
-                    VStack(spacing: 0) {
-                        ProvenanceBar.nightLive(
-                            session: appSession.session,
-                            isRecording: model.isRecording,
-                            formatLabel: liveFormatLabel
-                        )
-                        liveToolbar
-                            .frame(height: 88)
-
-                        HStack(spacing: 0) {
-                            previewPane
-                                .frame(width: inspectorIsVisible ? geo.size.width - inspectorWidth : geo.size.width)
-                            if inspectorIsVisible {
-                                inspectorPane
-                                    .frame(width: inspectorWidth)
-                            }
-                        }
-                    }
-                } else {
-                    NavigationStack {
-                        VStack(spacing: 0) {
-                            ProvenanceBar.nightLive(
-                                session: appSession.session,
-                                isRecording: model.isRecording,
-                                formatLabel: liveFormatLabel
-                            )
-                            previewPane
-                                .frame(height: compactPreviewHeight)
-                            if inspectorIsVisible {
-                                guidancePane
-                                    .frame(maxHeight: .infinity)
-                                    .background(NativeTheme.nightSurface)
-                            }
-                        }
-                        .navigationTitle("Live & Aufnahme")
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button {
-                                    inspectorIsVisible.toggle()
-                                } label: {
-                                    Image(systemName: "slider.horizontal.3")
-                                }
-                                .accessibilityIdentifier("live.inspector.toggle")
-                            }
-                        }
-                    }
+            let isWide = geo.size.width >= 900 && geo.size.width > geo.size.height
+                && !dynamicTypeSize.isAccessibilitySize
+            VStack(spacing: 0) {
+                liveToolbar
+                ScrollView {
+                    liveStage(previewHeight: isWide
+                        ? max(220, min((geo.size.width - 32) * 9 / 16, geo.size.height - 335))
+                        : (geo.size.width - 32) * 9 / 16)
                 }
+            }
+            .sheet(isPresented: $inspectorIsVisible) {
+                inspectorPane
+                    .presentationDetents([.large])
             }
             .fieldInstrumentNightSurface()
-            .overlay(alignment: .bottom) {
-                if isWide {
-                    captureDock
-                        .padding(.bottom, 20)
-                        .padding(.trailing, inspectorIsVisible ? inspectorWidth : 0)
-                }
-            }
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: inspectorIsVisible)
             // System tab bar is replaced by FieldInstrumentTabBar in RootTabView.
             .toolbar(.hidden, for: .tabBar)
             .onAppear {
-                let sessionID = appSession.session.id
-                model.bind(to: sessionID)
-                model.teachingSituation = appSession.session.teachingSituation
-                model.analysisFocus = appSession.session.analysisIntent.codingFocus
-                syncOperatingMode()
-                operatorPseudonym = appSession.session.consentGrants
+                if liveStore.isRecording { recordingStartedAt = Date() }
+                operatorPseudonym = appStore.session.consentGrants
                     .last(where: { $0.authorizes(.collection) })?
                     .participantGroupPseudonym ?? ""
-                model.onCodingSnapshot = { sessionID, snap in
-                    Task {
-                        await appSession.attachCodingSnapshot(snap, for: sessionID, recordingIsActive: true)
-                    }
-                }
-                model.onCaptureObservation = { sessionID, observation in
-                    Task { await appSession.attachCaptureObservation(observation, for: sessionID) }
-                }
-                model.onRecordingFinalized = { transaction, url, runtimeStatus in
-                    if activePreparedRecording?.transactionID == transaction.transactionID {
-                        captureAuthorizationDeadlineTask?.cancel()
-                        activePreparedRecording = nil
-                    }
-                    return await appSession.attachRecording(
-                        for: transaction,
-                        finalizedURL: url,
-                        runtimeStatus: runtimeStatus
-                    )
-                }
-                model.onRecordingBegan = { transaction in
-                    Task { await appSession.markRecordingBegan(transaction) }
-                }
-                model.onRecordingCompletionUnknown = { transaction, _ in
-                    if activePreparedRecording?.transactionID == transaction.transactionID {
-                        captureAuthorizationDeadlineTask?.cancel()
-                        activePreparedRecording = nil
-                    }
-                    Task { await appSession.recordingCompletionIsUnknown(transaction) }
-                }
-                model.onRecordingFailed = { transaction, reason in
-                    if activePreparedRecording?.transactionID == transaction.transactionID {
-                        captureAuthorizationDeadlineTask?.cancel()
-                        activePreparedRecording = nil
-                    }
-                    Task { await appSession.recordingDidFail(transaction, reason: reason) }
-                }
-                syncCaptureAuthorization()
-                model.start()
+                liveStore.synchronizeSession()
+                liveStore.start()
             }
-            .onChange(of: appSession.session.teachingSituation) { _, newValue in
-                model.teachingSituation = newValue
+            .onChange(of: appStore.session.teachingSituation) { _, newValue in
+                liveStore.teachingSituation = newValue
             }
-            .onChange(of: appSession.session.analysisIntent) { _, newValue in
-                model.analysisFocus = newValue.codingFocus
+            .onChange(of: appStore.session.analysisIntent) { _, newValue in
+                liveStore.analysisFocus = newValue
             }
-            .onChange(of: appSession.session.operatingMode) { _, _ in
+            .onChange(of: appStore.session.operatingMode) { _, _ in
                 forceRecord = false
                 overrideReason = ""
-                syncOperatingMode()
-                syncCaptureAuthorization()
+                liveStore.synchronizeSession()
             }
-            .onChange(of: appSession.session.experimentalProtocol) { _, _ in
-                syncOperatingMode()
-                syncCaptureAuthorization()
+            .onChange(of: appStore.session.experimentalProtocol) { _, _ in
+                liveStore.synchronizeSession()
             }
-            .onChange(of: appSession.session.consentGrants) { _, _ in
-                syncCaptureAuthorization()
+                .onChange(of: appStore.session.consentGrants) { _, _ in
+                liveStore.synchronizeSession()
+            }
+            .onChange(of: liveStore.isRecording) { _, isRecording in
+                recordingStartedAt = isRecording ? Date() : nil
             }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
-                    syncOperatingMode()
-                    syncCaptureAuthorization()
+                    liveStore.synchronizeSession()
                 } else {
                     audioCheck.cancel(resumeCapture: false)
                 }
             }
-            .task {
-                while !Task.isCancelled {
-                    syncOperatingMode()
-                    syncCaptureAuthorization()
-                    do {
-                        try await Task.sleep(nanoseconds: 30_000_000_000)
-                    } catch {
-                        return
-                    }
-                }
-            }
-            .onChange(of: appSession.session.id) { _, newValue in
+            .onChange(of: appStore.session.id) { _, newValue in
                 forceRecord = false
                 overrideReason = ""
                 audioCheck.cancel(resumeCapture: false)
-                model.bind(to: newValue)
-                model.teachingSituation = appSession.session.teachingSituation
-                model.analysisFocus = appSession.session.analysisIntent.codingFocus
-                syncOperatingMode()
-                syncCaptureAuthorization()
-                operatorPseudonym = appSession.session.consentGrants
+                liveStore.synchronizeSession()
+                operatorPseudonym = appStore.session.consentGrants
                     .last(where: { $0.authorizes(.collection) })?
                     .participantGroupPseudonym ?? ""
             }
             .onDisappear {
                 audioCheck.cancel(resumeCapture: false)
-                captureAuthorizationDeadlineTask?.cancel()
-                model.stop()
+                liveStore.stop()
             }
         }
     }
 
-    /// Compact format chip for provenance (falls back when capture is not yet negotiated).
+    /// Compact format chip for provenance. Never imply a negotiated capture fact
+    /// before AVFoundation has supplied one.
     var liveFormatLabel: String {
-        let configuration = model.runtimeStatus.videoConfiguration
+        let configuration = liveStore.runtimeStatus.videoConfiguration
         if configuration.isEmpty || configuration == "Noch nicht ausgehandelt" {
-            return "1920×1080"
+            return "Nicht ausgehandelt"
         }
         return configuration
     }
 }
 
+extension LiveGuidanceView {
+    @MainActor
+    func beginRecording() {
+        Task {
+            await liveStore.beginRecording(
+                readiness: readiness,
+                allowDespiteWarnings: requiresOverride && forceRecord,
+                overrideReason: overrideReason,
+                operatorPseudonym: operatorPseudonym
+            )
+            forceRecord = false
+            overrideReason = ""
+        }
+    }
+
+    func formatCapacity(_ bytes: Int64) -> String {
+        ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+    }
+}
+
 #Preview {
+    let appStore = AppStore()
     LiveGuidanceView()
-        .environmentObject(AppSessionModel())
+        .environmentObject(appStore)
+        .environmentObject(LiveStore(appStore: appStore))
 }

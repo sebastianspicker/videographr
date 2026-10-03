@@ -20,8 +20,6 @@ public struct GuidanceConfig: Equatable, Sendable {
         public var emptyEdgeCritical = 0.38
         public var tooDarkLuminance = 0.18
         public var tooBrightLuminance = 0.88
-        public var interactionZoneMinScore = 0.48
-        public var interactionZoneCriticalScore = 0.32
         public var maxHighlightClipFraction = 0.12
         public var minGlobalContrast = 0.18
         public var minEdgeEnergy = 0.02
@@ -55,8 +53,6 @@ public struct GuidanceConfig: Equatable, Sendable {
     public var emptyEdgeCritical: Double
     public var tooDarkLuminance: Double
     public var tooBrightLuminance: Double
-    public var interactionZoneMinScore: Double
-    public var interactionZoneCriticalScore: Double
     public var maxHighlightClipFraction: Double
     public var minGlobalContrast: Double
     public var minEdgeEnergy: Double
@@ -102,10 +98,6 @@ public struct GuidanceConfig: Equatable, Sendable {
         )
         (imbalanceWarning, emptyEdgeCritical) = (values.imbalanceWarning, values.emptyEdgeCritical)
         (tooDarkLuminance, tooBrightLuminance) = (values.tooDarkLuminance, values.tooBrightLuminance)
-        (interactionZoneMinScore, interactionZoneCriticalScore) = (
-            values.interactionZoneMinScore,
-            values.interactionZoneCriticalScore
-        )
         (maxHighlightClipFraction, minGlobalContrast) = (
             values.maxHighlightClipFraction,
             values.minGlobalContrast

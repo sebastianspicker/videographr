@@ -4,54 +4,17 @@ import SwiftUI
 extension SetupView {
     var filteredSessions: [CaptureSession] {
         let query = sessionSearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return appSession.allSessions }
-        return appSession.allSessions.filter { session in
+        guard !query.isEmpty else { return appStore.allSessions }
+        return appStore.allSessions.filter { session in
             [session.title, session.purpose.titleDE, session.context.subject, session.context.gradeLevel]
                 .contains { $0.localizedCaseInsensitiveContains(query) }
         }
     }
 
     @ViewBuilder
-    var setupStatus: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            FieldSectionHeader(title: "Status & Aktionen")
-            FieldPanel {
-                HStack {
-                    Text("Lokale Startbedingungen")
-                        .font(.subheadline)
-                        .foregroundStyle(NativeTheme.dayInkSecondary)
-                    Spacer()
-                    Text(appSession.session.setupComplete ? "Ja" : "Nein")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(
-                            appSession.session.setupComplete ? NativeTheme.positiveDay : NativeTheme.warning
-                        )
-                        .accessibilityIdentifier("setup.complete")
-                }
-                Text(
-                    appSession.session.setupComplete
-                        ? "Titel, Mindestkontext sowie die zweckgebundenen Freigaben für Aufzeichnung und lokale Reflexion liegen vor."
-                        : "Für eine neue Aufnahme werden Titel, Fach, Lernziel sowie Freigaben für Aufzeichnung und lokale Reflexion benötigt."
-                )
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .padding(.top, 6)
-
-                HStack(spacing: 10) {
-                    FieldGhostButton(title: "Neue Sitzung") { appSession.newSession() }
-                        .accessibilityIdentifier("setup.newSession")
-                    Button("Speichern") { appSession.save() }
-                        .buttonStyle(.borderedProminent)
-                        .accessibilityIdentifier("setup.save")
-                }
-                .padding(.top, 12)
-            }
-        }
-    }
-
-    @ViewBuilder
     var savedSessions: some View {
-        if !appSession.allSessions.isEmpty {
+        let sessions = filteredSessions
+        if !appStore.allSessions.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 FieldSectionHeader(title: "Gespeicherte Sitzungen")
                 FieldPanel {
@@ -62,14 +25,14 @@ extension SetupView {
                         .background(NativeTheme.dayCanvas, in: RoundedRectangle(cornerRadius: 8))
                         .accessibilityIdentifier("setup.sessions.search")
 
-                    if filteredSessions.isEmpty {
+                    if sessions.isEmpty {
                         ContentUnavailableView.search(text: sessionSearchQuery)
                             .frame(minHeight: 120)
                     } else {
-                        VStack(spacing: 0) {
-                            ForEach(filteredSessions) { session in
+                        LazyVStack(spacing: 0) {
+                            ForEach(sessions) { session in
                                 Button {
-                                    appSession.select(session.id)
+                                    appStore.select(session.id)
                                 } label: {
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text(session.title)
@@ -94,7 +57,7 @@ extension SetupView {
                                         sessionPendingDeletion = session
                                     }
                                 }
-                                if session.id != filteredSessions.last?.id {
+                                if session.id != sessions.last?.id {
                                     Divider().overlay(NativeTheme.dayHairline)
                                 }
                             }
@@ -103,68 +66,6 @@ extension SetupView {
                     }
                 }
             }
-        }
-    }
-
-    /// Wide-layout readiness rail.
-    var readinessRail: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("STARTBEDINGUNGEN")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(0.8)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                    .padding(.bottom, 12)
-
-                FieldReadinessItem(
-                    title: "Kontext vollständig",
-                    detail: "Titel, Fach, Lernziel, Dauer und Situation sind definiert.",
-                    isMet: appSession.session.context.isMinimallyComplete
-                        && !appSession.session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                )
-                Divider().overlay(NativeTheme.dayHairline)
-                FieldReadinessItem(
-                    title: "Freigaben geprüft",
-                    detail: "Erhebung und lokale Reflexion sind zeitlich gültig.",
-                    isMet: appSession.session.authorizes(.collection)
-                        && appSession.session.authorizes(.localReflection)
-                )
-                Divider().overlay(NativeTheme.dayHairline)
-                FieldReadinessItem(
-                    title: "Speicher verfügbar",
-                    detail: "Lokaler Speicher für die geplante Dauer wird vor dem Take erneut geprüft.",
-                    isMet: true
-                )
-                Divider().overlay(NativeTheme.dayHairline)
-                FieldReadinessItem(
-                    title: "Aufbewahrung gesetzt",
-                    detail: "Retention-Policy der Sitzung ist hinterlegt.",
-                    isMet: true
-                )
-
-                FieldReadyBanner(
-                    isReady: appSession.session.setupComplete,
-                    readyText: "Alle Startbedingungen erfüllt. Live zeigt nur direkte technische Signale, keine pädagogische Bewertung.",
-                    blockedText: "Vervollständigen Sie Titel, Kontext und Freigaben, bevor Sie aufnehmen."
-                )
-                .padding(.top, 18)
-
-                HStack(spacing: 8) {
-                    Image(systemName: "shield")
-                        .font(.caption)
-                    Text("Lokal gespeichert · Geräteeigentümer-Schutz aktiv")
-                        .font(.caption)
-                }
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .padding(.top, 16)
-            }
-            .padding(20)
-        }
-        .background(NativeTheme.daySurface)
-        .overlay(alignment: .leading) {
-            Rectangle()
-                .fill(NativeTheme.dayHairline)
-                .frame(width: 1)
         }
     }
 }

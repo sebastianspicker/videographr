@@ -79,26 +79,6 @@ public extension CVFeatureFusion {
         return (sx / n, sy / n)
     }
 
-    /// Interaction density: multi-person presence in mid-band with moderate coverage (Lehr-Lern activity).
-    static func interactionDensity(from cv: CVFeatures) -> Double {
-        guard cv.analysisSucceeded else { return 0 }
-        let peopleN = max(cv.personCount, cv.faceCount)
-        let count = min(1, Double(peopleN) / 5.0)
-        let mid = cv.personMidBandOccupancy
-        let use = cv.peopleSpatialUsefulness
-        let multi = min(1, Double(max(0, peopleN - 1)) / 4.0)
-        let layoutBoost: Double = {
-            switch cv.layoutPattern {
-            case .dyadClose, .multiCluster, .circleLike, .frontalRows: return 0.85
-            case .presentationFocus: return 0.55
-            case .sparseSpread, .wholeRoomDense: return 0.65
-            default: return 0.35
-            }
-        }()
-        let poseBoost = cv.poseConfidenceMean * 0.08
-        return min(1, max(0, 0.26 * count + 0.26 * mid + 0.20 * use + 0.12 * multi + 0.10 * layoutBoost + poseBoost))
-    }
-
     /// Scale variance of person rects (area or height); high = mixed distances / group depth.
     static func actorScaleVariance(personRects: [ImageNormalizedRect]) -> Double {
         guard personRects.count >= 2 else { return 0 }

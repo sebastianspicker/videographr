@@ -109,7 +109,6 @@ public enum GuidanceCategory: String, Sendable, CaseIterable {
     case interaction
     case motion
     case people
-    case teachingScene
 }
 
 public struct GuidanceTip: Equatable, Identifiable, Sendable {
@@ -136,16 +135,13 @@ public struct GuidanceTip: Equatable, Identifiable, Sendable {
     }
 }
 
-/// Full live understanding input: orientation + frame metrics + optional CV + motion + teaching situation.
+/// Full live understanding input: orientation + frame metrics + optional CV + motion.
 public struct GuidanceInput: Equatable, Sendable {
     public struct Values: Equatable, Sendable {
         public var orientation: OrientationSample
         public var frame: FrameMetrics
         public var cv = CVFeatures.empty
         public var motion = MotionMetrics.stable
-        public var teachingSituation = TeachingSituationID.frontalBoardInstruction
-        public var analysisFocus: CodingAnalysisFocus?
-        public var operatingMode = GuidanceOperatingMode.evidenceSafe
 
         public init(orientation: OrientationSample, frame: FrameMetrics) {
             self.orientation = orientation
@@ -157,19 +153,10 @@ public struct GuidanceInput: Equatable, Sendable {
     public var frame: FrameMetrics
     public var cv: CVFeatures
     public var motion: MotionMetrics
-    /// Selected teaching-situation preset (drives scene expectations and coding priors).
-    public var teachingSituation: TeachingSituationID
-    /// Optional analysis focus (professional vision, CM, LAF, …) soft-reweights IPN/GTI priors.
-    public var analysisFocus: CodingAnalysisFocus?
-    /// Evidence-safe is the default. Experimental mode is required before legacy
-    /// IPN/GTI rule output is exposed as hypotheses.
-    public var operatingMode: GuidanceOperatingMode
 
     public init(_ values: Values) {
         (orientation, frame) = (values.orientation, values.frame)
         (cv, motion) = (values.cv, values.motion)
-        (teachingSituation, analysisFocus) = (values.teachingSituation, values.analysisFocus)
-        operatingMode = values.operatingMode
     }
 }
 
@@ -177,14 +164,7 @@ public struct GuidanceResult: Equatable, Sendable {
     public struct Values: Equatable, Sendable {
         public var tips: [GuidanceTip]
         public var placement: PlacementAssessment
-        public var scene = TeachingSceneAssessment.unavailable
-        public var pedagogicalCoding = PedagogicalCodingResult.empty()
-        public var teachingSituation = TeachingSituationID.frontalBoardInstruction
-        public var researchQuality: ResearchCaptureQuality?
-        public var structureSufficiency: ResearchStructureSufficiency?
         public var observability = CaptureObservabilityAssessment(dimensions: [])
-        public var operatingMode = GuidanceOperatingMode.evidenceSafe
-        public var experimentalHypotheses = ExperimentalHypothesisSet.empty
 
         public init(tips: [GuidanceTip], placement: PlacementAssessment) {
             self.tips = tips
@@ -196,18 +176,8 @@ public struct GuidanceResult: Equatable, Sendable {
     public var overallSeverity: GuidanceSeverity
     public var isReadyToRecord: Bool
     public var placement: PlacementAssessment
-    public var scene: TeachingSceneAssessment
-    public var pedagogicalCoding: PedagogicalCodingResult
-    public var teachingSituation: TeachingSituationID
-    /// Unvalidated rule-set composite (placement + scene match + coding + layout), not scientific validity.
-    public var researchQuality: ResearchCaptureQuality
-    /// Preset-conditional structure sufficiency (CV/scene vs teaching situation).
-    public var structureSufficiency: ResearchStructureSufficiency
-    /// Purpose- and mode-invariant direct capture measurements.
+    /// Direct capture measurements, never pedagogical or research conclusions.
     public var observability: CaptureObservabilityAssessment
-    public var operatingMode: GuidanceOperatingMode
-    /// Present only when callers explicitly select experimental research mode.
-    public var experimentalHypotheses: ExperimentalHypothesisSet
 
     public init(_ values: Values) {
         tips = values.tips.sorted {
@@ -215,58 +185,19 @@ public struct GuidanceResult: Equatable, Sendable {
         }
         overallSeverity = tips.map(\.severity).max() ?? .ok
         placement = values.placement
-        scene = values.scene
-        pedagogicalCoding = values.pedagogicalCoding
-        teachingSituation = values.teachingSituation
-        researchQuality = values.researchQuality ?? Self.assessResearchQuality(values)
-        isReadyToRecord = Self.isReady(values, researchQuality: researchQuality)
-        structureSufficiency = values.structureSufficiency ?? Self.defaultStructureSufficiency(values)
+        isReadyToRecord = Self.isReady(values)
         observability = values.observability
-        operatingMode = values.operatingMode
-        experimentalHypotheses = values.experimentalHypotheses
     }
 
-    private static func assessResearchQuality(_ values: Values) -> ResearchCaptureQuality {
-        var input = ResearchCaptureQuality.AssessmentInput(
-            placement: values.placement,
-            scene: values.scene,
-            coding: values.pedagogicalCoding
-        )
-        input.teachingSituation = values.teachingSituation
-        return ResearchCaptureQuality.assess(input)
-    }
-
-    private static func defaultStructureSufficiency(_ values: Values) -> ResearchStructureSufficiency {
-        var structure = ResearchStructureSufficiency.Values()
-        structure.teachingSituation = values.teachingSituation
-        structure.sceneType = values.scene.sceneType
-        structure.layoutPattern = values.scene.layoutPattern
-        structure.summaryDE = "Struktur-Suffizienz nicht ausgewertet."
-        return ResearchStructureSufficiency(structure)
-    }
-
-    private static func isReady(_ values: Values, researchQuality: ResearchCaptureQuality) -> Bool {
+    private static func isReady(_ values: Values) -> Bool {
         guard tipsPermitRecording(values.tips) else { return false }
-        guard values.placement.quality == .directSignalsPass else { return false }
-        return !hasStructureEvidence(values) || researchQuality.level != .unsuitable
+        return values.placement.quality == .directSignalsPass
     }
 
     private static func tipsPermitRecording(_ tips: [GuidanceTip]) -> Bool {
         let hasCritical = tips.contains { $0.severity == .critical }
         let warningCount = tips.filter { $0.severity == .warning }.count
         return !hasCritical && warningCount <= 1
-    }
-
-    private static func hasStructureEvidence(_ values: Values) -> Bool {
-        if values.scene.confidence >= 0.25 { return true }
-        if values.pedagogicalCoding.overallConfidence > 0.15 { return true }
-        return codingHasStructure(values.pedagogicalCoding) && values.scene.sceneType != .emptyOrUnusable
-    }
-
-    private static func codingHasStructure(_ coding: PedagogicalCodingResult) -> Bool {
-        !coding.ipnDimensions.isEmpty
-            || !coding.timssActivities.isEmpty
-            || !coding.gtiDimensions.isEmpty
     }
 
     /// Convenience for tests that only care about tips.

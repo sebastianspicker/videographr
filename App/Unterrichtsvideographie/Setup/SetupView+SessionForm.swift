@@ -1,165 +1,132 @@
-import GuidanceEngine
+import ExperimentalResearch
 import SessionCore
 import SwiftUI
 
 extension SetupView {
-    @ViewBuilder
-    var storageStatus: some View {
-        FieldPanel {
-            HStack(spacing: 10) {
-                Image(systemName: saveStateSymbol)
-                    .foregroundStyle(saveStateColor)
-                Text(appSession.saveState.titleDE)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(saveStateColor)
-                    .accessibilityIdentifier("setup.saveState")
-                Spacer()
-            }
-            if let error = appSession.lastStoreError {
-                Text(error)
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.danger)
-                    .padding(.top, 6)
-            }
-        }
-    }
-
-    @ViewBuilder
     var sessionDetails: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            FieldSectionHeader(title: "Sitzung")
-            HStack(spacing: 12) {
-                FieldPanel {
-                    FieldLabeledInput(label: "Sitzungstitel") {
-                        TextField("Titel", text: sessionBinding(\.title))
-                            .textFieldStyle(.plain)
-                            .accessibilityIdentifier("setup.title")
-                    }
-                }
-                FieldPanel {
-                    FieldLabeledInput(label: "Zweck der Sitzung") {
-                        Picker("Zweck", selection: sessionBinding(\.purpose)) {
-                            ForEach(CapturePurpose.allCases) { purpose in
-                                Text(purpose.titleDE).tag(purpose)
-                            }
-                        }
-                        .labelsHidden()
-                        .pickerStyle(.menu)
-                    }
-                }
+        VStack(alignment: .leading, spacing: 14) {
+            ScientificFormRow(label: "Titel") {
+                TextField("Sitzungstitel", text: sessionBinding(\.title))
+                    .accessibilityIdentifier("setup.title")
+                    .submitLabel(.next)
+                    .focused($focusedField, equals: .title)
+                    .scientificInput()
             }
-            FieldPanel {
-                FieldLabeledInput(label: "Analysefokus") {
-                    Picker("Analysefokus", selection: sessionBinding(\.analysisIntent)) {
-                        ForEach(AnalysisIntent.allCases) { intent in
-                            Text(intent.titleDE).tag(intent)
-                        }
+            ScientificFormRow(label: "Zweck") {
+                Picker("Zweck der Sitzung", selection: sessionBinding(\.purpose)) {
+                    ForEach(CapturePurpose.allCases) { purpose in
+                        Text(purpose.titleDE).tag(purpose)
                     }
-                    .labelsHidden()
-                    .pickerStyle(.menu)
                 }
+                .labelsHidden().pickerStyle(.menu)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .scientificInput()
             }
         }
     }
 
-    @ViewBuilder
+    var context: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            contextTextRow("Fach", text: contextBinding(\.subject), id: "setup.subject", focus: .subject)
+            contextTextRow("Klassenstufe", text: contextBinding(\.gradeLevel), focus: .grade)
+            contextTextRow("Stundenziel", text: contextBinding(\.lessonGoal), id: "setup.lessonGoal", multiline: true, focus: .goal)
+        }
+    }
+
+    var additionalContext: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            contextTextRow("Standort", text: contextBinding(\.schoolOrSite), focus: .site)
+            contextTextRow("Notizen", text: contextBinding(\.notes), multiline: true, focus: .contextNotes)
+        }
+    }
+
     var capturePlan: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            FieldSectionHeader(title: "Aufnahmeplanung")
-            FieldPanel {
-                Stepper(
-                    "Geplante Dauer: \(appSession.session.plannedDurationMinutes) Minuten",
-                    value: sessionBinding(\.plannedDurationMinutes),
-                    in: 1...240,
-                    step: 5
-                )
-                .accessibilityIdentifier("setup.plannedDuration")
-                Text("Die geplante Dauer wird vor der Aufnahme für Speicher- und Ressourcenprüfungen verwendet. Die tatsächliche Dauer wird separat im Take-Manifest dokumentiert.")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                    .padding(.top, 6)
+        ScientificFormRow(label: "Geplante Dauer") {
+            Stepper(value: sessionBinding(\.plannedDurationMinutes), in: 1...240, step: 5) {
+                Text("\(appStore.session.plannedDurationMinutes) Min.").monospacedDigit()
             }
+            .accessibilityIdentifier("setup.plannedDuration")
+            .accessibilityHint("Planungswert für Speicher- und Ressourcenprüfungen, kein automatischer Aufnahmestopp.")
+            .scientificInput()
         }
     }
 
-    @ViewBuilder
+    var analysisFocus: some View {
+        ScientificFormRow(label: "Analysefokus") {
+            Picker("Analysefokus", selection: sessionBinding(\.analysisIntent)) {
+                ForEach(AnalysisIntent.allCases) { intent in
+                    Text(intent.titleDE).tag(intent)
+                }
+            }
+            .labelsHidden().pickerStyle(.menu)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .scientificInput()
+        }
+    }
+
     var teachingSituation: some View {
         VStack(alignment: .leading, spacing: 10) {
-            FieldSectionHeader(title: "Unterrichtssituation")
-            FieldPanel {
-                Picker("Situation", selection: sessionBinding(\.teachingSituation)) {
+            ScientificFormRow(label: "Situation") {
+                Picker("Unterrichtssituation", selection: sessionBinding(\.teachingSituation)) {
                     ForEach(TeachingSituationID.allCases) { situation in
                         let preset = TeachingSituationCatalogue.preset(for: situation)
                         Text("\(TeachingSituationCatalogue.family(for: situation)): \(preset.titleDE)")
                             .tag(situation)
                     }
                 }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                let preset = appSession.session.teachingSituationPreset
-                Text("Vom Operator gewählte Planungsvorlage. Sie ist keine automatisch erkannte Unterrichtsform und beeinflusst die Aufnahmefreigabe nicht.")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                    .padding(.top, 8)
-                Text(preset.captureGuidanceDE)
-                    .font(.caption2)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                    .padding(.top, 4)
+                .labelsHidden().pickerStyle(.menu)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .scientificInput()
             }
+            Text("Vom Operator gewählte Planungsvorlage. Sie ist keine automatisch erkannte Unterrichtsform und beeinflusst die Aufnahmefreigabe nicht.")
+                .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
+            Text(TeachingSituationCatalogue.preset(for: appStore.session.teachingSituation).captureGuidanceDE)
+                .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
         }
     }
 
-    @ViewBuilder
-    var context: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            FieldSectionHeader(
-                title: "Sitzungskontext",
-                subtitle: "minimal erforderlich für Start"
-            )
-            FieldPanel(padding: 0) {
-                VStack(spacing: 0) {
-                    contextTextRow(key: "Fach", text: contextBinding(\.subject), id: "setup.subject")
-                    Divider().overlay(NativeTheme.dayHairline)
-                    contextTextRow(key: "Lernziel", text: contextBinding(\.lessonGoal), id: "setup.lessonGoal", axis: true)
-                    Divider().overlay(NativeTheme.dayHairline)
-                    contextTextRow(key: "Klassenstufe", text: contextBinding(\.gradeLevel))
-                    Divider().overlay(NativeTheme.dayHairline)
-                    contextTextRow(key: "Standort", text: contextBinding(\.schoolOrSite))
-                    Divider().overlay(NativeTheme.dayHairline)
-                    contextTextRow(key: "Notizen", text: contextBinding(\.notes), axis: true)
+    var retention: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Aufbewahrung").font(.headline)
+            Toggle("Aufbewahrungsdatum festhalten", isOn: Binding(
+                get: { appStore.session.retentionPolicy.retainUntil != nil },
+                set: { enabled in
+                    appStore.edit { $0.retentionPolicy.retainUntil = enabled ? Date() : nil }
                 }
+            ))
+            if let retainedDate = appStore.session.retentionPolicy.retainUntil {
+                DatePicker("Aufbewahren bis", selection: Binding(
+                    get: { appStore.session.retentionPolicy.retainUntil ?? retainedDate },
+                    set: { value in appStore.edit { $0.retentionPolicy.retainUntil = value } }
+                ), displayedComponents: .date)
             }
+            TextField("Vorgehen nach Ablauf", text: Binding(
+                get: { appStore.session.retentionPolicy.actionAfterExpiry },
+                set: { value in appStore.edit { $0.retentionPolicy.actionAfterExpiry = value } }
+            ), axis: .vertical)
+            .scientificInput()
+            Text("Diese Angaben dokumentieren die Aufbewahrung. Die App löscht keine Daten automatisch.")
+                .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
         }
     }
 
     private func contextTextRow(
-        key: String,
-        text: Binding<String>,
-        id: String? = nil,
-        axis: Bool = false
+        _ label: String, text: Binding<String>, id: String? = nil, multiline: Bool = false,
+        focus: PreparationField
     ) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Text(key)
-                .font(.subheadline)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .frame(width: 100, alignment: .leading)
-                .padding(.top, 2)
+        ScientificFormRow(label: label) {
             Group {
-                if axis {
-                    TextField(key, text: text, axis: .vertical)
-                        .lineLimit(2...4)
+                if multiline {
+                    TextField(label, text: text, axis: .vertical).lineLimit(2...4)
                 } else {
-                    TextField(key, text: text)
+                    TextField(label, text: text)
                 }
             }
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(NativeTheme.dayInk)
-            .multilineTextAlignment(.trailing)
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .scientificInput()
+            .focused($focusedField, equals: focus)
+            .submitLabel(multiline ? .done : .next)
             .modifier(OptionalAccessibilityIdentifier(id))
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
     }
 }
 
@@ -167,10 +134,6 @@ private struct OptionalAccessibilityIdentifier: ViewModifier {
     let id: String?
     init(_ id: String?) { self.id = id }
     func body(content: Content) -> some View {
-        if let id {
-            content.accessibilityIdentifier(id)
-        } else {
-            content
-        }
+        if let id { content.accessibilityIdentifier(id) } else { content }
     }
 }

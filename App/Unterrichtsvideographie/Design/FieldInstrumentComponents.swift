@@ -2,23 +2,28 @@ import SwiftUI
 
 // MARK: - Panel
 
-/// Hairline day/night panel used instead of Form sections.
+/// An editorial day/night section. It keeps related controls together without
+/// turning every block of content into a floating card.
 struct FieldPanel<Content: View>: View {
     var role: NativeTheme.SurfaceRole = .day
     var padding: CGFloat = 16
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        content()
+        VStack(alignment: .leading, spacing: 8) {
+            content()
+        }
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                role == .day ? NativeTheme.daySurface : NativeTheme.nightElevated,
-                in: RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous)
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous)
-                    .strokeBorder(NativeTheme.hairline(role: role), lineWidth: 1)
+            .overlay(alignment: .top) {
+                Rectangle()
+                    .fill(NativeTheme.hairline(role: role))
+                    .frame(height: 1)
+            }
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(NativeTheme.hairline(role: role))
+                    .frame(height: 1)
             }
     }
 }
@@ -30,16 +35,27 @@ struct FieldSectionHeader: View {
     var subtitle: String? = nil
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(NativeTheme.dayInkSecondary)
-            if let subtitle {
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                heading
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
+            VStack(alignment: .leading, spacing: 3) {
+                heading
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var heading: some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(NativeTheme.dayInkSecondary)
+        if let subtitle {
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(NativeTheme.dayInkTertiary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -55,47 +71,58 @@ struct FieldEyebrow: View {
     }
 }
 
-// MARK: - Editable field
+/// Shared view header for the day atelier. The accessory moves below the title
+/// at large Dynamic Type sizes instead of compressing the main label.
+struct FieldViewHeader<Accessory: View>: View {
+    let eyebrow: String
+    let title: String
+    var summary: String? = nil
+    @ViewBuilder var accessory: () -> Accessory
 
-struct FieldLabeledInput<Content: View>: View {
-    let label: String
-    @ViewBuilder var content: () -> Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-            content()
-                .font(.body.weight(.medium))
-                .foregroundStyle(NativeTheme.dayInk)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    init(
+        eyebrow: String,
+        title: String,
+        summary: String? = nil,
+        @ViewBuilder accessory: @escaping () -> Accessory
+    ) {
+        self.eyebrow = eyebrow
+        self.title = title
+        self.summary = summary
+        self.accessory = accessory
     }
-}
-
-/// Quiet table row used for context key/value pairs.
-struct FieldContextRow: View {
-    let key: String
-    let value: String
 
     var body: some View {
-        HStack(spacing: 12) {
-            Text(key)
-                .font(.subheadline)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .frame(width: 110, alignment: .leading)
-            Text(value.isEmpty ? "Nicht angegeben" : value)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(NativeTheme.dayInk)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .multilineTextAlignment(.trailing)
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(NativeTheme.dayInkTertiary.opacity(0.7))
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .bottom, spacing: 16) {
+                titleBlock
+                Spacer(minLength: 12)
+                accessory()
+            }
+            VStack(alignment: .leading, spacing: 12) {
+                titleBlock
+                accessory()
+            }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 13)
+        .padding(.bottom, 16)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(NativeTheme.dayHairline).frame(height: 1)
+        }
+    }
+
+    private var titleBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            FieldEyebrow(text: eyebrow)
+            Text(title)
+                .font(.title2.weight(.semibold))
+                .tracking(-0.3)
+                .foregroundStyle(NativeTheme.dayInk)
+            if let summary {
+                Text(summary)
+                    .font(.subheadline)
+                    .foregroundStyle(NativeTheme.dayInkTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 
@@ -106,8 +133,9 @@ struct FieldScopeChip: View {
     let isOn: Bool
 
     var body: some View {
-        Text(title)
+        Label(title, systemImage: isOn ? "checkmark.circle.fill" : "circle")
             .font(.caption.weight(.medium))
+            .labelStyle(.titleAndIcon)
             .padding(.horizontal, 9)
             .padding(.vertical, 5)
             .foregroundStyle(isOn ? NativeTheme.positiveDay : NativeTheme.dayInkTertiary)
@@ -134,13 +162,22 @@ struct FieldStatusBadge: View {
     }
 
     var body: some View {
-        Text(title.uppercased())
-            .font(.system(size: 9.5, weight: .semibold))
+        Label(title.uppercased(), systemImage: symbol)
+            .font(.caption.weight(.medium))
             .tracking(0.6)
+            .labelStyle(.titleAndIcon)
             .padding(.horizontal, 7)
             .padding(.vertical, 3)
             .foregroundStyle(foreground)
             .background(background, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+    }
+
+    private var symbol: String {
+        switch tone {
+        case .positive: return "checkmark.circle.fill"
+        case .warning: return "exclamationmark.triangle.fill"
+        case .neutral: return "info.circle"
+        }
     }
 
     private var foreground: Color {
@@ -160,102 +197,7 @@ struct FieldStatusBadge: View {
     }
 }
 
-// MARK: - Readiness checklist
-
-struct FieldReadinessItem: View {
-    let title: String
-    let detail: String
-    let isMet: Bool
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            ZStack {
-                Circle()
-                    .strokeBorder(isMet ? NativeTheme.positiveDay : NativeTheme.dayHairlineStrong, lineWidth: 1.5)
-                    .background(Circle().fill(isMet ? NativeTheme.positiveWash : Color.clear))
-                if isMet {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(NativeTheme.positiveDay)
-                }
-            }
-            .frame(width: 16, height: 16)
-            .padding(.top, 2)
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(NativeTheme.dayInk)
-                Text(detail)
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.vertical, 10)
-    }
-}
-
-struct FieldReadyBanner: View {
-    let isReady: Bool
-    let readyText: String
-    let blockedText: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                Image(systemName: isReady ? "lock.fill" : "exclamationmark.triangle.fill")
-                    .font(.subheadline)
-                Text(isReady ? "Bereit für die Aufnahme" : "Noch nicht bereit")
-                    .font(.subheadline.weight(.semibold))
-            }
-            .foregroundStyle(isReady ? NativeTheme.positiveDay : NativeTheme.warning)
-
-            Text(isReady ? readyText : blockedText)
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            (isReady ? NativeTheme.positiveWash : NativeTheme.warning.opacity(0.12)),
-            in: RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous)
-                .strokeBorder(
-                    isReady ? NativeTheme.positiveDay.opacity(0.22) : NativeTheme.warning.opacity(0.28),
-                    lineWidth: 1
-                )
-        }
-    }
-}
-
-// MARK: - Primary / ghost buttons
-
-struct FieldPrimaryButton: View {
-    let title: String
-    var isEnabled: Bool = true
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(Color.white)
-        .background(
-            NativeTheme.accent.opacity(isEnabled ? 1 : 0.4),
-            in: RoundedRectangle(cornerRadius: 9, style: .continuous)
-        )
-        .disabled(!isEnabled)
-    }
-}
+// MARK: - Ghost buttons
 
 struct FieldGhostButton: View {
     let title: String
@@ -271,8 +213,56 @@ struct FieldGhostButton: View {
         .buttonStyle(.plain)
         .foregroundStyle(NativeTheme.dayInkSecondary)
         .overlay {
-            RoundedRectangle(cornerRadius: 9, style: .continuous)
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
                 .strokeBorder(NativeTheme.dayHairlineStrong, lineWidth: 1)
         }
+    }
+}
+
+/// Aligned fields on iPad, stacked labels on phones and at accessibility sizes.
+struct ScientificFormRow<Content: View>: View {
+    let label: String
+    @ViewBuilder var content: () -> Content
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        Group {
+            if sizeClass == .regular && !typeSize.isAccessibilitySize {
+                HStack(alignment: .center, spacing: 16) {
+                    Text(label)
+                        .foregroundStyle(NativeTheme.nightInkSecondary)
+                        .frame(width: 120, alignment: .leading)
+                    content().frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 7) {
+                    Text(label).foregroundStyle(NativeTheme.nightInkSecondary)
+                    content().frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+        .font(.body)
+    }
+}
+
+struct ScientificCheckboxStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button {
+            configuration.isOn.toggle()
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
+                    .font(.title3)
+                    .foregroundStyle(configuration.isOn ? NativeTheme.accent : NativeTheme.nightInkSecondary)
+                configuration.label.foregroundStyle(NativeTheme.nightInk)
+                Spacer(minLength: 0)
+            }
+            .frame(minHeight: 44, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityValue(configuration.isOn ? "Ausgewählt" : "Nicht ausgewählt")
+        .accessibilityAddTraits(configuration.isOn ? .isSelected : [])
     }
 }

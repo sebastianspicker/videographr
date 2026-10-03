@@ -6,20 +6,35 @@ struct ProvenanceBar: View {
     enum Role {
         case day
         case night
-
-        var themeRole: NativeTheme.SurfaceRole {
-            switch self {
-            case .day: return .day
-            case .night: return .night
-            }
-        }
     }
 
     let role: Role
     let segments: [String]
     var trailing: String? = nil
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                stackedContent
+            } else {
+                inlineContent
+            }
+        }
+        .padding(.horizontal, role == .day ? 20 : 16)
+        .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 8 : 0)
+        .frame(minHeight: 40)
+        .background(barBackground)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(hairline)
+                .frame(height: 1)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("chrome.provenance")
+    }
+
+    private var inlineContent: some View {
         HStack(spacing: 0) {
             ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
                 if index > 0 {
@@ -35,19 +50,32 @@ struct ProvenanceBar: View {
                 Text(trailing)
                     .font(.system(.caption2, design: .monospaced))
                     .foregroundStyle(secondaryInk)
-                    .lineLimit(1)
+                .lineLimit(1)
             }
         }
-        .padding(.horizontal, role == .day ? 20 : 16)
-        .frame(height: 40)
-        .background(barBackground)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(hairline)
-                .frame(height: 1)
+    }
+
+    private var stackedContent: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(segments.first ?? "Videographr")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(primaryInk)
+                Spacer(minLength: 8)
+                if let trailing {
+                    Text(trailing)
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundStyle(secondaryInk)
+                        .lineLimit(1)
+                }
+            }
+            if segments.count > 1 {
+                Text(segments.dropFirst().joined(separator: " · "))
+                    .font(.caption2)
+                    .foregroundStyle(secondaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("chrome.provenance")
     }
 
     private var separator: some View {
@@ -71,79 +99,5 @@ struct ProvenanceBar: View {
 
     private var barBackground: Color {
         role == .day ? NativeTheme.dayCanvas.opacity(0.92) : NativeTheme.nightCanvas.opacity(0.92)
-    }
-}
-
-extension ProvenanceBar {
-    /// Standard session-aware segments for day surfaces.
-    static func daySession(_ session: CaptureSession, activeGrantCount: Int) -> ProvenanceBar {
-        let mode = session.operatingMode == .evidenceSafe ? "Evidence-safe" : "Experimental"
-        let grants = activeGrantCount == 1
-            ? "1 Freigabe aktiv"
-            : "\(activeGrantCount) Freigaben aktiv"
-        return ProvenanceBar(
-            role: .day,
-            segments: [mode, grants, "Nur lokal · kein Cloud"],
-            trailing: "schema v\(session.schemaVersion) · \(BuildIdentity.current.displayVersion)"
-        )
-    }
-
-    /// Live instrument bar (pre-roll / recording).
-    static func nightLive(
-        session: CaptureSession,
-        isRecording: Bool,
-        formatLabel: String = "1920×1080"
-    ) -> ProvenanceBar {
-        let mode = session.operatingMode == .evidenceSafe ? "Evidence-safe" : "Experimental"
-        let phase = isRecording ? "recording" : "pre-roll"
-        return ProvenanceBar(
-            role: .night,
-            segments: [
-                mode,
-                isRecording ? "Freigaben eingefroren" : "Freigaben geprüft",
-                "\(formatLabel) · kontinuierliche Take"
-            ],
-            trailing: phase
-        )
-    }
-}
-
-/// Compact Evidence-safe status used in side rails / footers.
-struct EvidenceSafeModeBadge: View {
-    let role: ProvenanceBar.Role
-
-    var body: some View {
-        VStack(spacing: 6) {
-            Circle()
-                .fill(led)
-                .frame(width: 5, height: 5)
-                .shadow(color: led.opacity(0.35), radius: 3)
-            Text("EVIDENCE\nSAFE")
-                .font(.system(size: 8, weight: .medium))
-                .tracking(0.6)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(secondary)
-        }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 6)
-        .frame(width: 52)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(role == .day ? NativeTheme.daySurface : NativeTheme.nightSurface)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(role == .day ? NativeTheme.dayHairline : NativeTheme.nightHairline)
-        }
-        .accessibilityLabel("Evidence-safe Modus aktiv")
-        .accessibilityIdentifier("chrome.evidenceSafeBadge")
-    }
-
-    private var led: Color {
-        role == .day ? NativeTheme.positiveDay : NativeTheme.positiveNight
-    }
-
-    private var secondary: Color {
-        role == .day ? NativeTheme.dayInkTertiary : NativeTheme.nightInkTertiary
     }
 }

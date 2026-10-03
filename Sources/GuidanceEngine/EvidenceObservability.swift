@@ -1,17 +1,5 @@
 import Foundation
 
-/// Declares whether callers want capture observability only or explicitly
-/// unvalidated research hypotheses. Evidence-safe is the product default.
-public enum GuidanceOperatingMode: Equatable, Sendable {
-    case evidenceSafe
-    case experimentalResearch(protocolReference: String)
-
-    public var isExperimental: Bool {
-        if case .experimentalResearch = self { return true }
-        return false
-    }
-}
-
 /// A direct, non-pedagogical measurement reported by the capture pipeline.
 public struct CaptureObservabilityDimension: Equatable, Identifiable, Sendable {
     public enum Status: String, Equatable, Sendable {
@@ -169,50 +157,6 @@ public struct CaptureObservabilityAssessment: Equatable, Sendable {
     ) -> CaptureObservabilityDimension.Status {
         if value <= passMaximum { return .pass }
         return value <= warnMaximum ? .warn : .fail
-    }
-}
-
-public enum ExperimentalValidationStatus: String, Codable, Equatable, Sendable {
-    case unvalidated
-}
-
-/// Explicitly unvalidated output from the historic rule set. `ruleSupport`
-/// describes rule activation only; it is not a probability or rater confidence.
-public struct ExperimentalHypothesis: Equatable, Identifiable, Sendable {
-    public var id: String
-    public var family: PedagogicalCodeFamily
-    public var code: String
-    public var labelDE: String
-    public var ruleSupport: Double
-    public var rationaleDE: String
-    public var validationStatus: ExperimentalValidationStatus
-
-    public init(assignment: PedagogicalCodeAssignment) {
-        self.id = assignment.id
-        self.family = assignment.family
-        self.code = assignment.code
-        self.labelDE = assignment.labelDE
-        self.ruleSupport = assignment.level
-        self.rationaleDE = assignment.rationaleDE
-        self.validationStatus = .unvalidated
-    }
-}
-
-public struct ExperimentalHypothesisSet: Equatable, Sendable {
-    public var hypotheses: [ExperimentalHypothesis]
-    public var validationStatus: ExperimentalValidationStatus
-    public var limitationDE: String
-
-    public init(hypotheses: [ExperimentalHypothesis]) {
-        self.hypotheses = hypotheses
-        self.validationStatus = .unvalidated
-        self.limitationDE = "Regelbasierte, unvalidierte Hypothesen. Sie sind keine pädagogischen Bewertungen und ersetzen keine menschliche Kodierung."
-    }
-
-    public static let empty = ExperimentalHypothesisSet(hypotheses: [])
-
-    static func fromLegacyCoding(_ coding: PedagogicalCodingResult) -> ExperimentalHypothesisSet {
-        ExperimentalHypothesisSet(hypotheses: (coding.ipnDimensions + coding.timssActivities + coding.gtiDimensions).map(ExperimentalHypothesis.init))
     }
 }
 

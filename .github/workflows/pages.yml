@@ -6,6 +6,7 @@ name: Deploy static demo to Pages
     branches: [main]
     paths:
       - "docs/demo/**"
+      - "scripts/verify_demo.py"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -33,6 +34,8 @@ jobs:
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
         with:
           enablement: true
+      - name: Verify static demo
+        run: python3 scripts/verify_demo.py
       - name: Upload demo
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:

@@ -1,60 +1,56 @@
 # Changelog
 
 All notable changes to Videographr are documented here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and release identifiers follow
-[Semantic Versioning](https://semver.org/).
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and release identifiers
+follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-No changes are recorded after the current candidate.
+- No release candidate is designated.
+- Bound routine motion guidance updates, advance experimental windows only for
+  fresh Vision observations, and record the sampling change in new provenance.
+- Reuse Vision requests and capture buffers while retaining audio clipping and
+  dropout evidence in bounded UI updates.
+- Load sessions asynchronously, avoid repeated journal hydration and full-list
+  autosave reads, and copy imports outside the shared persistence lane.
+- Fix first-attachment playback, isolate playback clock updates, and report
+  checked media availability and pending device checks accurately.
+- Encode persisted and exported consent-scope sets in canonical order, so the
+  study-package manifest, exported `session.json`, and their digests no longer
+  vary between runs for identical sessions. Earlier files still decode.
+- Move recording admission, consent and mode transitions, observation
+  measurements, and the live experimental analysis windows into SwiftPM
+  targets with tests. `AppStore` is now the only writer of the active session.
+  Persisted and exported formats are unchanged and pinned by contract tests.
 
 ## [0.1.0-alpha.1] - Unreleased
 
-Candidate for the first public source alpha. The iOS bundle reports marketing version `0.1.0`,
-build `1`; the proposed GitHub prerelease tag is `v0.1.0-alpha.1`.
+Proposed first public source alpha. The iOS bundle reports marketing version
+`0.1.0`, build `1`; the proposed GitHub prerelease tag is `v0.1.0-alpha.1`.
 
 ### Added
 
-- German SwiftUI workflow for setup, live capture guidance, reflection, learning content, and
-  scientific-alpha information.
+- German SwiftUI workflow for setup, live capture guidance, reflection, learning
+  content, and scientific-alpha information.
 - Evidence-safe direct technical observations with explicit missingness.
-- Versioned scoped consent, retention, capture decisions, take manifests, media provenance,
-  time-linked annotations, and bounded observation/coding journals.
-- Protocol-gated experimental hypotheses that remain separate from readiness and user reflection.
-- Local device-owner authentication, protected file handling, descriptor-pinned imports, and
-  rollback/reconciliation for interrupted persistence operations.
-- Consent-scoped study packages with exact membership, SHA-256 digests, durable export attempts,
-  per-attempt leases, and exactly-once outcome transitions.
-- SwiftPM unit suites and assertion-backed Simulator screenshot workflow.
-- Public scientific-alpha, evaluation, security, contribution, release, and research-gap docs.
-
-### Fixed
-
-- Experimental guidance now describes direct visibility and explicitly unvalidated rule results
-  without asserting IPN, coding, or analysis suitability.
-- Public API documentation describes experimental thresholds as unvalidated rule inputs rather
-  than evidence of research or analysis suitability.
-- Learn privacy copy distinguishes configured iOS protections from physical-device verification.
-- Recording-state and guidance-activity chips use distinct labels.
-- Public writing-policy checks no longer interpret Swift operators or web URL paths as formatting
-  and machine-specific paths.
-- Late AVFoundation callbacks can no longer finalize, fail, or remove a newer recording transaction.
-- Capture callback timeouts now preserve an honest completion-unknown state until a late result or
-  relaunch reconciliation resolves ownership.
-- Concurrent edits and share-sheet outcomes cannot overwrite unrelated session or terminal export
-  state.
-- Failed session deletion restores metadata, journals, and quarantined media before returning.
-- Imports reject unsafe file types and remain bound to the opened descriptor during the copy.
-- Simulator recording attempts are rejected before recording storage is prepared, and late capture
-  errors cannot displace the active synthetic fallback.
-- Learn-topic paragraphs and line breaks remain visible after Markdown rendering.
-- The app target shares audio-sample construction across capture and Simulator guidance paths, so
-  the signing-disabled Release analysis compiles both paths.
+- Versioned scoped consent, retention, capture decisions, take manifests, media
+  provenance, time-linked annotations, and bounded observation and coding journals.
+- Protocol-gated experimental hypotheses that stay separate from readiness,
+  consent, and export authority, with optional labeled reflection aids kept
+  separate from human-authored notes.
+- Local device-owner authentication, protected file handling, descriptor-pinned
+  imports, and recovery for interrupted persistence operations.
+- Consent-scoped study packages with exact metadata membership, SHA-256 digests,
+  durable export attempts, and per-attempt leases.
+- SwiftPM unit suites, hardware-free app-unit capture-event tests, architecture
+  checks, public-hygiene checks, and release Simulator analysis and build commands.
 
 ### Known limits
 
 - No signed IPA, TestFlight, App Store, or production deployment is provided.
-- Physical-device capture, interruptions, audio routes, file protection, storage/thermal pressure,
-  and a 60-minute take are not yet closed release evidence.
+- Physical-device capture, interruption, audio-route, file-protection, storage,
+  thermal, and long-take checks are not current release evidence.
+- No dedicated UI-test target or screenshot-baseline harness is present.
 - No classroom or minor data is authorized by this repository.
-- No human-rater validation or effectiveness study supports pedagogical or educational claims.
+- No human-rater validation or effectiveness study supports pedagogical or
+  educational claims.

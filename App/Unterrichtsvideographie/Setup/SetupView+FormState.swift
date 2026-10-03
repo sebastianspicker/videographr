@@ -8,11 +8,11 @@ extension SetupView {
             && !experimentalOversightReference.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && experimentalExpiry > Date()
             && experimentalDisclosureAcknowledged
-            && appSession.session.authorizes(.researchProcessing)
+            && appStore.session.authorizes(.researchProcessing)
     }
 
     var saveStateSymbol: String {
-        switch appSession.saveState {
+        switch appStore.saveState {
         case .saved: return "checkmark.circle"
         case .unsaved: return "pencil.circle"
         case .saving: return "arrow.triangle.2.circlepath"
@@ -21,7 +21,7 @@ extension SetupView {
     }
 
     var saveStateColor: Color {
-        switch appSession.saveState {
+        switch appStore.saveState {
         case .saved: return NativeTheme.positiveDay
         case .unsaved, .saving: return .secondary
         case .failed: return NativeTheme.danger
@@ -35,31 +35,20 @@ extension SetupView {
                 if enabled { consentScopes.insert(scope) } else { consentScopes.remove(scope) }
             }
         ))
+        .toggleStyle(ScientificCheckboxStyle())
         .accessibilityIdentifier("setup.consent.scope.\(scope.rawValue)")
     }
 
     func sessionBinding<Value>(_ keyPath: WritableKeyPath<CaptureSession, Value>) -> Binding<Value> {
-        Binding(
-            get: { appSession.session[keyPath: keyPath] },
-            set: { value in
-                appSession.session[keyPath: keyPath] = value
-                appSession.markDirty()
-            }
-        )
+        appStore.binding(keyPath)
     }
 
     func contextBinding(_ keyPath: WritableKeyPath<SessionContext, String>) -> Binding<String> {
-        Binding(
-            get: { appSession.session.context[keyPath: keyPath] },
-            set: { value in
-                appSession.session.context[keyPath: keyPath] = value
-                appSession.markDirty()
-            }
-        )
+        appStore.binding((\CaptureSession.context).appending(path: keyPath))
     }
 
     func loadFormState() {
-        guard let grant = appSession.session.consentGrants.last(where: { $0.withdrawnAt == nil }) else {
+        guard let grant = appStore.session.consentGrants.last(where: { $0.withdrawnAt == nil }) else {
             consentDocumentIdentifier = ""
             consentDocumentVersion = ""
             participantGroupPseudonym = ""
@@ -73,7 +62,7 @@ extension SetupView {
         consentScopes = grant.scopes
         consentExpires = grant.expiresAt != nil
         consentExpiry = grant.expiresAt ?? consentExpiry
-        if let protocolReference = appSession.session.experimentalProtocol {
+        if let protocolReference = appStore.session.experimentalProtocol {
             experimentalProtocolIdentifier = protocolReference.protocolIdentifier
             experimentalOversightReference = protocolReference.oversightReference
             experimentalExpiry = protocolReference.expiresAt

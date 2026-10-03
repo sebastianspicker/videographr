@@ -5,6 +5,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+# Operating-system metadata is ignored on purpose and is never public source.
+OS_METADATA_NAMES = {".DS_Store", "Thumbs.db", "desktop.ini"}
+
 
 def hidden_public_source_issues(
     root: Path,
@@ -26,6 +29,8 @@ def _hidden_source_files(
     issues: list[str] = []
     for path in source_root.rglob("*"):
         if not path.is_file() or path.suffix.lower() not in public_source_suffixes:
+            continue
+        if path.name in OS_METADATA_NAMES or path.name.startswith("._"):
             continue
         relative = path.relative_to(root).as_posix()
         if relative not in candidates:
