@@ -10,183 +10,199 @@ extension SetupView {
             && (!consentExpires || consentExpiry > Date())
     }
 
-    var scopedConsent: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Dokumentierte Freigaben").font(.headline)
-            consentPanel
-        }
-    }
-
-    private var consentPanel: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            ScientificFormRow(label: "Dokument") {
-                TextField("Dokumentkennung", text: $consentDocumentIdentifier)
-                    .textInputAutocapitalization(.never).autocorrectionDisabled()
-                    .scientificInput()
-                    .accessibilityIdentifier("setup.consent.document")
-                    .focused($focusedField, equals: .document).submitLabel(.next)
-            }
-            ScientificFormRow(label: "Version") {
-                TextField("Dokumentversion", text: $consentDocumentVersion)
-                    .textInputAutocapitalization(.never).autocorrectionDisabled()
-                    .scientificInput()
-                    .accessibilityIdentifier("setup.consent.version")
-                    .focused($focusedField, equals: .version).submitLabel(.next)
-            }
-            ScientificFormRow(label: "Gruppenpseudonym") {
-                TextField("Gruppenpseudonym", text: $participantGroupPseudonym)
-                    .textInputAutocapitalization(.never).autocorrectionDisabled()
-                    .scientificInput()
-                    .accessibilityIdentifier("setup.consent.pseudonym")
-                    .focused($focusedField, equals: .group).submitLabel(.done)
-            }
-            if let grant = appStore.session.consentGrants.last(where: { $0.withdrawnAt == nil }) {
-                ScientificFormRow(label: "Erteilt am") {
-                    Text(grant.grantedAt, style: .date)
-                        .foregroundStyle(NativeTheme.nightInkSecondary)
+    var consentPanel: some View {
+        VStack(alignment: .leading, spacing: Space.l) {
+            LedgerPair {
+                LedgerField("Einwilligungsdokument") {
+                    TextField("Dokumentkennung", text: $consentDocumentIdentifier)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled()
+                        .writingLine(mono: true)
+                        .accessibilityIdentifier("setup.consent.document")
+                        .focused($focusedField, equals: .document).submitLabel(.next)
+                }
+            } trailing: {
+                LedgerField("Version") {
+                    TextField("Dokumentversion", text: $consentDocumentVersion)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled()
+                        .writingLine(mono: true)
+                        .accessibilityIdentifier("setup.consent.version")
+                        .focused($focusedField, equals: .version).submitLabel(.next)
                 }
             }
-            FlowScopeToggles(scopes: $consentScopes, toggle: consentScopeToggle)
-                .padding(.vertical, 4)
+            LedgerPair {
+                LedgerField("Gruppenpseudonym") {
+                    TextField("Gruppenpseudonym", text: $participantGroupPseudonym)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled()
+                        .writingLine(mono: true)
+                        .accessibilityIdentifier("setup.consent.pseudonym")
+                        .focused($focusedField, equals: .group).submitLabel(.done)
+                }
+            } trailing: {
+                if let grant = appStore.session.consentGrants.last(where: { $0.withdrawnAt == nil }) {
+                    LedgerField("Dokumentiert am") {
+                        Text(grant.grantedAt, style: .date)
+                            .font(Typeface.value)
+                            .foregroundStyle(Ink.instrument)
+                            .frame(minHeight: Space.target, alignment: .leading)
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 0) {
+                FormLabel("Freigegebene Zwecke")
+                    .padding(.bottom, Space.xs)
+                ScopeChecklist(scopes: $consentScopes, toggle: consentScopeToggle)
+            }
+
             Toggle("Ablaufdatum festlegen", isOn: $consentExpires)
-                .toggleStyle(ScientificCheckboxStyle())
+                .toggleStyle(InkCheckboxStyle())
             if consentExpires {
                 DatePicker("Gültig bis", selection: $consentExpiry, in: Date()..., displayedComponents: .date)
+                    .font(Typeface.body)
             }
-            Button("Freigaben speichern") {
-                appStore.updateConsentGrant(ConsentGrantDraft(
-                    scopes: consentScopes,
-                    documentIdentifier: consentDocumentIdentifier,
-                    documentVersion: consentDocumentVersion,
-                    participantGroupPseudonym: participantGroupPseudonym,
-                    expiresAt: consentExpires ? consentExpiry : nil
-                ))
+
+            VStack(alignment: .leading, spacing: Space.s) {
+                Button("Freigaben dokumentieren") {
+                    appStore.updateConsentGrant(ConsentGrantDraft(
+                        scopes: consentScopes,
+                        documentIdentifier: consentDocumentIdentifier,
+                        documentVersion: consentDocumentVersion,
+                        participantGroupPseudonym: participantGroupPseudonym,
+                        expiresAt: consentExpires ? consentExpiry : nil
+                    ))
+                }
+                .buttonStyle(InkButtonStyle(kind: .secondary))
+                .disabled(!canSaveConsentGrant)
+                .accessibilityIdentifier("setup.consent.save")
+                if !canSaveConsentGrant {
+                    Text("Erforderlich: Dokument, Version, Gruppenpseudonym und mindestens ein Zweck. Ein Ablaufdatum muss in der Zukunft liegen.")
+                        .font(Typeface.captionSmall)
+                        .foregroundStyle(Ink.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
-            .buttonStyle(ScientificButtonStyle())
-            .disabled(!canSaveConsentGrant)
-            .accessibilityIdentifier("setup.consent.save")
-            if !canSaveConsentGrant {
-                Text("Dokument, Version, Gruppenpseudonym und mindestens ein Zweck sind erforderlich. Ein Ablaufdatum muss in der Zukunft liegen.")
-                    .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
+
+            VStack(alignment: .leading, spacing: Space.s) {
+                if appStore.session.canStartNewCapture {
+                    StatusMark("Erhebung und lokale Reflexion sind dokumentiert.", kind: .secured)
+                } else {
+                    StatusMark("Für den Aufnahmestart fehlen Freigaben für Erhebung oder lokale Reflexion.", kind: .attention)
+                }
+                Text("Sekundärnutzung und externe Weitergabe werden beim Export gesondert geprüft. Frühere Bestätigungen ersetzen keine zweckgebundene Freigabe.")
+                    .font(Typeface.captionSmall)
+                    .foregroundStyle(Ink.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Text(appStore.session.canStartNewCapture
-                 ? "Erhebung und lokale Reflexion: aktive Freigaben dokumentiert."
-                 : "Für den Aufnahmestart fehlen aktive Freigaben für Erhebung oder lokale Reflexion.")
-                .font(.caption)
-                .foregroundStyle(appStore.session.canStartNewCapture ? NativeTheme.accent : NativeTheme.warning)
-            Text("Sekundärnutzung und externe Weitergabe werden beim Export gesondert geprüft. Frühere Bestätigungen ersetzen keine zweckgebundene Freigabe.")
-                .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
         }
     }
 
     var modePanel: some View {
-        FieldPanel {
-            operatingModeContent
+        VStack(alignment: .leading, spacing: Space.l) {
+            if appStore.session.operatingMode == .evidenceSafe {
+                VStack(alignment: .leading, spacing: Space.xs) {
+                    HStack(alignment: .firstTextBaseline, spacing: Space.s) {
+                        Text("Evidence-safe").font(Typeface.heading)
+                        FormLabel("Standard", small: true)
+                    }
+                    Text("Die App zeigt direkte Messsignale und fehlende Werte. Sie stellt keine IPN-, TIMSS- oder GTI-Hypothesen als Fakten dar.")
+                        .font(Typeface.callout)
+                        .foregroundStyle(Ink.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                DisclosureGroup("Experimentellen Modus vorbereiten") {
+                    experimentalActivation
+                }
+                .disclosureGroupStyle(InkDisclosureStyle())
+                .accessibilityIdentifier("setup.experimentalActivation")
+            } else {
+                HypothesisBlock(title: "Experimenteller Forschungsmodus aktiv") {
+                    Text("Hypothesen sind nicht validiert. Sie beeinflussen weder die Aufnahmebereitschaft noch ersetzen sie menschliche Kodierung.")
+                        .font(Typeface.callout)
+                        .foregroundStyle(Ink.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Zum evidenzsicheren Modus zurückkehren") {
+                        appStore.returnToEvidenceSafe()
+                    }
+                    .buttonStyle(InkButtonStyle(kind: .secondary))
+                    .accessibilityIdentifier("setup.mode.evidenceSafe")
+                }
+            }
+            Text("experimental · \(appStore.session.operatingMode == .evidenceSafe ? "aus" : "an") · \(appStore.session.experimentalProtocol?.protocolIdentifier ?? "kein Protokoll")")
+                .font(Typeface.valueSmall)
+                .foregroundStyle(Ink.tertiary)
         }
-        .frame(maxWidth: .infinity, alignment: .top)
     }
 
-    @ViewBuilder
-    private var operatingModeContent: some View {
-        HStack {
-            Text("Betriebsmodus")
-                .font(.subheadline.weight(.semibold))
-            Spacer()
-            FieldStatusBadge(
-                title: appStore.session.operatingMode == .evidenceSafe ? "Standard" : "Experiment",
-                tone: appStore.session.operatingMode == .evidenceSafe ? .positive : .warning
-            )
+    private var experimentalActivation: some View {
+        HypothesisBlock(title: "Nur für protokollierte Forschung") {
+            VStack(alignment: .leading, spacing: Space.l) {
+                LedgerPair {
+                    LedgerField("Protokoll-ID") {
+                        TextField("Protokoll-ID", text: $experimentalProtocolIdentifier)
+                            .textInputAutocapitalization(.never)
+                            .writingLine(mono: true)
+                            .accessibilityIdentifier("setup.experimental.protocol")
+                    }
+                } trailing: {
+                    LedgerField("Aufsicht / Kontakt") {
+                        TextField("Aufsicht / Kontakt", text: $experimentalOversightReference)
+                            .writingLine()
+                            .accessibilityIdentifier("setup.experimental.oversight")
+                    }
+                }
+                DatePicker("Protokoll gültig bis", selection: $experimentalExpiry, in: Date()..., displayedComponents: .date)
+                    .font(Typeface.body)
+                Toggle("Ich bestätige die sichtbare Kennzeichnung als nicht validiertes Experiment.", isOn: $experimentalDisclosureAcknowledged)
+                    .toggleStyle(InkCheckboxStyle())
+                    .accessibilityIdentifier("setup.experimental.acknowledged")
+                if !appStore.session.authorizes(.researchProcessing) {
+                    StatusMark("Zusätzlich erforderlich: eine dokumentierte Freigabe für Forschungsverarbeitung (§ 2).", kind: .attention)
+                }
+                Button("Experimentellen Modus aktivieren") {
+                    appStore.activateExperimentalMode(protocol: ResearchProtocolReference(
+                        protocolIdentifier: experimentalProtocolIdentifier,
+                        oversightReference: experimentalOversightReference,
+                        expiresAt: experimentalExpiry
+                    ))
+                }
+                .buttonStyle(InkButtonStyle(kind: .secondary))
+                .disabled(!canActivateExperimentalMode)
+                .accessibilityIdentifier("setup.mode.experimental")
+            }
         }
-
-        if appStore.session.operatingMode == .evidenceSafe {
-            Text("Evidence-safe")
-                .font(.body.weight(.semibold))
-                .padding(.top, 10)
-            Text("Direkte Messsignale und fehlende Werte. Keine IPN-, TIMSS- oder GTI-Hypothesen als Fakten.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .padding(.top, 4)
-
-            Text("Experimenteller Modus: nur für protokollierte Forschung")
-                .font(.caption.weight(.semibold))
-                .padding(.top, 14)
-            TextField("Protokoll-ID", text: $experimentalProtocolIdentifier)
-                .textInputAutocapitalization(.never)
-                .textFieldStyle(.plain)
-                .padding(10)
-                .background(NativeTheme.nightElevated, in: RoundedRectangle(cornerRadius: 4))
-                .accessibilityIdentifier("setup.experimental.protocol")
-            TextField("Aufsicht / Kontakt", text: $experimentalOversightReference)
-                .textFieldStyle(.plain)
-                .padding(10)
-                .background(NativeTheme.nightElevated, in: RoundedRectangle(cornerRadius: 4))
-                .accessibilityIdentifier("setup.experimental.oversight")
-                .padding(.top, 6)
-            DatePicker("Gültig bis", selection: $experimentalExpiry, in: Date()..., displayedComponents: .date)
-                .padding(.top, 6)
-            Toggle("Ich bestätige die sichtbare Kennzeichnung als nicht validiertes Experiment.", isOn: $experimentalDisclosureAcknowledged)
-                .font(.caption)
-                .accessibilityIdentifier("setup.experimental.acknowledged")
-                .padding(.top, 4)
-            if !appStore.session.authorizes(.researchProcessing) {
-                Label("Zusätzlich ist ein aktiver Freigabedatensatz für Forschungsverarbeitung erforderlich.", systemImage: "lock")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.warning)
-                    .padding(.top, 4)
-            }
-            Button("Experimentellen Modus aktivieren") {
-                appStore.activateExperimentalMode(protocol: ResearchProtocolReference(
-                    protocolIdentifier: experimentalProtocolIdentifier,
-                    oversightReference: experimentalOversightReference,
-                    expiresAt: experimentalExpiry
-                ))
-            }
-            .disabled(!canActivateExperimentalMode)
-            .accessibilityIdentifier("setup.mode.experimental")
-            .padding(.top, 8)
-        } else {
-            Label("Experimenteller Forschungsmodus aktiv", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(NativeTheme.warning)
-                .padding(.top, 10)
-            Text("Experimentelle Hypothesen sind nicht validiert, beeinflussen keine Aufnahmebereitschaft und ersetzen keine menschliche Kodierung.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .padding(.top, 4)
-            Button("Zum evidenzsicheren Modus zurückkehren") {
-                appStore.returnToEvidenceSafe()
-            }
-            .accessibilityIdentifier("setup.mode.evidenceSafe")
-            .padding(.top, 8)
-        }
-
-        Text("experimental · \(appStore.session.operatingMode == .evidenceSafe ? "aus" : "an") · \(appStore.session.experimentalProtocol?.protocolIdentifier ?? "kein Protokoll")")
-            .font(.system(.caption2, design: .monospaced))
-            .foregroundStyle(NativeTheme.dayInkTertiary)
-            .padding(.top, 12)
     }
 }
 
-/// Layout helper: stack scope toggles with chip-like density while keeping Toggle a11y.
-private struct FlowScopeToggles<ToggleView: View>: View {
+/// The five consent purposes as ballot boxes, each with what it unlocks.
+private struct ScopeChecklist<ToggleView: View>: View {
     @Binding var scopes: Set<ConsentScope>
     let toggle: (ConsentScope, String) -> ToggleView
 
-    private let items: [(ConsentScope, String)] = [
-        (.collection, "Aufzeichnung erheben"),
-        (.localReflection, "Lokal reflektieren"),
-        (.researchProcessing, "Für Forschung verarbeiten"),
-        (.secondaryUse, "Sekundärnutzung"),
-        (.externalSharing, "Externes Forschungspaket teilen")
+    private let items: [(scope: ConsentScope, title: String, unlocks: String)] = [
+        (.collection, "Aufzeichnung erheben", "nötig für Aufnahme und Export"),
+        (.localReflection, "Lokal reflektieren", "nötig für Aufnahme, Videoimport und Notizen"),
+        (.researchProcessing, "Für Forschung verarbeiten", "nötig für den experimentellen Modus"),
+        (.secondaryUse, "Sekundärnutzung", "nötig für den Metadatenexport"),
+        (.externalSharing, "Externes Forschungspaket teilen", "nötig für den Metadatenexport")
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(items, id: \.0) { scope, title in
-                toggle(scope, title)
-                    .font(.subheadline)
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(items, id: \.scope) { item in
+                VStack(alignment: .leading, spacing: 0) {
+                    toggle(item.scope, item.title)
+                        .accessibilityHint(item.unlocks)
+                    Text(item.unlocks)
+                        .font(Typeface.captionSmall)
+                        .foregroundStyle(Ink.tertiary)
+                        .padding(.leading, 32)
+                        .padding(.top, -8)
+                        .allowsHitTesting(false)
+                        .padding(.bottom, Space.s)
+                        .accessibilityHidden(true)
+                }
+                .overlay(alignment: .bottom) { Rule() }
             }
-
         }
     }
-
 }

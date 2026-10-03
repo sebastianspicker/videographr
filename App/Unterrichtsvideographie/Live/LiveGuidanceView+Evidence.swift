@@ -21,16 +21,13 @@ extension LiveGuidanceView {
             if appStore.session.operatingMode == .experimentalResearch,
                appStore.session.hasUsableExperimentalProtocol
             {
-                FieldPanel(role: .night, padding: 14) {
-                    VStack(alignment: .leading, spacing: 6) {
-                    Label("Experimenteller Forschungsmodus · nicht validiert", systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(NativeTheme.warningNight)
+                HypothesisBlock(title: "Experimenteller Forschungsmodus · nicht validiert") {
                     Text("Regelhypothesen sind von Aufnahmesignalen getrennt und beeinflussen weder Bereitschaft noch Reflexionsfragen.")
-                        .font(.caption)
-                        .foregroundStyle(NativeTheme.nightInkSecondary)
-                    }
+                        .font(Typeface.caption)
+                        .foregroundStyle(Room.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(.bottom, 12)
+                .padding(.bottom, Space.l)
             }
 
             instrumentSection(
@@ -38,35 +35,44 @@ extension LiveGuidanceView {
                 detail: "Direkte Signale"
             ) {
                 Text(liveStore.isRecording ? "Aufnahme läuft" : (readiness.canRecord ? "Bereit zur Aufnahme" : "Aufnahme prüfen"))
-                    .font(.headline)
+                    .font(Typeface.body.weight(.semibold))
+                    .foregroundStyle(Room.primary)
                     .accessibilityIdentifier("live.recordingState")
                     .accessibilityValue(recordingStateAccessibilityValue)
                 ForEach(dimensions) { dimension in
-                    Divider().overlay(NativeTheme.nightHairline)
-                    HStack(alignment: .top, spacing: 10) {
+                    Rule()
+                    HStack(alignment: .firstTextBaseline, spacing: Space.m) {
                         Image(systemName: observabilityIcon(dimension.status))
+                            .font(.footnote.weight(.semibold))
+                            .imageScale(.small)
                             .foregroundStyle(observabilityColor(dimension.status))
-                        VStack(alignment: .leading, spacing: 2) {
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: Space.xxs) {
                             HStack(alignment: .firstTextBaseline) {
                                 Text(dimension.labelDE)
-                                Spacer(minLength: 8)
+                                    .font(Typeface.callout)
+                                    .foregroundStyle(Room.primary)
+                                Spacer(minLength: Space.s)
                                 Text(observabilityStatusLabel(dimension.status))
-                                    .font(.caption.weight(.semibold))
+                                    .font(Typeface.labelSmall)
                                     .foregroundStyle(observabilityColor(dimension.status))
                             }
                                 .accessibilityIdentifier("live.observability.\(dimension.id)")
                             Text(dimension.detailDE)
-                                .font(.caption2)
-                                .foregroundStyle(NativeTheme.nightInkSecondary)
+                                .font(Typeface.captionSmall)
+                                .foregroundStyle(Room.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         Text(observabilityValue(dimension))
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(NativeTheme.nightInkSecondary)
+                            .font(Typeface.valueSmall)
+                            .monospacedDigit()
+                            .foregroundStyle(Room.instrument)
                     }
                 }
                 Text("Diese Werte beschreiben Aufnahmebedingungen, nicht Unterrichtsqualität.")
-                    .font(.caption2)
-                    .foregroundStyle(NativeTheme.nightInkTertiary)
+                    .font(Typeface.captionSmall)
+                    .foregroundStyle(Room.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             recordingControls
             liveTips
@@ -74,13 +80,11 @@ extension LiveGuidanceView {
             deviceAndFormat
             experimentalHypotheses
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, Space.xl)
+            .padding(.vertical, Space.l)
         }
         .scrollDismissesKeyboard(.immediately)
         .accessibilityIdentifier("live.guidanceList")
-        .background(NativeTheme.nightSurface)
-        .tint(NativeTheme.accent)
     }
 
     func instrumentSection<Content: View>(
@@ -88,25 +92,23 @@ extension LiveGuidanceView {
         detail: String? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(NativeTheme.nightInk)
-                Spacer(minLength: 0)
-                if let detail {
-                    Text(detail)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(NativeTheme.nightInkTertiary)
+        VStack(alignment: .leading, spacing: 0) {
+            Rule()
+            VStack(alignment: .leading, spacing: Space.m) {
+                HStack(alignment: .firstTextBaseline, spacing: Space.s) {
+                    FormLabel(title)
+                        .accessibilityAddTraits(.isHeader)
+                    Spacer(minLength: 0)
+                    if let detail {
+                        Text(detail)
+                            .font(Typeface.labelSmall)
+                            .foregroundStyle(Room.tertiary)
+                    }
                 }
+                content()
             }
-            content()
-        }
-        .padding(.vertical, 16)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(NativeTheme.nightHairline)
-                .frame(height: 1)
+            .padding(.top, Space.l)
+            .padding(.bottom, Space.xl)
         }
     }
 
@@ -121,12 +123,15 @@ extension LiveGuidanceView {
 
     private var recordingControls: some View {
         instrumentSection("Kontinuierliche Aufnahme") {
-            Text(appStore.session.title)
-                .font(.headline)
-                .accessibilityIdentifier("live.recordingControls")
-            Text("Geplant: \(appStore.session.plannedDurationMinutes) Minuten")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: Space.xxs) {
+                Text(appStore.session.title)
+                    .font(Typeface.heading)
+                    .foregroundStyle(Room.primary)
+                    .accessibilityIdentifier("live.recordingControls")
+                Text("geplant \(appStore.session.plannedDurationMinutes) Min.")
+                    .font(Typeface.valueSmall)
+                    .foregroundStyle(Room.secondary)
+            }
             readinessWarnings
             overrideControls
             auditPseudonym
@@ -139,23 +144,17 @@ extension LiveGuidanceView {
     private var readinessWarnings: some View {
         if !readiness.blockers.isEmpty && !liveStore.isRecording {
             ForEach(readiness.blockers) { blocker in
-                Label(blocker.messageDE, systemImage: "xmark.octagon")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.warningNight)
+                StatusMark(blocker.messageDE, kind: .fault)
             }
         }
         if liveStore.runtimeStatus.hasResourceWarning && !liveStore.isRecording {
-            Label(
+            StatusMark(
                 "Geräteressource warnt: Akku \(liveStore.runtimeStatus.batteryPercent.map { "\($0)%" } ?? "-"), Temperatur \(liveStore.runtimeStatus.thermalState)",
-                systemImage: "battery.25"
+                kind: .attention
             )
-            .font(.caption)
-            .foregroundStyle(NativeTheme.warningNight)
         }
         if !liveStore.runtimeStatus.spokenAudioCheckCompleted && !liveStore.isRecording {
-            Label("Sprechprobe wurde noch nicht vollständig abgehört.", systemImage: "ear")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.warningNight)
+            StatusMark("Sprechprobe wurde noch nicht vollständig abgehört.", kind: .attention)
         }
     }
 
@@ -163,41 +162,48 @@ extension LiveGuidanceView {
     private var overrideControls: some View {
         if !liveStore.isRecording && readiness.canOverrideQualityWarnings && requiresOverride {
             Toggle("Trotz technischer Warnungen aufnehmen", isOn: $forceRecord)
-                .font(.caption)
+                .toggleStyle(InkCheckboxStyle())
                 .accessibilityIdentifier("live.forceOverride")
             if forceRecord {
-                TextField("Begründung für Override", text: $overrideReason, axis: .vertical)
-                    .lineLimit(2...4)
-                    .accessibilityIdentifier("live.overrideReason")
+                LedgerField("Begründung") {
+                    TextField("Begründung für Override", text: $overrideReason, axis: .vertical)
+                        .lineLimit(2...4)
+                        .writingLine()
+                        .accessibilityIdentifier("live.overrideReason")
+                }
             }
         }
     }
 
     private var auditPseudonym: some View {
         Group {
-            TextField("Audit-Pseudonym", text: $operatorPseudonym)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .accessibilityIdentifier("live.operatorPseudonym")
+            LedgerField("Audit-Pseudonym") {
+                TextField("Audit-Pseudonym", text: $operatorPseudonym)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .writingLine(mono: true)
+                    .accessibilityIdentifier("live.operatorPseudonym")
+            }
             Text("Das Pseudonym bezeichnet den Auditkontext; die Geräteauthentifizierung schützt den Zugriff und bestätigt keine reale Identität.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(Typeface.captionSmall)
+                .foregroundStyle(Room.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
             if let message = liveStore.recordStatusMessage {
                 Text(message)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(Typeface.caption)
+                    .foregroundStyle(Room.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("live.recordStatus")
             }
         }
     }
 
     private var recordButtons: some View {
-        HStack {
+        HStack(spacing: Space.m) {
             Button { beginRecording() } label: {
-                Label(liveStore.isStartingRecording ? "Startet…" : (liveStore.isRecording ? "Läuft…" : "Start"), systemImage: "record.circle")
+                Text(liveStore.isStartingRecording ? "Startet…" : (liveStore.isRecording ? "Läuft…" : "Start"))
             }
-            .buttonStyle(.borderedProminent)
-            .tint(NativeTheme.recordSurface)
+            .buttonStyle(RecordButtonStyle(isRecording: false, compact: true))
             .accessibilityIdentifier("live.start")
             .disabled(
                 liveStore.isStartingRecording || liveStore.isRecording || liveStore.isFinalizingRecording
@@ -208,7 +214,7 @@ extension LiveGuidanceView {
             Button { liveStore.stopRecording() } label: {
                 Label("Stop", systemImage: "stop.circle")
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(InkButtonStyle(kind: .secondary))
             .accessibilityIdentifier("live.stop")
             .disabled((!liveStore.isStartingRecording && !liveStore.isRecording) || liveStore.isFinalizingRecording)
         }
@@ -217,13 +223,14 @@ extension LiveGuidanceView {
     @ViewBuilder
     private var captureRecoveryControls: some View {
         if let diagnostic = liveStore.artifactRecoveryDiagnostic {
-            Text(diagnostic)
-                .font(.caption)
-                .foregroundStyle(NativeTheme.warningNight)
+            StatusMark(diagnostic, kind: .attention)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(diagnostic)
                 .accessibilityIdentifier("live.artifactRecoveryDiagnostic")
         }
         if liveStore.canRetryCapture {
             Button("Kamera erneut versuchen") { liveStore.retryCapture() }
+                .buttonStyle(InkButtonStyle(kind: .secondary))
                 .accessibilityIdentifier("live.retry")
         }
         if liveStore.authorizationStatus == .denied || liveStore.authorizationStatus == .restricted
@@ -234,6 +241,7 @@ extension LiveGuidanceView {
                 guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                 UIApplication.shared.open(url)
             }
+            .buttonStyle(InkButtonStyle(kind: .quiet))
         }
     }
 
@@ -242,7 +250,8 @@ extension LiveGuidanceView {
             let tips = filming.visibleTips
             if tips.isEmpty {
                 Text(liveStore.isRecording ? "Keine kritischen technischen Hinweise." : "Analysiere Bild, Lage und Audio…")
-                    .foregroundStyle(.secondary)
+                    .font(Typeface.callout)
+                    .foregroundStyle(Room.secondary)
             } else {
                 ForEach(tips) { PrioritizedTipRow(item: $0, isRecording: liveStore.isRecording) }
             }
@@ -252,20 +261,27 @@ extension LiveGuidanceView {
     private var audioControls: some View {
         instrumentSection("Audio") {
             Text(filming.audio.message)
+                .font(Typeface.body)
+                .foregroundStyle(Room.primary)
+                .fixedSize(horizontal: false, vertical: true)
             Text(filming.audio.actionHint)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.tint)
-            metricRow("Peak", liveStore.audioSample.peakLevel)
-            metricRow("Mittel", liveStore.audioSample.averageLevel)
-            if let value = liveStore.audioSample.clippingFraction { metricRow("PCM-Vollaussteuerung", value) }
-            LabeledContent("Kanäle", value: liveStore.audioSample.channelCount.map(String.init) ?? "nicht verfügbar")
-            LabeledContent("Samplerate", value: liveStore.audioSample.sampleRate.map { String(format: "%.0f Hz", $0) } ?? "nicht verfügbar")
-            if let value = liveStore.audioSample.baselineLevelEstimate { metricRow("Niedrigstes Fenstermittel", value) }
-            LabeledContent("Zeitstempel-Lücke", value: liveStore.audioSample.dropoutDetected ? "erkannt" : "nicht erkannt")
-            LabeledContent("Route", value: liveStore.runtimeStatus.audioRoute)
+                .font(Typeface.callout.weight(.semibold))
+                .foregroundStyle(Room.human)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: Space.s) {
+                metricRow("Peak", liveStore.audioSample.peakLevel)
+                metricRow("Mittel", liveStore.audioSample.averageLevel)
+                if let value = liveStore.audioSample.clippingFraction { metricRow("PCM-Vollaussteuerung", value) }
+                instrumentRow("Kanäle", liveStore.audioSample.channelCount.map(String.init) ?? "nicht verfügbar")
+                instrumentRow("Samplerate", liveStore.audioSample.sampleRate.map { String(format: "%.0f Hz", $0) } ?? "nicht verfügbar")
+                if let value = liveStore.audioSample.baselineLevelEstimate { metricRow("Niedrigstes Fenstermittel", value) }
+                instrumentRow("Zeitstempel-Lücke", liveStore.audioSample.dropoutDetected ? "erkannt" : "nicht erkannt")
+                instrumentRow("Route", liveStore.runtimeStatus.audioRoute)
+            }
             Text("Der Pegeltest misst Amplitude, PCM-Vollaussteuerung und Zeitstempelkontinuität. Er misst weder True Peak nach ITU-R BS.1770 noch Sprachverständlichkeit. Vor Ort eine Hörprobe durchführen.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                .font(Typeface.captionSmall)
+                .foregroundStyle(Room.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
             spokenAudioControls
         }
     }
@@ -282,6 +298,7 @@ extension LiveGuidanceView {
             } label: {
                 Label("4-Sekunden-Sprechprobe aufnehmen", systemImage: "mic.badge.plus")
             }
+            .buttonStyle(InkButtonStyle(kind: .secondary))
             .disabled(
                 audioCheck.blocksCapture
                     || !appStore.session.authorizes(.collection)
@@ -292,27 +309,33 @@ extension LiveGuidanceView {
                 Button { audioCheck.play() } label: {
                     Label("Sprechprobe abhören", systemImage: "play.circle")
                 }
+                .buttonStyle(InkButtonStyle(kind: .secondary))
                 .accessibilityIdentifier("live.audioCheck.play")
             }
             if audioCheck.canCancel {
                 Button("Sprechprobe abbrechen", role: .cancel) { audioCheck.cancel(resumeCapture: true) }
+                    .buttonStyle(InkButtonStyle(kind: .quiet))
             }
             Label(audioCheck.statusText, systemImage: audioCheck.statusIcon)
-                .font(.caption)
-                .foregroundStyle(audioCheck.playbackCompleted ? NativeTheme.positiveNight : NativeTheme.nightInkSecondary)
+                .font(Typeface.caption.weight(.medium))
+                .foregroundStyle(audioCheck.playbackCompleted ? Room.secured : Room.secondary)
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("live.audioCheck.status")
         }
     }
 
     private var deviceAndFormat: some View {
         instrumentSection("Gerät & Format") {
-            LabeledContent("Video", value: liveStore.runtimeStatus.videoConfiguration)
-            LabeledContent("Akku", value: liveStore.runtimeStatus.batteryPercent.map { "\($0)%" } ?? "nicht verfügbar")
-            LabeledContent("Temperatur", value: liveStore.runtimeStatus.thermalState)
-            LabeledContent("Freier Speicher", value: liveStore.runtimeStatus.availableCapacityBytes.map(formatCapacity) ?? "nicht verfügbar")
+            VStack(alignment: .leading, spacing: Space.s) {
+                instrumentRow("Video", liveStore.runtimeStatus.videoConfiguration)
+                instrumentRow("Akku", liveStore.runtimeStatus.batteryPercent.map { "\($0)%" } ?? "nicht verfügbar")
+                instrumentRow("Temperatur", liveStore.runtimeStatus.thermalState)
+                instrumentRow("Freier Speicher", liveStore.runtimeStatus.availableCapacityBytes.map(formatCapacity) ?? "nicht verfügbar")
+            }
             Text("Dauer und Dateigröße werden auf die geplante Aufnahme begrenzt; während der Aufnahme wird die Sicherheitsreserve überwacht.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                .font(Typeface.captionSmall)
+                .foregroundStyle(Room.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -322,13 +345,22 @@ extension LiveGuidanceView {
            appStore.session.hasUsableExperimentalProtocol
         {
             instrumentSection("Experimentelle Regelhypothesen") {
-                Text(liveStore.experimentalResult?.hypotheses.limitationDE ?? "Experimentelle Regeln werden erst nach einem aktuellen Aufnahmesignal ausgewertet.")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.warningNight)
-                ForEach(liveStore.experimentalResult?.hypotheses.hypotheses.prefix(12) ?? []) { hypothesis in
-                    LabeledContent(hypothesis.labelDE) {
-                        Text(String(format: "Regelaktivierung %.0f %%", hypothesis.ruleSupport * 100))
-                            .font(.caption2)
+                HypothesisBlock {
+                    Text(liveStore.experimentalResult?.hypotheses.limitationDE ?? "Experimentelle Regeln werden erst nach einem aktuellen Aufnahmesignal ausgewertet.")
+                        .font(Typeface.caption)
+                        .foregroundStyle(Room.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    ForEach(liveStore.experimentalResult?.hypotheses.hypotheses.prefix(12) ?? []) { hypothesis in
+                        LabeledContent {
+                            Text(String(format: "Regelaktivierung %.0f %%", hypothesis.ruleSupport * 100))
+                                .font(Typeface.valueSmall)
+                                .monospacedDigit()
+                                .foregroundStyle(Room.hypothesis)
+                        } label: {
+                            Text(hypothesis.labelDE)
+                                .font(Typeface.callout)
+                                .foregroundStyle(Room.primary)
+                        }
                     }
                 }
             }

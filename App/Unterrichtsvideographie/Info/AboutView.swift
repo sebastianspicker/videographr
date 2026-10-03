@@ -3,179 +3,228 @@ import SwiftUI
 
 /// In-app product identity, epistemic boundary, and technical footprint.
 struct AboutView: View {
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                ProvenanceBar(
-                    role: .day,
-                    segments: ["Evidence-safe", "Alpha", "Nur lokal"],
-                    trailing: BuildIdentity.current.displayVersion
-                )
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        FieldViewHeader(
-                            eyebrow: "05 · Wissenschaftliche Alpha",
-                            title: "Über Videographr",
-                            summary: "Lokale Software für kontinuierliche Videoaufnahme und evidenzverknüpfte Reflexion in der Lehrkräftebildung."
-                        ) {
-                            FieldStatusBadge(title: "Alpha", tone: .neutral)
-                        }
-
-                        FieldPanel {
-                            VStack(alignment: .leading, spacing: 10) {
-                                FieldSectionHeader(title: "Videographr")
-                                factRow("Produkt", "Videographr")
-                                factRow("Version", BuildIdentity.current.displayVersion, monospaced: true)
-                                factRow("Domäne", "Unterrichtsvideographie")
-                                Text("Lokale Alpha-Software für kontinuierliche Videoaufnahme und evidenzverknüpfte Reflexion in der Lehrkräftebildung. Kein validiertes Kodierinstrument, kein Wirksamkeitsnachweis und kein Video-Portal.")
-                                    .font(.footnote)
-                                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                                    .accessibilityIdentifier("info.content")
-                            }
-                        }
-
-                        FieldPanel {
-                            VStack(alignment: .leading, spacing: 10) {
-                                FieldSectionHeader(title: "Normalbetrieb: evidenzsicher")
-                                Label("Direkte technische Beobachtbarkeit", systemImage: "eye")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(NativeTheme.dayInk)
-                                Text("Setup mit zweckgebundener Einwilligung → technische Aufnahmehinweise zu Horizont, Kameraruhe, Belichtung, sichtbaren Bildstrukturen und Audiopegel → Reflexion mit selbst gesetzten Zeitmarken.")
-                                    .font(.body)
-                                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                                Text("Bildstruktur-Signale beschreiben nur Beobachtbarkeit. Sie erkennen weder Unterrichtsqualität noch Lernen, Aufmerksamkeit, Feedback oder Beteiligung.")
-                                    .font(.caption)
-                                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                            }
-                        }
-
-                        FieldPanel {
-                            VStack(alignment: .leading, spacing: 10) {
-                                FieldSectionHeader(title: "Experimenteller Modus")
-                                Label("Unvalidierte regelbasierte Hypothesen", systemImage: "exclamationmark.triangle.fill")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(NativeTheme.warning)
-                                Text("Nur nach Eingabe einer gültigen Protokoll- und Aufsichtsreferenz. Regelaktivierungen werden dauerhaft getrennt vom Normalbetrieb gekennzeichnet und dürfen nicht als Wahrscheinlichkeit, menschlicher Code oder pädagogische Bewertung interpretiert werden.")
-                                    .font(.caption)
-                                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                            }
-                        }
-
-                        FieldPanel {
-                            VStack(alignment: .leading, spacing: 10) {
-                                FieldSectionHeader(title: "Technischer Datenweg")
-                                Text("CoreMotion und AVCapture → lokale Signalextraktion → technische Aufnahmehinweise → lokaler SessionStore. Video, Metadaten und Reflexion bleiben ohne ausdrückliche Freigabe im App-Speicher.")
-                                    .font(.footnote)
-                                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                                Label("Der lokale Zugriff ist durch die iOS-Geräteeigentümer-Authentifizierung geschützt. Ein Audit-Pseudonym ist keine bestätigte Identität.", systemImage: "lock")
-                                    .font(.caption)
-                                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                            }
-                        }
-
-                        FieldPanel {
-                            VStack(alignment: .leading, spacing: 10) {
-                                FieldSectionHeader(title: "Nachweisstand")
-                                factRow("Claim-Register", "v\(EvidenceClaimRegistry.version)")
-                                Text(EvidenceClaimRegistry.claims.first?.allowedWordingDE ?? "Die App meldet direkt beobachtbare Aufnahmebedingungen.")
-                                    .font(.footnote)
-                                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                                Text("Der aktuelle Stand belegt Implementierung und automatisierte Tests. Geräte-, Human-Rater- und Wirksamkeitsvalidierung sind getrennte, noch nicht erfüllte Stufen.")
-                                    .font(.caption)
-                                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                            }
-                        }
-
-                        FieldPanel {
-                            VStack(alignment: .leading, spacing: 10) {
-                                FieldSectionHeader(title: "Dokumentation")
-                                Text("docs/SCIENTIFIC_ALPHA.md · docs/RESEARCH_GAP_INVENTORY.md · docs/EVALUATION.md · docs/references/unterrichtsvideographie.md")
-                                    .font(.footnote)
-                                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                            }
-                        }
-
-                        FieldPanel {
-                            VStack(alignment: .leading, spacing: 10) {
-                                FieldSectionHeader(title: "Umfang")
-                                Text("Enthalten: lokale Sitzungsverwaltung, Geräteeigentümer-Zugriffsschutz, zweckgebundene Einwilligung, kontinuierliche Aufnahme, technische Observierbarkeit, Medienwiedergabe, Zeitmarken, strukturierte Reflexion und vorab protokollierter Metadatenexport.")
-                                    .font(.caption)
-                                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                                Text("Nicht enthalten: Multi-Cam-Synchronisation, Schnitt, Portal-Upload, institutionelle Datenschutzfreigabe, automatische pädagogische Bewertung, psychometrische Validierung oder Wirksamkeitsnachweis.")
-                                    .font(.caption)
-                                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                            }
-                        }
-
-                        FieldPanel {
-                            VStack(alignment: .leading, spacing: 10) {
-                                FieldSectionHeader(title: "Plattform")
-                                factRow("Zielgeräte", "iPhone & iPad (iOS 17+)", id: "info.platform")
-                                factRow("Sensoren", "Kamera, Mikrofon, Gyroskop/Lage")
-                                factRow("Speicherung", "lokal, sitzungsgebunden")
-                                factRow("Standardmodus", "evidenzsicher")
-                            }
-                        }
+            ScrollView {
+                VStack(alignment: .leading, spacing: Space.xl) {
+                    DocumentHeader(
+                        eyebrow: "05 · Wissenschaftliche Alpha",
+                        title: "Über Videographr",
+                        summary: "Lokale Software für kontinuierliche Videoaufnahme und evidenzverknüpfte Reflexion in der Lehrkräftebildung."
+                    ) {
+                        StatusMark("Alpha", kind: .neutral)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 28)
-                    .frame(maxWidth: 760, alignment: .leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    VStack(alignment: .leading, spacing: 0) {
+                        productSection
+                        normalModeSection
+                        experimentalSection
+                        dataPathSection
+                        evidenceSection
+                        documentationSection
+                        scopeSection
+                        platformSection
+                        Rule()
+                    }
                 }
+                .padding(.horizontal, sizeClass == .regular ? Space.gutterRegular : Space.gutterCompact)
+                .padding(.top, Space.xl)
+                .padding(.bottom, Space.xxxl)
+                .frame(maxWidth: Space.measure, alignment: .leading)
+                .frame(maxWidth: Space.pageMaximum, alignment: .leading)
+                .frame(maxWidth: .infinity)
             }
             .navigationTitle("Info")
             .navigationBarTitleDisplayMode(.inline)
-            .fieldInstrumentDaySurface()
+            .toolbar(.hidden, for: .navigationBar)
+            .paperSurface()
         }
     }
 
-    private func factRow(
-        _ key: String,
-        _ value: String,
-        monospaced: Bool = false,
-        id: String? = nil
-    ) -> some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline, spacing: 16) {
-                factKey(key)
-                factValue(value, monospaced: monospaced, id: id)
-            }
-            VStack(alignment: .leading, spacing: 3) {
-                factKey(key)
-                factValue(value, monospaced: monospaced, id: id)
+    // MARK: Sections
+
+    private var productSection: some View {
+        ProtocolSection("1", "Produkt") {
+            VStack(alignment: .leading, spacing: Space.m) {
+                VStack(spacing: 0) {
+                    FactRow(key: "Produkt", value: "Videographr")
+                    FactRow(key: "Version", value: BuildIdentity.current.displayVersion, mono: true)
+                    FactRow(key: "Domäne", value: "Unterrichtsvideographie")
+                }
+                Text("Lokale Alpha-Software für kontinuierliche Videoaufnahme und evidenzverknüpfte Reflexion in der Lehrkräftebildung. Kein validiertes Kodierinstrument, kein Wirksamkeitsnachweis und kein Video-Portal.")
+                    .font(Typeface.prose)
+                    .foregroundStyle(Ink.primary)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("info.content")
             }
         }
-        .padding(.vertical, 4)
     }
 
-    private func factKey(_ key: String) -> some View {
-        Text(key)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(NativeTheme.dayInkTertiary)
-            .frame(width: 130, alignment: .leading)
+    private var normalModeSection: some View {
+        ProtocolSection("2", "Normalbetrieb: evidenzsicher") {
+            VStack(alignment: .leading, spacing: Space.m) {
+                Text("Direkte technische Beobachtbarkeit")
+                    .font(Typeface.heading)
+                    .foregroundStyle(Ink.primary)
+                stepList([
+                    "Setup mit zweckgebundener Einwilligung",
+                    "technische Aufnahmehinweise zu Horizont, Kameraruhe, Belichtung, sichtbaren Bildstrukturen und Audiopegel",
+                    "Reflexion mit selbst gesetzten Zeitmarken",
+                ])
+                caption("Bildstruktur-Signale beschreiben nur Beobachtbarkeit. Sie erkennen weder Unterrichtsqualität noch Lernen, Aufmerksamkeit, Feedback oder Beteiligung.")
+            }
+        }
     }
 
-    private func factValue(_ value: String, monospaced: Bool, id: String?) -> some View {
-        Text(value)
-            .font(monospaced ? .system(.footnote, design: .monospaced) : .footnote)
-            .foregroundStyle(NativeTheme.dayInkSecondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .modifier(OptionalInfoAccessibilityIdentifier(id))
+    private var experimentalSection: some View {
+        ProtocolSection("3", "Experimenteller Modus") {
+            HypothesisBlock(title: "Unvalidierte regelbasierte Hypothesen") {
+                Text("Nur nach Eingabe einer gültigen Protokoll- und Aufsichtsreferenz. Regelaktivierungen werden dauerhaft getrennt vom Normalbetrieb gekennzeichnet und dürfen nicht als Wahrscheinlichkeit, menschlicher Code oder pädagogische Bewertung interpretiert werden.")
+                    .font(Typeface.proseSmall)
+                    .foregroundStyle(Ink.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
-}
 
-private struct OptionalInfoAccessibilityIdentifier: ViewModifier {
-    let id: String?
+    private var dataPathSection: some View {
+        ProtocolSection("4", "Technischer Datenweg") {
+            VStack(alignment: .leading, spacing: Space.m) {
+                stepList([
+                    "CoreMotion und AVCapture",
+                    "lokale Signalextraktion",
+                    "technische Aufnahmehinweise",
+                    "lokaler SessionStore",
+                ])
+                Text("Video, Metadaten und Reflexion bleiben ohne ausdrückliche Freigabe im App-Speicher.")
+                    .font(Typeface.prose)
+                    .foregroundStyle(Ink.primary)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+                StatusMark("Der lokale Zugriff ist durch die iOS-Geräteeigentümer-Authentifizierung geschützt.", kind: .secured)
+                caption("Ein Audit-Pseudonym ist keine bestätigte Identität.")
+            }
+        }
+    }
 
-    init(_ id: String?) { self.id = id }
+    private var evidenceSection: some View {
+        ProtocolSection("5", "Nachweisstand") {
+            VStack(alignment: .leading, spacing: Space.m) {
+                FactRow(key: "Claim-Register", value: "v\(EvidenceClaimRegistry.version)", mono: true)
+                Text(EvidenceClaimRegistry.claims.first?.allowedWordingDE ?? "Die App meldet direkt beobachtbare Aufnahmebedingungen.")
+                    .font(Typeface.prose)
+                    .foregroundStyle(Ink.primary)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+                caption("Der aktuelle Stand belegt Implementierung und automatisierte Tests. Geräte-, Human-Rater- und Wirksamkeitsvalidierung sind getrennte, noch nicht erfüllte Stufen.")
+            }
+        }
+    }
 
-    func body(content: Content) -> some View {
-        if let id {
-            content.accessibilityIdentifier(id)
-        } else {
-            content
+    private var documentationSection: some View {
+        ProtocolSection("6", "Dokumentation") {
+            VStack(spacing: 0) {
+                ForEach([
+                    "docs/SCIENTIFIC_ALPHA.md",
+                    "docs/RESEARCH_GAP_INVENTORY.md",
+                    "docs/EVALUATION.md",
+                    "docs/references/unterrichtsvideographie.md",
+                ], id: \.self) { path in
+                    Text(path)
+                        .font(Typeface.valueSmall)
+                        .foregroundStyle(Ink.instrument)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.vertical, Space.s)
+                        .overlay(alignment: .bottom) { Rule() }
+                }
+            }
+        }
+    }
+
+    private var scopeSection: some View {
+        ProtocolSection("7", "Umfang") {
+            VStack(alignment: .leading, spacing: Space.l) {
+                bulletList("Enthalten", [
+                    "lokale Sitzungsverwaltung",
+                    "Geräteeigentümer-Zugriffsschutz",
+                    "zweckgebundene Einwilligung",
+                    "kontinuierliche Aufnahme",
+                    "technische Observierbarkeit",
+                    "Medienwiedergabe",
+                    "Zeitmarken",
+                    "strukturierte Reflexion",
+                    "vorab protokollierter Metadatenexport",
+                ])
+                bulletList("Nicht enthalten", [
+                    "Multi-Cam-Synchronisation",
+                    "Schnitt",
+                    "Portal-Upload",
+                    "institutionelle Datenschutzfreigabe",
+                    "automatische pädagogische Bewertung",
+                    "psychometrische Validierung",
+                    "Wirksamkeitsnachweis",
+                ])
+            }
+        }
+    }
+
+    private var platformSection: some View {
+        ProtocolSection("8", "Plattform") {
+            VStack(spacing: 0) {
+                FactRow(key: "Zielgeräte", value: "iPhone & iPad (iOS 17+)", identifier: "info.platform")
+                FactRow(key: "Sensoren", value: "Kamera, Mikrofon, Gyroskop/Lage")
+                FactRow(key: "Speicherung", value: "lokal, sitzungsgebunden")
+                FactRow(key: "Standardmodus", value: "evidenzsicher")
+            }
+        }
+    }
+
+    // MARK: Building blocks
+
+    private func caption(_ text: String) -> some View {
+        Text(text)
+            .font(Typeface.caption)
+            .foregroundStyle(Ink.tertiary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// Ordered steps with a mono mark in the margin column.
+    private func stepList(_ steps: [String]) -> some View {
+        VStack(alignment: .leading, spacing: Space.s) {
+            ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                HStack(alignment: .firstTextBaseline, spacing: Space.s) {
+                    MarginMark(text: "\(index + 1)")
+                        .frame(width: 20, alignment: .leading)
+                    Text(step)
+                        .font(Typeface.prose)
+                        .foregroundStyle(Ink.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+    }
+
+    private func bulletList(_ label: String, _ items: [String]) -> some View {
+        VStack(alignment: .leading, spacing: Space.s) {
+            FormLabel(label)
+            ForEach(items, id: \.self) { item in
+                HStack(alignment: .firstTextBaseline, spacing: Space.s) {
+                    Text("–")
+                        .font(Typeface.valueSmall)
+                        .foregroundStyle(Ink.tertiary)
+                        .accessibilityHidden(true)
+                    Text(item)
+                        .font(Typeface.proseSmall)
+                        .foregroundStyle(Ink.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
         }
     }
 }

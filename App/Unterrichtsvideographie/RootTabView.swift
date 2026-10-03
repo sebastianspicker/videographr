@@ -3,42 +3,48 @@ import SwiftUI
 /// Session-centered navigation with a full-width capture surface on iPad.
 struct RootTabView: View {
     @EnvironmentObject private var appStore: AppStore
-    @State private var selection: FieldInstrumentTabBar.Tab
+    @State private var selection: Destination
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    init(selection: FieldInstrumentTabBar.Tab = .setup) {
+    init(selection: Destination = .setup) {
         _selection = State(initialValue: selection)
     }
 
     var body: some View {
         VStack(spacing: 0) {
             if selection != .live {
-                ScientificSessionHeader(session: appStore.session, selection: $selection)
+                Masthead(selection: $selection)
             }
             tabContent.frame(maxWidth: .infinity, maxHeight: .infinity)
             if horizontalSizeClass != .regular {
-                FieldInstrumentTabBar(selection: $selection, role: .night)
+                DestinationBar(selection: $selection)
+                    .environment(\.surfaceMaterial, selection == .live ? .room : .paper)
             }
         }
-        .background(NativeTheme.nightCanvas.ignoresSafeArea())
-        .foregroundStyle(NativeTheme.nightInk)
-        .preferredColorScheme(.dark)
-        .tint(NativeTheme.accent)
+        .background((selection == .live ? Room.canvas : Ink.paper).ignoresSafeArea())
+        .foregroundStyle(Ink.primary)
+        .tint(Ink.human)
+        // Capture is always dark, including status bar, keyboard and menus.
+        .preferredColorScheme(selection == .live ? .dark : nil)
     }
 
     @ViewBuilder
     private var tabContent: some View {
         switch appStore.bootstrapState {
         case .loading:
-            ProgressView("Lokale Sitzungen werden wiederhergestellt…")
+            ProgressView("Lokale Sitzungen werden geöffnet …")
+                .font(Typeface.callout)
+                .foregroundStyle(Ink.secondary)
                 .accessibilityIdentifier("app.loadingSessions")
         case let .failed(message):
             ContentUnavailableView {
                 Label("Sitzungen konnten nicht geöffnet werden", systemImage: "exclamationmark.triangle")
+                    .font(Typeface.section)
             } description: {
-                Text(message)
+                Text(message).font(Typeface.callout)
             } actions: {
                 Button("Erneut versuchen") { Task { await appStore.bootstrap() } }
+                    .buttonStyle(InkButtonStyle(kind: .primary))
                     .accessibilityIdentifier("app.retryLoadingSessions")
             }
         case .ready:

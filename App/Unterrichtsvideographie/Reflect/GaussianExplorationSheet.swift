@@ -36,12 +36,10 @@ struct GaussianExplorationSheet: View {
             GeometryReader { viewport in
               ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Label("Experiment · nicht validiert", systemImage: "exclamationmark.triangle")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(NativeTheme.warning)
+                    StatusMark("Experiment · nicht validiert", kind: .hypothesis, prominent: true)
                     Text("Relative Tiefe aus einem Standbild. Verdeckte Bereiche bleiben unbekannt.")
-                        .font(.callout)
-                        .foregroundStyle(NativeTheme.dayInkSecondary)
+                        .font(Typeface.callout)
+                        .foregroundStyle(Ink.secondary)
 
                     if let message {
                         unavailable(message)
@@ -51,7 +49,7 @@ struct GaussianExplorationSheet: View {
                         VStack(spacing: 12) {
                             ProgressView(stage.title)
                             Text("Die erste Berechnung kann länger dauern. Sie können jederzeit zur Aufnahme zurückkehren.")
-                                .font(.caption).foregroundStyle(NativeTheme.dayInkTertiary)
+                                .font(Typeface.caption).foregroundStyle(Ink.tertiary)
                         }
                             .frame(maxWidth: .infinity, minHeight: 180)
                             .accessibilityIdentifier("reflect.gaussian.loading")
@@ -62,24 +60,24 @@ struct GaussianExplorationSheet: View {
                                 Text("\(index + 1). \(prompt)")
                             }
                             Text("Impulse, keine Auswertung. Antworten werden hier nicht gespeichert; Notizen gehören in Ihre eigene Reflexion zur Originalaufnahme.")
-                                .font(.caption).foregroundStyle(NativeTheme.dayInkTertiary)
+                                .font(Typeface.caption).foregroundStyle(Ink.tertiary)
                         }
-                        .font(.callout).foregroundStyle(NativeTheme.dayInkSecondary).padding(.top, 8)
+                        .font(Typeface.callout).foregroundStyle(Ink.secondary).padding(.top, 8)
                     }
                     .accessibilityIdentifier("reflect.gaussian.prompts") }
                     DisclosureGroup("Was diese Ansicht zeigen kann") {
                         Text("Die KI schätzt relative Tiefe. Daraus entsteht eine unvollständige 2,5D-Oberfläche mit kleinen Perspektivänderungen. Schraffierte Flächen haben keine Bildinformation: Die Kamera hat dort nichts aufgenommen, oder an einer Tiefenkante öffnet sich eine Lücke. Auch unmarkierte Flächen beruhen auf geschätzter Tiefe. Geometrie und Größen sind nicht vermessen; die Ansicht zeigt keine zusätzlich aufgenommenen Ereignisse. Eine geometrische Ansicht von einem anderen Ort zeigt nicht, was eine Person dort gesehen oder erlebt hat.")
-                            .font(.callout).foregroundStyle(NativeTheme.dayInkSecondary).padding(.top, 8)
+                            .font(Typeface.callout).foregroundStyle(Ink.secondary).padding(.top, 8)
                     }
                     .accessibilityIdentifier("reflect.gaussian.limitations")
                     Text("Nur lokal und vorübergehend. Diese Ansicht wird weder als Medienbeleg gespeichert noch exportiert.")
-                        .font(.caption)
-                        .foregroundStyle(NativeTheme.dayInkTertiary)
+                        .font(Typeface.caption)
+                        .foregroundStyle(Ink.tertiary)
                 }
                 .padding(20)
               }
             }
-            .fieldInstrumentDaySurface()
+            .paperSurface()
             .navigationTitle("Perspektive erkunden")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -191,7 +189,7 @@ struct GaussianExplorationSheet: View {
             ContentUnavailableView("Perspektivansicht nicht verfügbar", systemImage: "viewfinder", description: Text(message))
             if canRetry {
                 Button("Erneut versuchen", action: retry)
-                    .buttonStyle(ScientificButtonStyle())
+                    .buttonStyle(InkButtonStyle(kind: .secondary))
                     .accessibilityIdentifier("reflect.gaussian.retry")
             }
         }
@@ -212,8 +210,8 @@ struct GaussianExplorationSheet: View {
                 if !showsSource { cameraControls }
             }
             Text("Originalposition: \(reflectionTimecode(Int64(result.actualTime.seconds * 1_000)))")
-                .font(.caption.monospacedDigit())
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+                .font(Typeface.valueSmall)
+                .foregroundStyle(Ink.tertiary)
         }
     }
 
@@ -246,6 +244,7 @@ struct GaussianExplorationSheet: View {
             }
             if marksUncertainty {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    // Must match the uncertainty tint in GaussianMetalView (1, 0.62, 0).
                     RoundedRectangle(cornerRadius: 2).fill(Color(red: 1, green: 0.62, blue: 0))
                         .frame(width: 16, height: 10).accessibilityHidden(true)
                     Text("Bernstein: Fläche gegenüber der Aufnahme gedehnt oder an einer Tiefenkante – hier ergänzt die Darstellung zwischen Bildpunkten.")
@@ -253,8 +252,8 @@ struct GaussianExplorationSheet: View {
             }
             Text(marksUncertainty ? "Ohne Markierung: ebenfalls geschätzte Tiefe, kein Genauigkeitsnachweis." : "Alle Flächen beruhen auf geschätzter Tiefe.")
         }
-        .font(.caption)
-        .foregroundStyle(NativeTheme.dayInkTertiary)
+        .font(Typeface.caption)
+        .foregroundStyle(Ink.tertiary)
     }
 
     private func canvasContent(_ result: GaussianFrameResult, width: CGFloat, heightLimit: CGFloat, token: UUID) -> some View {
@@ -284,7 +283,7 @@ struct GaussianExplorationSheet: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: min(max(1, width) / CGFloat(result.surface.aspectRatio), heightLimit))
-        .clipShape(RoundedRectangle(cornerRadius: NativeTheme.cornerRadius))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.control))
     }
 
     private var surfaceAspectRatio: Float { result?.surface.aspectRatio ?? 16 / 9 }
@@ -293,7 +292,7 @@ struct GaussianExplorationSheet: View {
         VStack(alignment: .leading, spacing: 8) {
                 GaussianPositionMap(camera: camera, surfaceAspectRatio: surfaceAspectRatio)
                 Toggle("Dehnung und Tiefenkanten markieren", isOn: $marksUncertainty)
-                    .font(.subheadline).accessibilityIdentifier("reflect.gaussian.uncertainty")
+                    .font(Typeface.callout).accessibilityIdentifier("reflect.gaussian.uncertainty")
                 cameraSlider("Seitlich", id: "horizontal", value: camera.horizontal, limit: GaussianCamera.lateralLimit,
                              negative: "links", positive: "rechts") {
                     camera = GaussianCamera(horizontal: $0, vertical: camera.vertical, dolly: camera.dolly,
@@ -323,14 +322,14 @@ struct GaussianExplorationSheet: View {
                 }
                 .accessibilityIdentifier("reflect.gaussian.angles")
                 Toggle("Perspektive durch Ziehen ändern", isOn: $allowsDragging)
-                    .font(.subheadline).accessibilityIdentifier("reflect.gaussian.dragEnabled")
+                    .font(Typeface.callout).accessibilityIdentifier("reflect.gaussian.dragEnabled")
                 Button("Perspektive zurücksetzen") { camera = GaussianCamera() }
-                    .buttonStyle(ScientificButtonStyle())
+                    .buttonStyle(InkButtonStyle(kind: .secondary))
                     .disabled(camera == GaussianCamera())
                     .accessibilityIdentifier("reflect.gaussian.reset")
                 Text(allowsDragging ? "Im Bild ziehen. Zum Scrollen außerhalb des Bildes wischen." : "Die Regler ändern die Ansicht. Ziehen im Bild ist ausgeschaltet, damit Sie durch die Seite scrollen können.")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
+                    .font(Typeface.caption)
+                    .foregroundStyle(Ink.tertiary)
         }
     }
 
@@ -340,11 +339,11 @@ struct GaussianExplorationSheet: View {
         let magnitude = isAngle ? String(format: "%.1f Grad", abs(value)) : "\(Int(abs(value) / limit * 100)) Prozent"
         let position = abs(value) < 0.0001 ? "Originalposition" : "\(value < 0 ? negative : positive) · \(magnitude)"
         return VStack(alignment: .leading, spacing: 0) {
-            Text(title).font(.subheadline.weight(.semibold))
-            Text(position).font(.caption).foregroundStyle(NativeTheme.dayInkTertiary)
+            Text(title).font(Typeface.callout.weight(.semibold))
+            Text(position).font(Typeface.caption).foregroundStyle(Ink.tertiary)
             Slider(value: Binding(get: { Double(value) }, set: { set(Float($0)) }), in: -Double(limit)...Double(limit))
                 .frame(minHeight: 44)
-                .tint(NativeTheme.accent)
+                .tint(Ink.human)
                 .accessibilityLabel(title)
                 .accessibilityValue(position)
                 .accessibilityIdentifier("reflect.gaussian.\(id)")
@@ -398,7 +397,7 @@ private struct GaussianHatchSwatch: View {
             context.stroke(lines, with: .color(Self.stripe), lineWidth: 1.5)
         }
         .frame(width: 16, height: 10)
-        .overlay(RoundedRectangle(cornerRadius: 2).stroke(NativeTheme.dayInkTertiary, lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: 2).stroke(Ink.tertiary, lineWidth: 0.5))
     }
 }
 
@@ -438,12 +437,12 @@ private struct GaussianPositionMap: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Position gegenüber der Aufnahme").font(.subheadline.weight(.semibold))
+            Text("Position gegenüber der Aufnahme").font(Typeface.heading)
             Canvas { context, size in draw(&context, size: size) }
                 .frame(height: 120)
                 .frame(maxWidth: .infinity)
             Text("Höhe: \(heightWord). Maßstab geschätzt, nicht vermessen.")
-                .font(.caption).foregroundStyle(NativeTheme.dayInkTertiary)
+                .font(Typeface.caption).foregroundStyle(Ink.tertiary)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Position gegenüber der Aufnahme")
@@ -467,13 +466,13 @@ private struct GaussianPositionMap: View {
         area.addLine(to: point(far * tanH, far))
         area.addLine(to: point(-far * tanH, far))
         area.closeSubpath()
-        context.fill(area, with: .color(NativeTheme.accent.opacity(0.18)))
-        context.stroke(area, with: .color(NativeTheme.accent.opacity(0.5)), lineWidth: 1)
+        context.fill(area, with: .color(Ink.human.opacity(0.18)))
+        context.stroke(area, with: .color(Ink.human.opacity(0.5)), lineWidth: 1)
 
         let origin = point(0, 0)
         context.fill(Path(ellipseIn: CGRect(x: origin.x - 4, y: origin.y - 4, width: 8, height: 8)),
-                     with: .color(NativeTheme.accent))
-        context.draw(Text("Aufnahme").font(.caption2).foregroundStyle(NativeTheme.dayInkSecondary),
+                     with: .color(Ink.human))
+        context.draw(Text("Aufnahme").font(.caption2).foregroundStyle(Ink.secondary),
                      at: CGPoint(x: origin.x - 10, y: origin.y), anchor: .trailing)
 
         let view = frame
@@ -483,10 +482,10 @@ private struct GaussianPositionMap: View {
         let length = SIMD2<Float>(view.forward.x, view.forward.z)
         let unit = length / max(simd_length(length), 0.0001)
         tick.addLine(to: CGPoint(x: center.x + CGFloat(unit.x) * 14, y: center.y - CGFloat(unit.y) * 14))
-        context.stroke(tick, with: .color(NativeTheme.dayInk), lineWidth: 2)
+        context.stroke(tick, with: .color(Ink.primary), lineWidth: 2)
         context.stroke(Path(ellipseIn: CGRect(x: center.x - 5, y: center.y - 5, width: 10, height: 10)),
-                       with: .color(NativeTheme.dayInk), lineWidth: 2)
-        context.draw(Text("Ansicht").font(.caption2).foregroundStyle(NativeTheme.dayInkSecondary),
+                       with: .color(Ink.primary), lineWidth: 2)
+        context.draw(Text("Ansicht").font(.caption2).foregroundStyle(Ink.secondary),
                      at: CGPoint(x: max(center.x, origin.x) + 10, y: center.y), anchor: .leading)
     }
 }

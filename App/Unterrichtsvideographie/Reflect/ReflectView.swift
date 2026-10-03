@@ -18,10 +18,12 @@ enum ReflectionAnnotationField: Hashable {
 }
 
 /// Post-take reflection grounded in user-linked media evidence.
-/// Field Instrument day-studio layout (non-Form).
+/// The page reads as a transcript: the player, the person's notes in
+/// Königsblau, and timecodes in the margin.
 struct ReflectView: View {
     @EnvironmentObject var appStore: AppStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) var sizeClass
     @Environment(\.scenePhase) var scenePhase
 
     @State var selectedAssetID: UUID?
@@ -93,29 +95,35 @@ struct ReflectView: View {
                         GeometryReader { geo in
                             let wide = geo.size.width >= 700 && !dynamicTypeSize.isAccessibilitySize
                             ScrollView {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    reflectionStatusHeader(index: index)
-                                    reflectionContextLine
+                                VStack(alignment: .leading, spacing: Space.xl) {
+                                    VStack(alignment: .leading, spacing: Space.s) {
+                                        reflectionStatusHeader(index: index)
+                                        reflectionContextLine
+                                    }
                                     if let error = appStore.lastStoreError {
-                                        Label(error, systemImage: "exclamationmark.triangle")
-                                            .font(.callout).foregroundStyle(NativeTheme.danger)
+                                        StatusMark(error, kind: .fault, prominent: true)
                                             .accessibilityIdentifier("reflect.operationError")
                                     }
                                     if wide {
-                                        HStack(alignment: .top, spacing: 16) {
+                                        HStack(alignment: .top, spacing: Space.xxl) {
                                             playerColumn
                                                 .frame(maxWidth: .infinity)
                                             notesColumn(index: index)
-                                                .frame(width: min(430, geo.size.width * 0.42))
+                                                .frame(width: min(400, geo.size.width * 0.42))
                                         }
                                     } else {
-                                        playerColumn
-                                        notesColumn(index: index)
+                                        VStack(alignment: .leading, spacing: Space.xxl) {
+                                            playerColumn
+                                            notesColumn(index: index)
+                                        }
                                     }
                                     reflectionSupportingSections(index: index)
                                 }
-                                .padding(12)
-                                .padding(.bottom, 20)
+                                .padding(.horizontal, pageGutter)
+                                .padding(.top, Space.xl)
+                                .padding(.bottom, Space.xxl)
+                                .frame(maxWidth: Space.pageMaximum, alignment: .leading)
+                                .frame(maxWidth: .infinity)
                             }
                             .scrollDismissesKeyboard(.immediately)
                             .accessibilityIdentifier("reflect.scroll")
@@ -124,7 +132,7 @@ struct ReflectView: View {
                     .toolbar(.hidden, for: .navigationBar)
                 }
             }
-            .fieldInstrumentDaySurface()
+            .paperSurface()
             .task(id: ReflectionMediaRequest(sessionID: appStore.session.id, assets: appStore.session.mediaAssets)) {
                 await refreshMediaAvailability()
             }
@@ -210,26 +218,26 @@ struct ReflectView: View {
         }
     }
 
+    var pageGutter: CGFloat {
+        sizeClass == .regular ? Space.gutterRegular : Space.gutterCompact
+    }
+
+    private var sessionTitle: String {
+        let title = appStore.session.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        return title.isEmpty ? "Neue Sitzung" : title
+    }
+
     private func reflectionStatusHeader(index: ReflectionAnnotationIndex) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: hasFinalizedSelectedRecording ? "checkmark.circle.fill" : "video")
-                .font(.title2)
-                .foregroundStyle(hasFinalizedSelectedRecording ? NativeTheme.positiveDay : NativeTheme.accent)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(hasFinalizedSelectedRecording ? "Aufnahme lokal gesichert" : "Video reflektieren")
-                    .font(.headline)
-                    .foregroundStyle(NativeTheme.dayInk)
-                Text("Lokales Video · Zeitmarken und menschliche Notizen")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
+        DocumentHeader(
+            eyebrow: "Notizen · \(sessionTitle)",
+            title: hasFinalizedSelectedRecording ? "Aufnahme lokal gesichert" : "Video reflektieren"
+        ) {
+            if reflectionIsComplete(index: index) {
+                StatusMark("Vollständig", kind: .secured)
+            } else {
+                StatusMark("Entwurf · \(index.linkedPromptCount) / 4 Fragen belegt", kind: .open)
             }
-            Spacer(minLength: 10)
-            FieldStatusBadge(
-                title: reflectionIsComplete(index: index) ? "Vollständig" : "Entwurf",
-                tone: reflectionIsComplete(index: index) ? .positive : .neutral
-            )
         }
-        .padding(.bottom, 4)
     }
 
     private var hasFinalizedSelectedRecording: Bool {
@@ -241,64 +249,67 @@ struct ReflectView: View {
 
     private var reflectionContextLine: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(spacing: 10) {
-                Label("Sitzung lokal", systemImage: "internaldrive")
-                Text("•")
-                Text(appStore.session.operatingMode == .evidenceSafe ? "Evidence-safe" : "Experimentell")
-                Text("•")
+            Text("Nur lokal · \(operatingModeTitle) · \(activeGrantCount) Freigaben aktiv")
+            VStack(alignment: .leading, spacing: Space.xxs) {
+                Text("Nur lokal")
+                Text(operatingModeTitle)
                 Text("\(activeGrantCount) Freigaben aktiv")
             }
-            VStack(alignment: .leading, spacing: 3) {
-                Label("Sitzung lokal", systemImage: "internaldrive")
-                Text(appStore.session.operatingMode == .evidenceSafe ? "Evidence-safe · Freigaben werden dokumentiert" : "Experimentell · Freigaben werden dokumentiert")
-            }
         }
-        .font(.caption)
-        .foregroundStyle(NativeTheme.dayInkTertiary)
+        .font(Typeface.labelSmall)
+        .tracking(0.3)
+        .foregroundStyle(Ink.tertiary)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Sitzung lokal. \(appStore.session.operatingMode == .evidenceSafe ? "Evidence-safe" : "Experimenteller") Modus. \(activeGrantCount) Freigaben aktiv.")
+    }
+
+    private var operatingModeTitle: String {
+        appStore.session.operatingMode == .evidenceSafe ? "Evidence-safe" : "Experimentell"
     }
 
     private var reflectionContextDetails: some View {
         DisclosureGroup("Details zur lokalen Sitzung") {
             Text("Nur lokal, kein Cloud-Abgleich. Schema v\(appStore.session.schemaVersion) · \(BuildIdentity.current.displayVersion)")
-                .font(.caption2)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-                .padding(.top, 4)
+                .font(Typeface.valueSmall)
+                .foregroundStyle(Ink.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.bottom, Space.l)
         }
-        .font(.caption)
-        .foregroundStyle(NativeTheme.dayInkSecondary)
+        .disclosureGroupStyle(InkDisclosureStyle())
         .accessibilityIdentifier("reflect.sessionDetails")
     }
 
-    @ViewBuilder
     private func reflectionSupportingSections(index: ReflectionAnnotationIndex) -> some View {
-        DisclosureGroup("Reflexionsstruktur") {
-            lafColumn(index: index)
-                .padding(.top, 10)
-        }
-        .font(.subheadline.weight(.medium))
-        .foregroundStyle(NativeTheme.dayInkSecondary)
-
-        reflectionContextDetails
-
-        DisclosureGroup("Fortschritt und Entwurf") {
-            reflectProgress(index: index)
-                .padding(.top, 8)
-        }
-        .font(.subheadline.weight(.medium))
-        .foregroundStyle(NativeTheme.dayInkSecondary)
-
-        if appStore.session.operatingMode == .experimentalResearch,
-           appStore.session.hasUsableExperimentalProtocol,
-           appStore.session.latestCodingSnapshot != nil
-        {
-            DisclosureGroup("Experimentelle Hilfen · nicht validiert") {
-                experimentalHypotheses
-                    .padding(.top, 8)
+        VStack(alignment: .leading, spacing: 0) {
+            Rule(strong: true)
+            DisclosureGroup("Reflexionsstruktur") {
+                lafColumn(index: index)
+                    .padding(.bottom, Space.l)
             }
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(NativeTheme.warning)
+            .disclosureGroupStyle(InkDisclosureStyle())
+
+            Rule()
+            DisclosureGroup("Fortschritt und Entwurf") {
+                reflectProgress(index: index)
+                    .padding(.bottom, Space.l)
+            }
+            .disclosureGroupStyle(InkDisclosureStyle())
+
+            Rule()
+            reflectionContextDetails
+
+            if appStore.session.operatingMode == .experimentalResearch,
+               appStore.session.hasUsableExperimentalProtocol,
+               appStore.session.latestCodingSnapshot != nil
+            {
+                Rule()
+                DisclosureGroup("Experimentelle Hilfen · nicht validiert") {
+                    experimentalHypotheses
+                        .padding(.bottom, Space.l)
+                }
+                .disclosureGroupStyle(InkDisclosureStyle())
+            }
+            Rule()
         }
     }
 }

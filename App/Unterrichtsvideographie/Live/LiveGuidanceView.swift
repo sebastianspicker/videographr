@@ -11,6 +11,7 @@ struct LiveGuidanceView: View {
     @EnvironmentObject var appStore: AppStore
     @EnvironmentObject var liveStore: LiveStore
     @Environment(\.dynamicTypeSize) var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject var audioCheck = SpokenAudioCheckModel()
@@ -70,9 +71,9 @@ struct LiveGuidanceView: View {
                 inspectorPane
                     .presentationDetents([.large])
             }
-            .fieldInstrumentNightSurface()
+            .roomSurface()
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: inspectorIsVisible)
-            // System tab bar is replaced by FieldInstrumentTabBar in RootTabView.
+            // System tab bar is replaced by DestinationBar in RootTabView.
             .toolbar(.hidden, for: .tabBar)
             .onAppear {
                 if liveStore.isRecording { recordingStartedAt = Date() }

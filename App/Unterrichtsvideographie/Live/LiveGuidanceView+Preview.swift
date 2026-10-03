@@ -6,15 +6,23 @@ extension LiveGuidanceView {
     }
 
     var accessiblePreviewUnavailableState: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(previewUnavailableTitle, systemImage: "video.slash")
-                .font(.headline)
-            Text(previewUnavailableDetail).font(.caption)
+        VStack(alignment: .leading, spacing: Space.s) {
+            Image(systemName: "video.slash")
+                .font(.title2)
+                .foregroundStyle(Room.secondary)
+                .accessibilityHidden(true)
+            Text(previewUnavailableTitle)
+                .font(Typeface.heading)
+                .foregroundStyle(Room.primary)
+            Text(previewUnavailableDetail)
+                .font(Typeface.caption)
+                .foregroundStyle(Room.secondary)
         }
         .fixedSize(horizontal: false, vertical: true)
-        .padding(16)
+        .padding(Space.l)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.black)
+        .overlay { Rectangle().strokeBorder(Room.rule, lineWidth: 1) }
         .accessibilityIdentifier("live.previewUnavailable")
     }
     var previewPane: some View {
@@ -38,39 +46,47 @@ extension LiveGuidanceView {
     /// Simulator values may exercise the direct-signal UI, but never stand in
     /// for a real camera image or recorded take.
     private var simulatorPreviewUnavailableState: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Space.s) {
             Image(systemName: "video.slash")
-                .font(.system(size: 40))
-                .foregroundStyle(NativeTheme.nightInk)
+                .font(.largeTitle)
+                .foregroundStyle(Room.secondary)
+                .accessibilityHidden(true)
             Text("Keine Kameravorschau im Simulator")
-                .font(.headline)
+                .font(Typeface.heading)
+                .foregroundStyle(Room.primary)
                 .accessibilityIdentifier("live.preview")
             Text("Simulator")
-                .font(.caption2)
+                .font(Typeface.labelSmall)
+                .foregroundStyle(Room.tertiary)
                 .accessibilityIdentifier("live.captureMode")
                 .accessibilityValue("simulator")
             Text(liveStore.lastError ?? "Direkte Bildsignale können hier nur als Testwerte vorliegen.")
-                .font(.caption)
+                .font(Typeface.caption)
+                .foregroundStyle(Room.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal)
+                .padding(.horizontal, Space.xl)
         }
-        .foregroundStyle(.white)
     }
 
     @ViewBuilder private var privacyCover: some View {
         if liveStore.privacyCoverIsVisible {
             Color.black
                 .overlay {
-                    VStack(spacing: 8) {
-                        Label(previewUnavailableTitle, systemImage: "eye.slash.fill")
-                            .font(.headline)
-                        Text(previewUnavailableDetail)
-                            .font(.caption)
+                    VStack(spacing: Space.s) {
+                        Image(systemName: "eye.slash.fill")
+                            .font(.largeTitle)
+                            .foregroundStyle(Room.secondary)
+                            .accessibilityHidden(true)
+                        Text(previewUnavailableTitle)
+                            .font(Typeface.heading)
+                            .foregroundStyle(Room.primary)
                             .multilineTextAlignment(.center)
-                            .foregroundStyle(NativeTheme.nightInkSecondary)
-                            .padding(.horizontal, 28)
+                        Text(previewUnavailableDetail)
+                            .font(Typeface.caption)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(Room.secondary)
                     }
-                    .foregroundStyle(.white)
+                    .padding(.horizontal, Space.xxl)
                 }
                 .accessibilityLabel("Vorschau pausiert, bis ein neues Kamerabild vorliegt")
                 .accessibilityIdentifier("live.privacyCover")
@@ -80,21 +96,37 @@ extension LiveGuidanceView {
     @ViewBuilder private var previewSourceStatus: some View {
         if !previewIsUnavailable && !dynamicTypeSize.isAccessibilitySize {
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(liveStore.isRecording ? "AUFNAHME LÄUFT" : "VORSCHAU")
-                        .font(.caption.weight(.semibold))
-                    if !liveStore.isRecording {
-                        Text("Noch keine Aufnahme").font(.caption)
+                if liveStore.isRecording {
+                    HStack(spacing: Space.s) {
+                        Circle()
+                            .fill(Room.primary)
+                            .frame(width: 8, height: 8)
+                            .accessibilityHidden(true)
+                        Text("Aufnahme läuft")
+                            .font(Typeface.labelSmall)
+                            .foregroundStyle(Room.primary)
                     }
+                    .padding(.horizontal, Space.s)
+                    .padding(.vertical, Space.xs + 2)
+                    .background(Room.signalDeep)
+                } else {
+                    Text("Vorschau · noch keine Aufnahme")
+                        .font(Typeface.labelSmall)
+                        .foregroundStyle(Room.primary)
+                        .padding(.horizontal, Space.s)
+                        .padding(.vertical, Space.xs + 2)
+                        .background(Color.black.opacity(0.72))
                 }
-                .padding(8).background(Color.black.opacity(0.8))
-                Spacer(minLength: 12)
+                Spacer(minLength: Space.m)
                 Text(liveFormatLabel)
-                    .font(.caption.monospacedDigit())
-                    .padding(8).background(Color.black.opacity(0.8))
+                    .font(Typeface.valueSmall)
+                    .monospacedDigit()
+                    .foregroundStyle(Room.instrument)
+                    .padding(.horizontal, Space.s)
+                    .padding(.vertical, Space.xs + 2)
+                    .background(Color.black.opacity(0.72))
             }
-            .foregroundStyle(NativeTheme.nightInk)
-            .padding(12)
+            .padding(Space.m)
         }
     }
 

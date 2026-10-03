@@ -11,23 +11,6 @@ extension SetupView {
             && appStore.session.authorizes(.researchProcessing)
     }
 
-    var saveStateSymbol: String {
-        switch appStore.saveState {
-        case .saved: return "checkmark.circle"
-        case .unsaved: return "pencil.circle"
-        case .saving: return "arrow.triangle.2.circlepath"
-        case .failed: return "exclamationmark.triangle"
-        }
-    }
-
-    var saveStateColor: Color {
-        switch appStore.saveState {
-        case .saved: return NativeTheme.positiveDay
-        case .unsaved, .saving: return .secondary
-        case .failed: return NativeTheme.danger
-        }
-    }
-
     func consentScopeToggle(_ scope: ConsentScope, _ title: String) -> some View {
         Toggle(title, isOn: Binding(
             get: { consentScopes.contains(scope) },
@@ -35,7 +18,7 @@ extension SetupView {
                 if enabled { consentScopes.insert(scope) } else { consentScopes.remove(scope) }
             }
         ))
-        .toggleStyle(ScientificCheckboxStyle())
+        .toggleStyle(InkCheckboxStyle())
         .accessibilityIdentifier("setup.consent.scope.\(scope.rawValue)")
     }
 

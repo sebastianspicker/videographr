@@ -6,12 +6,12 @@ extension LiveGuidanceView {
     func liveStage(previewHeight: CGFloat) -> some View {
         VStack(spacing: 0) {
             if dynamicTypeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("videographr · Sitzung lokal").font(.caption)
+                VStack(alignment: .leading, spacing: Space.s) {
                     sessionHeading
+                    LocalityMark()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.bottom, 12)
+                .padding(.bottom, Space.m)
             }
             if dynamicTypeSize.isAccessibilitySize && previewIsUnavailable {
                 accessiblePreviewUnavailableState
@@ -20,22 +20,23 @@ extension LiveGuidanceView {
                     .frame(height: previewHeight)
                     .frame(maxWidth: .infinity)
                     .clipped()
-                    .overlay { Rectangle().strokeBorder(NativeTheme.nightHairline, lineWidth: 1) }
+                    .overlay { Rectangle().strokeBorder(Room.rule, lineWidth: 1) }
             }
-            signalStrip.padding(.vertical, 14)
+            signalStrip.padding(.vertical, Space.l)
             captureDock
-            Text("Direkte technische Beobachtungen · Keine Unterrichtsbewertung")
-                .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
+            Text("Direkte technische Beobachtungen · keine Unterrichtsbewertung")
+                .font(Typeface.captionSmall)
+                .foregroundStyle(Room.tertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 12)
+                .padding(.top, Space.l)
         }
-        .padding(16)
+        .padding(Space.l)
     }
 
     var liveToolbar: some View {
         Group {
             if dynamicTypeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Space.xs) {
                     exitButton
                     detailsButton
                 }
@@ -44,23 +45,22 @@ extension LiveGuidanceView {
                 standardToolbar
             }
         }
-        .padding(.horizontal, 20).padding(.vertical, 8)
-        .background(NativeTheme.nightSurface)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(NativeTheme.nightHairline).frame(height: 1)
-        }
+        .padding(.horizontal, Space.gutterCompact)
+        .padding(.vertical, Space.xs)
+        .background(Room.surface)
+        .overlay(alignment: .bottom) { Rule() }
     }
 
     private var standardToolbar: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(spacing: 20) {
+            HStack(spacing: Space.gutterCompact) {
                 exitButton
                 Spacer(minLength: 0)
                 sessionHeading
                 Spacer(minLength: 0)
                 detailsButton
             }
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Space.s) {
                 HStack { exitButton; Spacer(); detailsButton }
                 sessionHeading
             }
@@ -69,179 +69,200 @@ extension LiveGuidanceView {
 
     private var exitButton: some View {
         Button(action: onExit) {
-            VStack(alignment: .leading, spacing: 4) {
-                if !dynamicTypeSize.isAccessibilitySize {
-                    Text("videographr").font(.title3.weight(.medium))
-                }
-                Label("Sitzung", systemImage: "arrow.left").font(.caption)
-            }
-            .frame(minHeight: 44, alignment: .leading)
+            Label("Sitzung", systemImage: "arrow.left")
         }
-        .buttonStyle(.plain)
+        .buttonStyle(InkButtonStyle(kind: .quiet))
         .accessibilityIdentifier("live.exit")
         .accessibilityLabel("Zur Sitzung")
     }
 
     private var sessionHeading: some View {
-        VStack(spacing: 4) {
+        VStack(alignment: dynamicTypeSize.isAccessibilitySize || horizontalSizeClass != .regular ? .leading : .center, spacing: Space.xxs) {
             Text(appStore.session.title.isEmpty ? "Neue Sitzung" : appStore.session.title)
-                .font(.headline).lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                .font(Typeface.heading)
+                .foregroundStyle(Room.primary)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
             Text([appStore.session.context.subject,
                   appStore.session.context.gradeLevel.isEmpty ? "" : "Klasse \(appStore.session.context.gradeLevel)"]
                 .filter { !$0.isEmpty }.joined(separator: " · "))
-                .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
+                .font(Typeface.valueSmall)
+                .foregroundStyle(Room.secondary)
         }
     }
 
     private var detailsButton: some View {
         Button { inspectorIsVisible.toggle() } label: {
-            VStack(alignment: .trailing, spacing: 4) {
-                if !dynamicTypeSize.isAccessibilitySize {
-                    Label("Lokal", systemImage: "externaldrive").font(.caption)
-                }
-                Text("Messwerte & Freigaben").font(.subheadline)
-            }
-            .frame(minHeight: 44)
+            Label("Messwerte & Freigaben", systemImage: "list.bullet.rectangle")
         }
-        .buttonStyle(.plain)
+        .buttonStyle(InkButtonStyle(kind: horizontalSizeClass == .regular ? .secondary : .quiet))
         .accessibilityIdentifier("live.inspector.toggle")
     }
 
     var inspectorPane: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Messwerte & Details").font(.title2.weight(.medium))
-                Spacer()
+            HStack(alignment: .firstTextBaseline, spacing: Space.l) {
+                Text("Messwerte & Freigaben")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Room.primary)
+                    .accessibilityAddTraits(.isHeader)
+                Spacer(minLength: Space.s)
                 Button("Fertig") { inspectorIsVisible = false }
-                    .buttonStyle(ScientificButtonStyle())
+                    .buttonStyle(InkButtonStyle(kind: .quiet))
             }
-            .padding(20)
-            Divider()
+            .padding(.horizontal, Space.xl)
+            .padding(.vertical, Space.m)
+            Rule()
             liveGuidanceEvidencePane(maximumDimensions: 4)
         }
-        .fieldInstrumentNightSurface()
+        .roomSurface()
     }
 
     var captureDock: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Divider().overlay(NativeTheme.nightHairline)
-            if dynamicTypeSize.isAccessibilitySize {
-                compactConsole
-            } else {
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .center, spacing: 24) {
-                        audioMeter.frame(minWidth: 180, maxWidth: .infinity)
-                        consoleDivider
-                        timingBlock.frame(minWidth: 220, maxWidth: .infinity)
-                        consoleDivider
-                        recordBlock.frame(minWidth: 230, maxWidth: .infinity)
-                    }
-                    .frame(minWidth: 760)
+        VStack(alignment: .leading, spacing: 0) {
+            Group {
+                if dynamicTypeSize.isAccessibilitySize || horizontalSizeClass != .regular {
                     compactConsole
+                } else {
+                    HStack(alignment: .top, spacing: 0) {
+                        timingBlock
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.trailing, Space.xl)
+                        consoleDivider
+                        audioMeter
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, Space.xl)
+                        consoleDivider
+                        recordBlock
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, Space.xl)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            .padding(.vertical, Space.l)
+            Rule()
         }
         .accessibilityElement(children: .contain)
     }
 
     private var compactConsole: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            timingBlock
-            audioMeter
+        VStack(alignment: .leading, spacing: Space.l) {
             recordBlock
+            Rule()
+            timingBlock
+            Rule()
+            audioMeter
         }
     }
 
     private var consoleDivider: some View {
-        Rectangle().fill(NativeTheme.nightHairline).frame(width: 1, height: 100)
+        Rectangle()
+            .fill(Room.rule)
+            .frame(width: 1)
+            .frame(maxHeight: .infinity)
+            .accessibilityHidden(true)
     }
 
     private var audioMeter: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("TON").font(.caption.weight(.medium))
+        VStack(alignment: .leading, spacing: Space.s) {
+            FormLabel("Ton")
             LiveAudioMeter(peak: previewIsUnavailable ? 0 : liveStore.audioSample.peakLevel,
                            average: previewIsUnavailable ? 0 : liveStore.audioSample.averageLevel)
                 .frame(height: 20)
                 .accessibilityLabel("Gemessener Audiopegel")
                 .accessibilityValue(audioStatusText)
             Text(liveStore.usingSimulatorFallback || liveStore.privacyCoverIsVisible
-                 ? "Audiosignal nicht verfügbar" : filming.audio.message).font(.caption)
-                .foregroundStyle(NativeTheme.nightInkSecondary)
+                 ? "Audiosignal nicht verfügbar" : filming.audio.message)
+                .font(Typeface.caption)
+                .foregroundStyle(Room.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             Text("Sprachverständlichkeit wird nicht gemessen.")
-                .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
+                .font(Typeface.captionSmall)
+                .foregroundStyle(Room.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
     private var timingBlock: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if liveStore.isRecording, let recordingStartedAt {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text(elapsedTimeLabel(from: recordingStartedAt, to: context.date))
-                        .font(.system(.largeTitle, design: .monospaced).weight(.medium))
+        VStack(alignment: .leading, spacing: Space.xs) {
+            Group {
+                if liveStore.isRecording, let recordingStartedAt {
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        Text(elapsedTimeLabel(from: recordingStartedAt, to: context.date))
+                    }
+                } else {
+                    Text("00:00")
                 }
-            } else {
-                Text("00:00").font(.system(.largeTitle, design: .monospaced).weight(.medium))
             }
-            Text("Geplant: \(appStore.session.plannedDurationMinutes) Min.")
-                .font(.subheadline).foregroundStyle(NativeTheme.nightInkSecondary)
-            Label(appStore.session.canStartNewCapture
-                  ? "Erhebung + lokale Reflexion: aktiv"
-                  : "Freigaben für Aufnahme fehlen", systemImage: "doc.text")
-                .font(.caption)
-                .foregroundStyle(appStore.session.canStartNewCapture ? NativeTheme.nightInkSecondary : NativeTheme.warning)
-                .fixedSize(horizontal: false, vertical: true)
+            .font(Typeface.timecode)
+            .monospacedDigit()
+            .foregroundStyle(Room.primary)
+            Text("geplant \(appStore.session.plannedDurationMinutes) Min.")
+                .font(Typeface.valueSmall)
+                .foregroundStyle(Room.secondary)
+            Group {
+                if appStore.session.canStartNewCapture {
+                    StatusMark("Erhebung und lokale Reflexion freigegeben", kind: .secured)
+                } else {
+                    StatusMark("Freigaben für Aufnahme fehlen", kind: .attention)
+                }
+            }
+            .padding(.top, Space.xs)
         }
     }
 
     private var recordBlock: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Space.s) {
             Button {
                 liveStore.isRecording ? liveStore.stopRecording() : beginRecording()
             } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: liveStore.isRecording ? "stop.fill" : "circle.fill")
-                        .foregroundStyle(liveStore.isRecording ? NativeTheme.nightInk : NativeTheme.recordAccent)
-                    Text(recordActionTitle).fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, minHeight: 30)
+                Text(recordActionTitle)
             }
-            .buttonStyle(ScientificButtonStyle())
-            .background(liveStore.isRecording ? NativeTheme.recordSurface : Color.clear,
-                        in: RoundedRectangle(cornerRadius: 4))
+            .buttonStyle(RecordButtonStyle(isRecording: liveStore.isRecording))
             .disabled(liveStore.isStartingRecording || liveStore.isFinalizingRecording
                 || (!liveStore.isRecording && (audioCheck.blocksCapture || !readiness.canOverrideQualityWarnings || !overrideIsValid)))
             .accessibilityIdentifier("live.captureDock")
             .accessibilityLabel(liveStore.isRecording ? "Aufnahme stoppen" : "Aufnahme starten")
-            Text(recordingStateLabel).font(.caption)
+            StatusMark(recordingStateLabel, kind: recordingStateKind)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(recordingStateLabel)
                 .accessibilityIdentifier("live.recordingState")
                 .accessibilityValue(recordingStateAccessibilityValue)
             if !liveStore.isRecording && !liveStore.runtimeStatus.spokenAudioCheckCompleted {
                 Button("Sprechprobe und Startbedingungen prüfen") { inspectorIsVisible = true }
-                    .font(.caption).frame(minHeight: 44, alignment: .leading)
+                    .buttonStyle(InkButtonStyle(kind: .quiet))
             } else {
                 Text(liveStore.recordStatusMessage ?? "Freigaben werden beim Start erneut geprüft.")
-                    .font(.caption).foregroundStyle(NativeTheme.nightInkSecondary)
+                    .font(Typeface.caption)
+                    .foregroundStyle(Room.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
 
     private var signalStrip: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .top, spacing: 24) {
-                directReadout("BILD", id: "currentFrame")
-                Spacer(minLength: 0)
-                directReadout("LAGE", id: "level")
-                Spacer(minLength: 0)
-                directReadout("BELICHTUNG", id: "exposure")
+        VStack(alignment: .leading, spacing: 0) {
+            Rule()
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 0) {
+                    directReadout("Bild", id: "currentFrame")
+                    consoleDivider
+                    directReadout("Lage", id: "level")
+                    consoleDivider
+                    directReadout("Belichtung", id: "exposure")
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: 0) {
+                    directReadout("Bild", id: "currentFrame")
+                    Rule()
+                    directReadout("Lage", id: "level")
+                    Rule()
+                    directReadout("Belichtung", id: "exposure")
+                }
             }
-            VStack(alignment: .leading, spacing: 10) {
-                directReadout("BILD", id: "currentFrame")
-                directReadout("LAGE", id: "level")
-                directReadout("BELICHTUNG", id: "exposure")
-            }
+            Rule()
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("live.signalStrip")
     }
 
@@ -253,12 +274,20 @@ extension LiveGuidanceView {
         let value = status == .unavailable ? "Nicht verfügbar"
             : status == .pass ? (id == "currentFrame" ? "Aktuell" : "Unauffällig")
             : status == .fail ? "Kritisch" : "Prüfen"
-        return HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text(title).font(.caption.weight(.semibold))
-            Text(value).font(.caption).foregroundStyle(status == .pass
-                ? NativeTheme.nightInkSecondary : observabilityColor(status))
+        return VStack(alignment: .leading, spacing: Space.xs) {
+            FormLabel(title, small: true)
+            Label {
+                Text(value).fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: observabilityIcon(status)).imageScale(.small)
+            }
+            .labelStyle(ReadoutLabelStyle())
+            .font(Typeface.callout.weight(.medium))
+            .foregroundStyle(observabilityColor(status))
         }
-        .fixedSize(horizontal: false, vertical: true)
+        .padding(.horizontal, Space.m)
+        .padding(.vertical, Space.s)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
     }
 
@@ -267,6 +296,12 @@ extension LiveGuidanceView {
         if liveStore.isStartingRecording { return "Aufnahme startet…" }
         if liveStore.isRecording { return "Aufnahme läuft · kontinuierlicher Take" }
         return readiness.canRecord ? "Direkte Startbedingungen erfüllt" : "Aufnahmebedingungen prüfen"
+    }
+
+    private var recordingStateKind: StatusMark.Kind {
+        if liveStore.isFinalizingRecording || liveStore.isStartingRecording { return .open }
+        if liveStore.isRecording { return .neutral }
+        return readiness.canRecord ? .secured : .attention
     }
 
     private var recordActionTitle: String {
@@ -281,47 +316,101 @@ extension LiveGuidanceView {
     }
 
     func metricRow(_ title: String, _ value: Double) -> some View {
-        LabeledContent(title) {
-            Text(String(format: "%.0f %%", value * 100)).monospacedDigit()
+        instrumentRow(title, String(format: "%.0f %%", value * 100))
+    }
+
+    /// A measured value: interface label, graphite mono reading.
+    func instrumentRow(_ title: String, _ value: String) -> some View {
+        LabeledContent {
+            Text(value)
+                .font(Typeface.valueSmall)
+                .monospacedDigit()
+                .foregroundStyle(Room.instrument)
+                .multilineTextAlignment(.trailing)
+        } label: {
+            Text(title)
+                .font(Typeface.callout)
+                .foregroundStyle(Room.primary)
         }
     }
 
     func observabilityIcon(_ status: CaptureObservabilityDimension.Status) -> String {
         switch status {
-        case .pass: return "checkmark.circle.fill"
-        case .warn: return "exclamationmark.triangle.fill"
-        case .fail: return "xmark.octagon.fill"
-        case .unavailable: return "questionmark.circle"
+        case .pass: return "checkmark"
+        case .warn: return "exclamationmark.triangle"
+        case .fail: return "xmark.octagon"
+        case .unavailable: return "minus"
         }
     }
 
     func observabilityColor(_ status: CaptureObservabilityDimension.Status) -> Color {
         switch status {
-        case .pass: return NativeTheme.positiveNight
-        case .warn: return NativeTheme.warningNight
-        case .fail: return NativeTheme.dangerNight
-        case .unavailable: return NativeTheme.nightInkTertiary
+        case .pass: return Room.secondary
+        case .warn: return Room.attention
+        case .fail: return Room.fault
+        case .unavailable: return Room.tertiary
         }
     }
 
     func observabilityValue(_ dimension: CaptureObservabilityDimension) -> String {
         dimension.value.map { String(format: "%.0f %%", $0 * 100) } ?? "-"
     }
+}
 
-    func statusChip(icon: String, text: String, tint: Color = NativeTheme.nightInk) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-            Text(text)
-                .lineLimit(2)
+private struct ReadoutLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            configuration.icon
+            configuration.title
         }
-        .font(.caption.weight(.semibold))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(NativeTheme.nightElevated.opacity(0.92), in: RoundedRectangle(cornerRadius: 4))
+    }
+}
+
+/// The one signal-red control: it starts and ends the take. Disabled, it
+/// carries no red at all.
+struct RecordButtonStyle: ButtonStyle {
+    let isRecording: Bool
+    var compact = false
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: Space.m) {
+            Image(systemName: isRecording ? "stop.fill" : "circle.fill")
+                .imageScale(.medium)
+                .foregroundStyle(glyph)
+                .accessibilityHidden(true)
+            configuration.label
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .font(Typeface.body.weight(.semibold))
+        .foregroundStyle(text)
+        .multilineTextAlignment(.leading)
+        .padding(.horizontal, 18)
+        .padding(.vertical, Space.m)
+        .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? Space.target : 56)
+        .background(fill, in: RoundedRectangle(cornerRadius: Radius.control))
         .overlay {
-            RoundedRectangle(cornerRadius: 4).strokeBorder(NativeTheme.nightHairline)
+            if !isRunning {
+                RoundedRectangle(cornerRadius: Radius.control)
+                    .strokeBorder(isEnabled ? Room.ruleStrong : Room.rule, lineWidth: 1)
+            }
         }
-        .foregroundStyle(tint)
+        .opacity(configuration.isPressed ? 0.72 : 1)
+        .contentShape(Rectangle())
+    }
+
+    private var isRunning: Bool { isRecording && isEnabled }
+
+    private var fill: Color { isRunning ? Room.signalDeep : Room.raised }
+
+    private var text: Color {
+        guard isEnabled else { return Room.tertiary }
+        return Room.primary
+    }
+
+    private var glyph: Color {
+        guard isEnabled else { return Room.tertiary }
+        return isRecording ? Room.primary : Room.signal
     }
 }
 
@@ -329,13 +418,15 @@ extension LiveGuidanceView {
 private struct LiveAudioMeter: View {
     let peak: Double
     let average: Double
+    private let segments = 24
 
     var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<16, id: \.self) { index in
+        let level = min(1, max(0, max(peak, average)))
+        HStack(spacing: Space.xxs) {
+            ForEach(0..<segments, id: \.self) { index in
+                let position = Double(index) / Double(segments)
                 Rectangle()
-                    .fill(Double(index) / 16 < min(1, max(0, max(peak, average)))
-                          ? NativeTheme.accent : NativeTheme.nightHairline)
+                    .fill(position < level ? (position >= 0.85 ? Room.attention : Room.instrument) : Room.rule)
             }
         }
         .accessibilityElement(children: .ignore)

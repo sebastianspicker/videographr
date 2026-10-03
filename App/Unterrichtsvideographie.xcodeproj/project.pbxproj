@@ -14,7 +14,6 @@
 		B20000000000000000000001 /* VisionPeopleObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* VisionPeopleObservation.swift */; };
 		19C1D2C6C482454BB2A3FF11 /* UnterrichtsvideographieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F00CA048E044F839F591E36 /* UnterrichtsvideographieApp.swift */; };
 		F3C37036F0E246D782327D52 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CD2791E65549EFB33B43B2 /* RootTabView.swift */; };
-		C60000000000000000000001 /* NativeTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C60000000000000000000002 /* NativeTheme.swift */; };
 		B6E9DD2C0470426DB52011B0 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4BB85670084E1A8C3CE021 /* AppStore.swift */; };
 		B10000000000000000000001 /* BuildIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* BuildIdentity.swift */; };
 		B20000000000000000000003 /* MediaInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000004 /* MediaInspector.swift */; };
@@ -60,7 +59,6 @@
 		A71000000000000000000004 /* Unterrichtsvideographie.app in Frameworks */ = {isa = PBXBuildFile; fileRef = EEA4598008934D319CB064CF /* Unterrichtsvideographie.app */; };
 		F6C0986CA4704B468D29775B /* LearnContent in Frameworks */ = {isa = PBXBuildFile; productRef = 9E971A4E08B54DC39E7887A3 /* LearnContent */; };
 		09AAFDFB258040C5977E1002 /* SessionCore in Frameworks */ = {isa = PBXBuildFile; productRef = F28C8D8333E849D99BBD72E5 /* SessionCore */; };
-		E10000000000000000000001 /* ProvenanceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000002 /* ProvenanceBar.swift */; };
 		E10000000000000000000003 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000004 /* AboutView.swift */; };
 		E10000000000000000000005 /* SetupView+SessionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000006 /* SetupView+SessionForm.swift */; };
 		E10000000000000000000007 /* SetupView+ConsentMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000008 /* SetupView+ConsentMode.swift */; };
@@ -68,8 +66,7 @@
 		E1000000000000000000000B /* LiveGuidanceView+Chrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000000000000000000000C /* LiveGuidanceView+Chrome.swift */; };
 		E1000000000000000000000F /* ReflectView+Export.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000010 /* ReflectView+Export.swift */; };
 		E10000000000000000000011 /* ReflectView+Playback.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000012 /* ReflectView+Playback.swift */; };
-		E10000000000000000000013 /* FieldInstrumentComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000014 /* FieldInstrumentComponents.swift */; };
-		E10000000000000000000015 /* FieldInstrumentTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000016 /* FieldInstrumentTabBar.swift */; };
+		E10000000000000000000015 /* ProtocolNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000016 /* ProtocolNavigation.swift */; };
 		398874911B1F220853E342B6 /* ReflectionPlaybackModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00BFCDC6D974A2E0295355B8 /* ReflectionPlaybackModel.swift */; };
 		C0CA295F5C9EFE61C8DAC315 /* ReflectionPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8A575301B614780DF0261F /* ReflectionPresentationTests.swift */; };
 		45442D376C44457AC10FD113 /* AppStoreOptimizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FBE719D2B1429688DB553F /* AppStoreOptimizationTests.swift */; };
@@ -80,6 +77,13 @@
 		C50000000000000000000001 /* RecordingTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50000000000000000000002 /* RecordingTransaction.swift */; };
 		C50000000000000000000003 /* MotionGuidanceCadence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50000000000000000000004 /* MotionGuidanceCadence.swift */; };
 		C50000000000000000000005 /* SessionStore+RecordingArtifactSecuring.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50000000000000000000006 /* SessionStore+RecordingArtifactSecuring.swift */; };
+		D70000000000000000000001 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70000000000000000000002 /* DesignTokens.swift */; };
+		D70000000000000000000003 /* ProtocolComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70000000000000000000004 /* ProtocolComponents.swift */; };
+		D70000000000000000000005 /* SourceSerif4Display-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = D70000000000000000000006 /* SourceSerif4Display-Semibold.otf */; };
+		D70000000000000000000007 /* SourceSerif4Subhead-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = D70000000000000000000008 /* SourceSerif4Subhead-Semibold.otf */; };
+		D70000000000000000000009 /* SourceSerif4SmText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = D7000000000000000000000A /* SourceSerif4SmText-Regular.otf */; };
+		D7000000000000000000000B /* SourceSerif4SmText-It.otf in Resources */ = {isa = PBXBuildFile; fileRef = D7000000000000000000000C /* SourceSerif4SmText-It.otf */; };
+		D7000000000000000000000D /* SourceSerif4-OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = D7000000000000000000000E /* SourceSerif4-OFL.txt */; };
 /* End PBXBuildFile section */
 
 
@@ -92,7 +96,6 @@
 		EEA4598008934D319CB064CF /* Unterrichtsvideographie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unterrichtsvideographie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F00CA048E044F839F591E36 /* UnterrichtsvideographieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnterrichtsvideographieApp.swift; sourceTree = "<group>"; };
 		A1CD2791E65549EFB33B43B2 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
-		C60000000000000000000002 /* NativeTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTheme.swift; sourceTree = "<group>"; };
 		7C4BB85670084E1A8C3CE021 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
 		B10000000000000000000002 /* BuildIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildIdentity.swift; sourceTree = "<group>"; };
 		B20000000000000000000004 /* MediaInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaInspector.swift; sourceTree = "<group>"; };
@@ -133,7 +136,6 @@
 		D50000000000000000000012 /* ReflectView+Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReflectView+Content.swift"; sourceTree = "<group>"; };
 		2F803C960F5746C5875B94AC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D353BCCEDE0D47AABECF5A5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E10000000000000000000002 /* ProvenanceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProvenanceBar.swift"; sourceTree = "<group>"; };
 		E10000000000000000000004 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AboutView.swift"; sourceTree = "<group>"; };
 		E10000000000000000000006 /* SetupView+SessionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+SessionForm.swift"; sourceTree = "<group>"; };
 		E10000000000000000000008 /* SetupView+ConsentMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SetupView+ConsentMode.swift"; sourceTree = "<group>"; };
@@ -141,8 +143,7 @@
 		E1000000000000000000000C /* LiveGuidanceView+Chrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveGuidanceView+Chrome.swift"; sourceTree = "<group>"; };
 		E10000000000000000000010 /* ReflectView+Export.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReflectView+Export.swift"; sourceTree = "<group>"; };
 		E10000000000000000000012 /* ReflectView+Playback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReflectView+Playback.swift"; sourceTree = "<group>"; };
-		E10000000000000000000014 /* FieldInstrumentComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FieldInstrumentComponents.swift"; sourceTree = "<group>"; };
-		E10000000000000000000016 /* FieldInstrumentTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FieldInstrumentTabBar.swift"; sourceTree = "<group>"; };
+		E10000000000000000000016 /* ProtocolNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProtocolNavigation.swift"; sourceTree = "<group>"; };
 		A71000000000000000000001 /* CaptureEventBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureEventBoundaryTests.swift; sourceTree = "<group>"; };
 		A71000000000000000000002 /* UnterrichtsvideographieAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnterrichtsvideographieAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00BFCDC6D974A2E0295355B8 /* ReflectionPlaybackModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReflectionPlaybackModel.swift"; sourceTree = "<group>"; };
@@ -155,6 +156,13 @@
 		C50000000000000000000002 /* RecordingTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingTransaction.swift; sourceTree = "<group>"; };
 		C50000000000000000000004 /* MotionGuidanceCadence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGuidanceCadence.swift; sourceTree = "<group>"; };
 		C50000000000000000000006 /* SessionStore+RecordingArtifactSecuring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionStore+RecordingArtifactSecuring.swift"; sourceTree = "<group>"; };
+		D70000000000000000000002 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DesignTokens.swift"; sourceTree = "<group>"; };
+		D70000000000000000000004 /* ProtocolComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProtocolComponents.swift"; sourceTree = "<group>"; };
+		D70000000000000000000006 /* SourceSerif4Display-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4Display-Semibold.otf"; sourceTree = "<group>"; };
+		D70000000000000000000008 /* SourceSerif4Subhead-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4Subhead-Semibold.otf"; sourceTree = "<group>"; };
+		D7000000000000000000000A /* SourceSerif4SmText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4SmText-Regular.otf"; sourceTree = "<group>"; };
+		D7000000000000000000000C /* SourceSerif4SmText-It.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4SmText-It.otf"; sourceTree = "<group>"; };
+		D7000000000000000000000E /* SourceSerif4-OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "SourceSerif4-OFL.txt"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,7 +225,6 @@
 			children = (
 				2F00CA048E044F839F591E36 /* UnterrichtsvideographieApp.swift */,
 				A1CD2791E65549EFB33B43B2 /* RootTabView.swift */,
-				C60000000000000000000002 /* NativeTheme.swift */,
 				E10000000000000000000020 /* Design */,
 				E10000000000000000000021 /* Info */,
 				E20000000000000000000001 /* Application */,
@@ -338,9 +345,10 @@
 		E10000000000000000000020 /* Design */ = {
 			isa = PBXGroup;
 			children = (
-				E10000000000000000000002 /* ProvenanceBar.swift */,
-				E10000000000000000000016 /* FieldInstrumentTabBar.swift */,
-				E10000000000000000000014 /* FieldInstrumentComponents.swift */,
+				E10000000000000000000016 /* ProtocolNavigation.swift */,
+				D70000000000000000000002 /* DesignTokens.swift */,
+				D70000000000000000000004 /* ProtocolComponents.swift */,
+				D700000000000000000000F0 /* Fonts */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -351,6 +359,18 @@
 				E10000000000000000000004 /* AboutView.swift */,
 			);
 			path = Info;
+			sourceTree = "<group>";
+		};
+		D700000000000000000000F0 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				D70000000000000000000006 /* SourceSerif4Display-Semibold.otf */,
+				D70000000000000000000008 /* SourceSerif4Subhead-Semibold.otf */,
+				D7000000000000000000000A /* SourceSerif4SmText-Regular.otf */,
+				D7000000000000000000000C /* SourceSerif4SmText-It.otf */,
+				D7000000000000000000000E /* SourceSerif4-OFL.txt */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -463,6 +483,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				ECDEB2883D9F458887D53FDF /* Assets.xcassets in Resources */,
+				D70000000000000000000005 /* SourceSerif4Display-Semibold.otf in Resources */,
+				D70000000000000000000007 /* SourceSerif4Subhead-Semibold.otf in Resources */,
+				D70000000000000000000009 /* SourceSerif4SmText-Regular.otf in Resources */,
+				D7000000000000000000000B /* SourceSerif4SmText-It.otf in Resources */,
+				D7000000000000000000000D /* SourceSerif4-OFL.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -496,10 +521,9 @@
 				B20000000000000000000001 /* VisionPeopleObservation.swift in Sources */,
 				19C1D2C6C482454BB2A3FF11 /* UnterrichtsvideographieApp.swift in Sources */,
 				F3C37036F0E246D782327D52 /* RootTabView.swift in Sources */,
-				C60000000000000000000001 /* NativeTheme.swift in Sources */,
-				E10000000000000000000015 /* FieldInstrumentTabBar.swift in Sources */,
-				E10000000000000000000013 /* FieldInstrumentComponents.swift in Sources */,
-				E10000000000000000000001 /* ProvenanceBar.swift in Sources */,
+				E10000000000000000000015 /* ProtocolNavigation.swift in Sources */,
+				D70000000000000000000001 /* DesignTokens.swift in Sources */,
+				D70000000000000000000003 /* ProtocolComponents.swift in Sources */,
 				E10000000000000000000003 /* AboutView.swift in Sources */,
 				E10000000000000000000005 /* SetupView+SessionForm.swift in Sources */,
 				E10000000000000000000007 /* SetupView+ConsentMode.swift in Sources */,

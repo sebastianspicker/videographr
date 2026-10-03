@@ -409,6 +409,20 @@ final class ScientificVideoSnapshotTests: XCTestCase {
             size: phone,
             name: "redesign-accessibility-setup"
         )
+        let darkSetupLiveStore = LiveStore(appStore: appStore)
+        await render(
+            RootTabView(selection: .setup)
+                .environmentObject(appStore).environmentObject(darkSetupLiveStore)
+                .environment(\.horizontalSizeClass, .regular),
+            size: ipad, name: "redesign-ipad-setup-dark", style: .dark
+        )
+        let darkReflectionLiveStore = LiveStore(appStore: appStore)
+        await render(
+            RootTabView(selection: .reflect)
+                .environmentObject(appStore).environmentObject(darkReflectionLiveStore)
+                .environment(\.horizontalSizeClass, .compact),
+            size: phone, name: "redesign-iphone-reflection-dark", style: .dark
+        )
         let emptyStore = AppStore(store: SessionStore(rootDirectory: try makeFixtureRoot()), bootstrapMode: .deferred)
         let accessibilityCapture = LiveStore(appStore: appStore)
         await render(
@@ -428,11 +442,14 @@ final class ScientificVideoSnapshotTests: XCTestCase {
 
     @MainActor
     private func render<Content: View>(
-        _ content: Content, size: CGSize, name: String, scrollToBottom: Bool = false
+        _ content: Content, size: CGSize, name: String, scrollToBottom: Bool = false,
+        style: UIUserInterfaceStyle = .light
     ) async {
-        let host = UIHostingController(rootView: content)
+        let host = UIHostingController(rootView: content.environment(\.colorScheme, style == .dark ? .dark : .light))
+        host.overrideUserInterfaceStyle = style
         let requestedBounds = CGRect(origin: .zero, size: size)
         let window = UIWindow(frame: requestedBounds)
+        window.overrideUserInterfaceStyle = style
         let container = UIViewController()
         window.rootViewController = container
         container.addChild(host)
@@ -450,7 +467,7 @@ final class ScientificVideoSnapshotTests: XCTestCase {
         host.view.setNeedsLayout()
         host.view.layoutIfNeeded()
         await Task.yield()
-        try? await Task.sleep(nanoseconds: 600_000_000)
+        try? await Task.sleep(nanoseconds: 1_500_000_000)
         host.view.frame = requestedBounds
         host.view.bounds = requestedBounds
         host.view.setNeedsLayout()
@@ -479,6 +496,11 @@ final class ScientificVideoSnapshotTests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+        // Optional local review export: `TEST_RUNNER_SNAPSHOT_DIR=<dir> xcodebuild test …`.
+        if let directory = ProcessInfo.processInfo.environment["SNAPSHOT_DIR"], !directory.isEmpty,
+           let png = image.pngData() {
+            try? png.write(to: URL(fileURLWithPath: directory).appendingPathComponent("\(name).png"))
+        }
     }
 
     @MainActor

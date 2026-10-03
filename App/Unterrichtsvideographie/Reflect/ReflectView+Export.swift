@@ -5,82 +5,55 @@ import UIKit
 extension ReflectView {
     var metadataReview: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: Space.xl) {
                 metadataReviewHeader
-
-                export
-                if let error = appStore.lastStoreError {
-                    Label(error, systemImage: "exclamationmark.triangle")
-                        .font(.callout).foregroundStyle(NativeTheme.danger)
-                        .accessibilityIdentifier("reflect.exportError")
+                VStack(alignment: .leading, spacing: 0) {
+                    ProtocolSection("1", "Inhalt") {
+                        exportContents
+                    }
+                    ProtocolSection("2", "Erforderliche Freigaben") {
+                        exportScopes
+                    }
+                    ProtocolSection("3", "Weitergabe") {
+                        export
+                        if let error = appStore.lastStoreError {
+                            StatusMark(error, kind: .fault, prominent: true)
+                                .accessibilityIdentifier("reflect.exportError")
+                        }
+                        exportOutcome
+                    }
+                    metadataGrantGuidance
                 }
-                exportOutcome
-                metadataGrantGuidance
             }
-            .padding(12)
-            .padding(.bottom, 20)
+            .padding(.horizontal, pageGutter)
+            .padding(.top, Space.xl)
+            .padding(.bottom, Space.xxl)
+            .frame(maxWidth: Space.pageMaximum, alignment: .leading)
+            .frame(maxWidth: .infinity)
         }
-        .fieldInstrumentDaySurface()
+        .paperSurface()
         .toolbar(.visible, for: .navigationBar)
         .accessibilityIdentifier("reflect.metadataReviewScreen")
     }
 
     private var metadataReviewHeader: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                metadataReviewTitle
-                Spacer(minLength: 8)
-                metadataReviewStatus
-            }
-            VStack(alignment: .leading, spacing: 8) {
-                metadataReviewTitle
-                metadataReviewStatus
+        DocumentHeader(
+            eyebrow: "Metadaten weitergeben",
+            title: "Paket prüfen",
+            summary: "Umfang und Freigaben vor der Systemauswahl prüfen."
+        ) {
+            if appStore.session.canExportExternally {
+                StatusMark("Bereit", kind: .secured)
+            } else {
+                StatusMark("Freigaben prüfen", kind: .attention)
             }
         }
-    }
-
-    private var metadataReviewTitle: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("Metadaten weitergeben")
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(NativeTheme.dayInk)
-            Text("Umfang und Freigaben vor der Systemauswahl prüfen.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-        }
-    }
-
-    private var metadataReviewStatus: some View {
-        FieldStatusBadge(
-            title: appStore.session.canExportExternally ? "Bereit" : "Freigaben prüfen",
-            tone: appStore.session.canExportExternally ? .positive : .warning
-        )
     }
 
     @ViewBuilder
     var export: some View {
-        FieldPanel(padding: 12) {
-            FieldSectionHeader(title: "Paket prüfen", subtitle: appStore.session.title)
-
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 20) {
-                    exportContents
-                    exportScopes
-                }
-                VStack(alignment: .leading, spacing: 12) {
-                    exportContents
-                    exportScopes
-                }
-            }
-
-            Label("Videodatei nicht enthalten", systemImage: "video.slash")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(NativeTheme.dayInk)
-            Text("Metadaten sind nicht anonym und können Personenbezug haben. Das Paket enthält keine lokale oder importierte Videodatei.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-
-            if appStore.session.canExportExternally {
+        if appStore.session.canExportExternally {
+            VStack(alignment: .leading, spacing: Space.s) {
                 Button {
                     isPreparingExport = true
                     Task {
@@ -96,95 +69,157 @@ extension ReflectView {
                         systemImage: "square.and.arrow.up"
                     )
                 }
-                .buttonStyle(ScientificButtonStyle(prominent: true))
+                .buttonStyle(InkButtonStyle(kind: .primary))
                 .disabled(isPreparingExport)
                 .accessibilityLabel("Metadatenpaket exportieren")
 
                 Text("Öffnet nach erfolgreicher Vorbereitung die Systemauswahl. Abschluss durch das System ist kein Zustell- oder Lesebeleg.")
-                    .font(.caption2)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-            } else {
-                Text("Die erforderlichen Freigaben sind nicht aktiv. Sekundärnutzung und externe Weitergabe werden nicht aus der Erhebungsfreigabe abgeleitet.")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
+                    .font(Typeface.captionSmall)
+                    .foregroundStyle(Ink.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+        } else {
+            Text("Die erforderlichen Freigaben sind nicht aktiv. Sekundärnutzung und externe Weitergabe werden nicht aus der Erhebungsfreigabe abgeleitet.")
+                .font(Typeface.proseSmall)
+                .foregroundStyle(Ink.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: Space.measure, alignment: .leading)
         }
     }
 
     private var metadataGrantGuidance: some View {
-        FieldPanel(padding: 12) {
+        VStack(alignment: .leading, spacing: Space.s) {
+            Rule()
             Text("Freigaben bleiben sitzungsbezogen")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(NativeTheme.dayInk)
+                .font(Typeface.heading)
+                .foregroundStyle(Ink.primary)
+                .accessibilityAddTraits(.isHeader)
+                .padding(.top, Space.l)
             Text("Erhebungsfreigabe erweitert sich nicht automatisch auf Sekundärnutzung oder externe Weitergabe.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+                .font(Typeface.proseSmall)
+                .foregroundStyle(Ink.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: Space.measure, alignment: .leading)
             Button("Freigaben in der Sitzung bearbeiten") {
                 onEditSession()
             }
-            .buttonStyle(ScientificButtonStyle())
+            .buttonStyle(InkButtonStyle(kind: .secondary))
             .accessibilityIdentifier("reflect.editSessionGrants")
+            .padding(.top, Space.xs)
         }
     }
 
+    private static let packageFiles: [(name: String, description: String)] = [
+        ("session.json", "Sitzungskontext und Freigabemetadaten"),
+        ("annotations.jsonl", "Menschliche Notizen und Zeitbereiche"),
+        ("observations.jsonl", "Technische Beobachtungen"),
+        ("coding-snapshots.jsonl", "Kodierungsschnappschüsse und Herkunft"),
+        ("manifest.json", "Prüfsummen und Herkunft"),
+    ]
+
     private var exportContents: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Text("Enthalten")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(NativeTheme.dayInkSecondary)
-            packageLine("Sitzungskontext und Freigabemetadaten")
-            packageLine("Menschliche Notizen und Zeitbereiche")
-            packageLine("Technische Beobachtungen")
-            packageLine("Kodierungsschnappschüsse und Herkunft")
-            Text("session.json · annotations.jsonl · observations.jsonl · coding-snapshots.jsonl")
-                .font(.system(.caption2, design: .monospaced))
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Self.packageFiles, id: \.name) { file in
+                packageLine(file.name, file.description)
+            }
+            Label {
+                Text("Nicht enthalten: Videodatei")
+                    .font(Typeface.body.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "video.slash")
+            }
+            .foregroundStyle(Ink.primary)
+            .padding(.vertical, Space.m)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(alignment: .bottom) { Rule(strong: true) }
+            Text("Metadaten sind nicht anonym und können Personenbezug haben. Das Paket enthält keine lokale oder importierte Videodatei.")
+                .font(Typeface.proseSmall)
+                .foregroundStyle(Ink.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: Space.measure, alignment: .leading)
+                .padding(.top, Space.m)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var exportScopes: some View {
         let required = StudyExportProjection.requiredScopes(for: appStore.session)
-        return VStack(alignment: .leading, spacing: 7) {
-            Text("Erforderliche Freigaben")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(NativeTheme.dayInkSecondary)
+        return VStack(alignment: .leading, spacing: 0) {
             ForEach(ConsentScope.allCases, id: \.self) { scope in
                 if required.contains(scope) {
-                    FieldScopeChip(title: exportScopeTitle(scope), isOn: appStore.session.authorizes(scope))
+                    exportScopeRow(scope)
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private func exportScopeRow(_ scope: ConsentScope) -> some View {
+        let documented = appStore.session.authorizes(scope)
+        return ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: Space.l) {
+                Text(exportScopeTitle(scope))
+                    .font(Typeface.body)
+                    .foregroundStyle(Ink.primary)
+                Spacer(minLength: Space.m)
+                exportScopeMark(documented)
+            }
+            VStack(alignment: .leading, spacing: Space.xxs) {
+                Text(exportScopeTitle(scope))
+                    .font(Typeface.body)
+                    .foregroundStyle(Ink.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                exportScopeMark(documented)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, Space.s + 2)
+        .overlay(alignment: .bottom) { Rule() }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func exportScopeMark(_ documented: Bool) -> some View {
+        documented
+            ? StatusMark("dokumentiert", kind: .secured)
+            : StatusMark("fehlt", kind: .attention)
+    }
+
     @ViewBuilder
     var exportOutcome: some View {
         if let event = appStore.session.exportEvents.max(by: { $0.exportedAt < $1.exportedAt }) {
             let presentation = exportOutcomePresentation(for: event)
-            FieldPanel(padding: 12) {
-                Label(presentation.title, systemImage: presentation.symbol)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(presentation.color)
+            VStack(alignment: .leading, spacing: Space.s) {
+                StatusMark(presentation.title, kind: presentation.kind, prominent: true)
                 Text(presentation.detail)
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                VStack(alignment: .leading, spacing: 5) {
-                    exportOutcomeLine("Paket", "Metadaten ohne Video")
-                    exportOutcomeLine("Exportvorgang", event.status.rawValue)
-                    exportOutcomeLine("Protokolliert", event.exportedAt.formatted(date: .abbreviated, time: .shortened))
+                    .font(Typeface.proseSmall)
+                    .foregroundStyle(Ink.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: Space.measure, alignment: .leading)
+                VStack(alignment: .leading, spacing: 0) {
+                    FactRow(key: "Paket", value: "Metadaten ohne Video")
+                    FactRow(key: "Exportvorgang", value: event.status.rawValue, mono: true)
+                    FactRow(
+                        key: "Protokolliert",
+                        value: event.exportedAt.formatted(date: .abbreviated, time: .shortened),
+                        mono: true
+                    )
                 }
                 if let failure = event.failureDescription, !failure.isEmpty {
                     Text(failure)
-                        .font(.caption2)
-                        .foregroundStyle(NativeTheme.danger)
+                        .font(Typeface.captionSmall)
+                        .foregroundStyle(Ink.fault)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 if event.status == .completed {
                     Text("Externe Kopien können durch die App nicht zurückgerufen werden.")
-                        .font(.caption2)
-                        .foregroundStyle(NativeTheme.dayInkTertiary)
+                        .font(Typeface.captionSmall)
+                        .foregroundStyle(Ink.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            .padding(.top, Space.m)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityIdentifier("reflect.exportOutcome")
         }
     }
@@ -199,51 +234,55 @@ extension ReflectView {
         }
     }
 
-    private func exportOutcomePresentation(for event: ExportEvent) -> (title: String, detail: String, symbol: String, color: Color) {
+    private func exportOutcomePresentation(for event: ExportEvent) -> (title: String, detail: String, kind: StatusMark.Kind) {
         switch event.status {
         case .completed:
             return (
                 "Weitergabe vom System bestätigt",
                 "Das System meldet den Vorgang als abgeschlossen. Dies ist kein Nachweis, dass die Datei zugestellt oder gelesen wurde.",
-                "checkmark.circle",
-                NativeTheme.accent
+                .secured
             )
         case .attempted:
             return (
                 "Weitergabe wird noch eingeordnet",
                 "Der vorbereitete Vorgang ist lokal protokolliert. Ein bestätigter Abschluss liegt noch nicht vor.",
-                "clock",
-                NativeTheme.warning
+                .attention
             )
         case .cancelled:
-            return ("Weitergabe abgebrochen", "Die Systemauswahl wurde ohne bestätigten Abschluss beendet.", "xmark.circle", NativeTheme.dayInkTertiary)
+            return ("Weitergabe abgebrochen", "Die Systemauswahl wurde ohne bestätigten Abschluss beendet.", .neutral)
         case .failed:
-            return ("Weitergabe fehlgeschlagen", "Der Fehler ist im lokalen Exportvorgang vermerkt.", "exclamationmark.triangle", NativeTheme.danger)
+            return ("Weitergabe fehlgeschlagen", "Der Fehler ist im lokalen Exportvorgang vermerkt.", .fault)
         case .outcomeUnknown:
-            return ("Ausgang der Weitergabe unbekannt", "Der Vorgang bleibt lokal als ungeklärt protokolliert.", "questionmark.circle", NativeTheme.warning)
+            return ("Ausgang der Weitergabe unbekannt", "Der Vorgang bleibt lokal als ungeklärt protokolliert.", .attention)
         }
     }
 
-    private func exportOutcomeLine(_ label: String, _ value: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text(label)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(NativeTheme.dayInkSecondary)
-                .frame(width: 98, alignment: .leading)
-            Text(value)
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+    private func packageLine(_ name: String, _ description: String) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: Space.l) {
+                Text(name)
+                    .font(Typeface.value)
+                    .foregroundStyle(Ink.instrument)
+                    .frame(width: 220, alignment: .leading)
+                Text(description)
+                    .font(Typeface.callout)
+                    .foregroundStyle(Ink.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            VStack(alignment: .leading, spacing: Space.xxs) {
+                Text(name)
+                    .font(Typeface.value)
+                    .foregroundStyle(Ink.instrument)
+                Text(description)
+                    .font(Typeface.callout)
+                    .foregroundStyle(Ink.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-    }
-
-    private func packageLine(_ text: String) -> some View {
-        HStack(alignment: .top, spacing: 6) {
-            Text("·")
-                .foregroundStyle(NativeTheme.dayInkTertiary)
-            Text(text)
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkSecondary)
-        }
+        .padding(.vertical, Space.s + 2)
+        .overlay(alignment: .bottom) { Rule() }
+        .accessibilityElement(children: .combine)
     }
 
     func recordCancelledExportIfNeeded() {

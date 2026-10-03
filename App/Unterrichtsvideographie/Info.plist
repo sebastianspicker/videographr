@@ -32,6 +32,13 @@
 	<string>Videographr nutzt das Mikrofon für Pegelkontrolle und kontinuierliche Aufnahme (ggf. mit externen Audiogeräten).</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Videographr nutzt Lage- und Gyroskopdaten für Hinweise zu Kameraneigung und Aufnahmestabilität.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>SourceSerif4Display-Semibold.otf</string>
+		<string>SourceSerif4Subhead-Semibold.otf</string>
+		<string>SourceSerif4SmText-Regular.otf</string>
+		<string>SourceSerif4SmText-It.otf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

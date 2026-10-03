@@ -170,14 +170,21 @@ struct ReflectionPlaybackControls: View {
 
     var body: some View {
         let duration = max(1, durationMilliseconds ?? 0)
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
+        VStack(alignment: .leading, spacing: Space.s) {
+            HStack(alignment: .firstTextBaseline, spacing: Space.xs) {
                 ReflectionTimecode(playback: playback)
-                    .font(.system(.caption, design: .monospaced))
-                Spacer()
+                    .font(Typeface.timecodeInline)
+                    .foregroundStyle(Ink.primary)
+                    .monospacedDigit()
+                Text("/")
+                    .font(Typeface.timecodeInline)
+                    .foregroundStyle(Ink.tertiary)
+                    .accessibilityHidden(true)
                 Text(reflectionTimecode(duration))
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
+                    .font(Typeface.timecodeInline)
+                    .foregroundStyle(Ink.tertiary)
+                    .monospacedDigit()
+                Spacer(minLength: 0)
             }
             Slider(
                 value: Binding(
@@ -186,22 +193,23 @@ struct ReflectionPlaybackControls: View {
                 ),
                 in: 0...Double(duration)
             )
-            .tint(NativeTheme.accent)
+            .tint(Ink.human)
             .accessibilityLabel("Wiedergabeposition")
             .accessibilityValue(reflectionTimecode(playback.positionMilliseconds))
 
-            HStack {
+            HStack(spacing: Space.l) {
                 Button("Zum Anfang") { playback.seek(to: 0, durationMilliseconds: durationMilliseconds) }
-                Spacer()
+                    .buttonStyle(InkButtonStyle(kind: .quiet))
+                Spacer(minLength: Space.s)
                 Button(rangeStartMilliseconds == nil ? "Bereich beginnen" : "Bereich verwerfen") {
                     rangeStartMilliseconds = rangeStartMilliseconds == nil ? playback.positionMilliseconds : nil
                 }
+                .buttonStyle(InkButtonStyle(kind: .secondary))
             }
-            .buttonStyle(ScientificButtonStyle())
             if let rangeStartMilliseconds {
                 Text("Bereich: \(reflectionTimecode(rangeStartMilliseconds)) bis aktuelle Position")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
+                    .font(Typeface.caption)
+                    .foregroundStyle(Ink.tertiary)
             }
         }
     }

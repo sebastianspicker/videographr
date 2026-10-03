@@ -7,49 +7,53 @@ struct PrioritizedTipRow: View {
     var isRecording: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                presentationBadge
-                severityBadge
-                Text(categoryLabel)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Spacer()
+        VStack(alignment: .leading, spacing: Space.xs) {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: Space.m) {
+                    phaseLabel
+                    severityMark
+                    categoryText
+                    Spacer(minLength: 0)
+                }
+                VStack(alignment: .leading, spacing: Space.xxs) {
+                    phaseLabel
+                    severityMark
+                    categoryText
+                }
             }
             if let note = item.phaseNoteDE {
                 Text(note)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(item.presentation == .postTakeNote ? Color.secondary : NativeTheme.warningNight)
+                    .font(Typeface.captionSmall.weight(.semibold))
+                    .foregroundStyle(isPostTake ? Room.secondary : Room.attention)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Text(item.tip.message)
-                .font(.body)
-                .opacity(item.presentation == .postTakeNote ? 0.85 : 1)
+                .font(Typeface.body)
+                .foregroundStyle(isPostTake ? Room.secondary : Room.primary)
+                .fixedSize(horizontal: false, vertical: true)
             Text(item.tip.actionHint)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(item.presentation == .postTakeNote ? Color.secondary : Color.accentColor)
+                .font(Typeface.callout.weight(.semibold))
+                .foregroundStyle(isPostTake ? Room.secondary : Room.human)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, Space.xs)
         .accessibilityElement(children: .combine)
     }
 
-    private var presentationBadge: some View {
-        Text(item.presentation == .postTakeNote ? "Nach Aufnahme" : (isRecording ? "Während Aufnahme" : "Vor Aufnahme"))
-            .font(.caption2.weight(.bold))
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(
-                (item.presentation == .postTakeNote ? Color.gray : Color.blue).opacity(0.15),
-                in: Capsule()
-            )
+    private var isPostTake: Bool { item.presentation == .postTakeNote }
+
+    private var phaseLabel: some View {
+        FormLabel(isPostTake ? "Nach Aufnahme" : (isRecording ? "Während Aufnahme" : "Vor Aufnahme"), small: true)
     }
 
-    private var severityBadge: some View {
-        Text(severityLabel)
-            .font(.caption2.weight(.bold))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(severityColor.opacity(0.18), in: Capsule())
-            .foregroundStyle(severityColor)
+    private var severityMark: some View {
+        StatusMark(severityLabel, kind: severityKind)
+    }
+
+    private var categoryText: some View {
+        Text(categoryLabel)
+            .font(Typeface.labelSmall)
+            .foregroundStyle(Room.tertiary)
     }
 
     private var severityLabel: String {
@@ -61,12 +65,12 @@ struct PrioritizedTipRow: View {
         }
     }
 
-    private var severityColor: Color {
+    private var severityKind: StatusMark.Kind {
         switch item.tip.severity {
-        case .ok: NativeTheme.positiveNight
-        case .info: NativeTheme.nightInkSecondary
-        case .warning: NativeTheme.warningNight
-        case .critical: NativeTheme.dangerNight
+        case .ok: .secured
+        case .info: .neutral
+        case .warning: .attention
+        case .critical: .fault
         }
     }
 

@@ -8,173 +8,146 @@ extension ReflectView {
     // MARK: - Studio columns
 
     var playerColumn: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Space.l) {
             mediaEvidenceStudio
         }
-        .padding(14)
-        .background(NativeTheme.daySurface, in: RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous)
-                .strokeBorder(NativeTheme.dayHairline)
-        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     func lafColumn(index: ReflectionAnnotationIndex) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Reflexionsfokus")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(NativeTheme.dayInk)
+        VStack(alignment: .leading, spacing: Space.m) {
             Text("Vier Fragen strukturieren die eigene Analyse. Sie erzeugen keine automatische Bewertung.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+                .font(Typeface.caption)
+                .foregroundStyle(Ink.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+            VStack(alignment: .leading, spacing: 0) {
+                Rule()
                 ForEach(Array(ReflectionPromptID.allCases.enumerated()), id: \.element.id) { number, prompt in
                     Button {
                         focusedPrompt = prompt
                     } label: {
-                        lafCard(prompt, number: number + 1, index: index)
+                        lafRow(prompt, number: number + 1, index: index)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityAddTraits(focusedPrompt == prompt ? .isSelected : [])
+                    Rule()
                 }
             }
         }
-        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(NativeTheme.daySurface, in: RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous)
-                .strokeBorder(NativeTheme.dayHairline)
-        }
     }
 
     func notesColumn(index: ReflectionAnnotationIndex) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
+        VStack(alignment: .leading, spacing: Space.l) {
+            VStack(alignment: .leading, spacing: Space.xxs) {
                 Text("Eigene Beobachtung")
-                    .font(.headline)
-                Spacer()
-                Text("Menschlich verfasst")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
+                    .font(Typeface.section)
+                    .foregroundStyle(Ink.primary)
+                    .accessibilityAddTraits(.isHeader)
+                FormLabel("menschlich verfasst", small: true)
             }
 
-            Picker("Reflexionsfokus", selection: $focusedPrompt) {
-                ForEach(ReflectionPromptID.allCases) { prompt in
-                    Text(prompt.titleDE).tag(prompt)
-                }
-            }
-            .pickerStyle(.menu)
-            .accessibilityIdentifier("reflect.promptPicker")
-
-            DisclosureGroup("Reflexionsfrage") {
+            LedgerField("Reflexionsfokus") {
+                LedgerMenuPicker(
+                    title: "Reflexionsfokus",
+                    selection: $focusedPrompt,
+                    options: ReflectionPromptID.allCases.map { ($0, $0.titleDE) },
+                    accessibilityID: "reflect.promptPicker"
+                )
                 Text(focusedPrompt.promptDE)
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                    .padding(.top, 3)
+                    .font(Typeface.quote)
+                    .foregroundStyle(Ink.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, Space.s)
             }
-            .font(.caption.weight(.medium))
-            .foregroundStyle(NativeTheme.dayInkSecondary)
 
-            TextField("Autor-Pseudonym", text: $annotationAuthor)
-                .textInputAutocapitalization(.characters)
-                .submitLabel(.next)
-                .onSubmit { annotationFocus = .note }
-                .scientificInput()
-                .focused($annotationFocus, equals: .author)
-                .accessibilityIdentifier("reflect.annotationAuthor")
+            LedgerField("Autor-Pseudonym") {
+                TextField("Autor-Pseudonym", text: $annotationAuthor)
+                    .textInputAutocapitalization(.characters)
+                    .submitLabel(.next)
+                    .onSubmit { annotationFocus = .note }
+                    .writingLine(mono: true)
+                    .focused($annotationFocus, equals: .author)
+                    .accessibilityIdentifier("reflect.annotationAuthor")
+            }
 
-            TextField("Beobachtungsnotiz", text: binding(for: focusedPrompt), axis: .vertical)
-                .lineLimit(3...5)
-                .font(.body)
-                .submitLabel(.done)
-                .onSubmit { annotationFocus = nil }
-                .scientificInput()
-                .focused($annotationFocus, equals: .note)
-                .accessibilityIdentifier("reflect.\(focusedPrompt.rawValue)")
+            LedgerField("Beobachtung") {
+                TextField("Beobachtungsnotiz", text: binding(for: focusedPrompt), axis: .vertical)
+                    .lineLimit(4...8)
+                    .submitLabel(.done)
+                    .onSubmit { annotationFocus = nil }
+                    .writingLine()
+                    .focused($annotationFocus, equals: .note)
+                    .accessibilityIdentifier("reflect.\(focusedPrompt.rawValue)")
+            }
 
-            if let annotationEditorMessage {
-                Label(annotationEditorMessage, systemImage: annotationMessageSymbol)
-                    .font(.caption)
-                    .foregroundStyle(annotationMessageColor)
+            VStack(alignment: .leading, spacing: Space.s) {
+                if let annotationEditorMessage {
+                    StatusMark(
+                        annotationEditorMessage,
+                        kind: annotationEditorMessage.hasPrefix("Notiz lokal gesichert") ? .secured : .fault
+                    )
                     .accessibilityIdentifier("reflect.annotationSaveState")
-            }
+                }
 
-            if case .failed(let failure) = appStore.saveState {
-                Label("Lokale Speicherung fehlgeschlagen: \(failure)", systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.danger)
-            } else {
-                Label("Sitzung: \(appStore.saveState.titleDE)", systemImage: saveStateSymbol)
-                    .font(.caption)
-                    .foregroundStyle(saveStateColor)
-                    .accessibilityIdentifier("reflect.persistenceState")
+                if case .failed(let failure) = appStore.saveState {
+                    StatusMark("Lokale Speicherung fehlgeschlagen: \(failure)", kind: .fault)
+                } else {
+                    SaveStateMark(state: appStore.saveState)
+                        .accessibilityIdentifier("reflect.persistenceState")
+                }
             }
 
             noteActions
 
-            let annotations = index.annotations(for: focusedPrompt)
-            if annotations.isEmpty {
-                Label("Noch kein Medienbeleg", systemImage: "link.badge.plus")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-            } else {
-                DisclosureGroup("Medienbelege (\(annotations.count))") {
-                    reflectEvidenceSummary(for: focusedPrompt, index: index)
-                        .padding(.top, 4)
-                }
-                .font(.caption.weight(.medium))
-                .foregroundStyle(NativeTheme.dayInkSecondary)
+            VStack(alignment: .leading, spacing: Space.xs) {
+                FormLabel("Medienbelege zu dieser Frage")
+                reflectEvidenceSummary(for: focusedPrompt, index: index)
             }
 
             DisclosureGroup("Schnelle Verknüpfung") {
                 reflectPromptEvidenceControls(for: focusedPrompt)
-                    .padding(.top, 4)
             }
-            .font(.caption.weight(.medium))
-            .foregroundStyle(NativeTheme.dayInkSecondary)
+            .disclosureGroupStyle(InkDisclosureStyle())
         }
-        .padding(14)
-        .background(NativeTheme.daySurface, in: RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous)
-                .strokeBorder(NativeTheme.dayHairline)
-        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var annotationIntervalFields: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text("Ausgewählter Zeitbereich")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(NativeTheme.dayInkSecondary)
+        VStack(alignment: .leading, spacing: Space.s) {
+            FormLabel("Ausgewählter Zeitbereich")
             ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) {
+                HStack(alignment: .top, spacing: Space.xl) {
                     annotationTimeField("Von", text: $annotationStartTimecode, focus: .start, identifier: "reflect.annotationStart")
                     annotationTimeField("Bis", text: $annotationEndTimecode, focus: .end, identifier: "reflect.annotationEnd")
                 }
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: Space.l) {
                     annotationTimeField("Von", text: $annotationStartTimecode, focus: .start, identifier: "reflect.annotationStart")
                     annotationTimeField("Bis", text: $annotationEndTimecode, focus: .end, identifier: "reflect.annotationEnd")
                 }
             }
             Text("MM:SS · Die Notiz wird mit diesem Bereich verknüpft.")
-                .font(.caption2)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+                .font(Typeface.captionSmall)
+                .foregroundStyle(Ink.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
             if ReflectionAnnotationTimecode.parse(annotationStartTimecode) == .success(0),
                ReflectionAnnotationTimecode.parse(annotationEndTimecode) == .success(0) {
                 Text("00:00 bis 00:00 bezeichnet das gesamte Video.")
-                    .font(.caption2).foregroundStyle(NativeTheme.dayInkSecondary)
+                    .font(Typeface.captionSmall)
+                    .foregroundStyle(Ink.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
 
     private var noteActions: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(spacing: 10) {
+            HStack(spacing: Space.m) {
                 saveAnnotationButton
                 metadataReviewLink
             }
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Space.s) {
                 saveAnnotationButton
                 metadataReviewLink
             }
@@ -187,17 +160,17 @@ extension ReflectView {
         } label: {
             Label("Metadaten prüfen", systemImage: "doc.text.magnifyingglass")
         }
-        .buttonStyle(ScientificButtonStyle())
+        .buttonStyle(InkButtonStyle(kind: .secondary))
         .accessibilityIdentifier("reflect.metadataReview")
     }
 
     private var annotationIntervalActions: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(spacing: 8) {
+            HStack(spacing: Space.m) {
                 currentPositionButton
                 wholeVideoButton
             }
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Space.s) {
                 currentPositionButton
                 wholeVideoButton
             }
@@ -208,7 +181,7 @@ extension ReflectView {
         Button(isSavingAnnotation ? "Notiz wird gesichert…" : "Notiz sichern") {
             saveHumanAnnotation()
         }
-        .buttonStyle(ScientificButtonStyle(prominent: true))
+        .buttonStyle(InkButtonStyle(kind: .primary))
         .disabled(isSavingAnnotation || !hasPlayableSelectedMedia)
         .accessibilityIdentifier("reflect.annotationSave")
     }
@@ -217,7 +190,7 @@ extension ReflectView {
         Button("Aktuelle Position") {
             usePlaybackPositionForAnnotationInterval()
         }
-        .buttonStyle(ScientificButtonStyle())
+        .buttonStyle(InkButtonStyle(kind: .secondary))
         .accessibilityLabel("Aktuelle Wiedergabeposition für den Zeitbereich übernehmen")
     }
 
@@ -225,7 +198,7 @@ extension ReflectView {
         Button("Ganzes Video") {
             useWholeVideoForAnnotationInterval()
         }
-        .buttonStyle(ScientificButtonStyle())
+        .buttonStyle(InkButtonStyle(kind: .secondary))
         .accessibilityLabel("Gesamtes Video für den Zeitbereich übernehmen")
     }
 
@@ -235,12 +208,8 @@ extension ReflectView {
         focus: ReflectionAnnotationField,
         identifier: String
     ) -> some View {
-        HStack(spacing: 6) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+        LedgerField(label) {
             TextField("00:00", text: text)
-                .font(.system(.body, design: .monospaced))
                 .keyboardType(.numbersAndPunctuation)
                 .textInputAutocapitalization(.never)
                 .submitLabel(focus == .start ? .next : .done)
@@ -248,97 +217,72 @@ extension ReflectView {
                 .focused($annotationFocus, equals: focus)
                 .accessibilityLabel("\(label), Minuten und Sekunden")
                 .accessibilityIdentifier(identifier)
-        }
-        .scientificInput()
-    }
-
-    private var annotationMessageSymbol: String {
-        annotationEditorMessage?.hasPrefix("Notiz lokal gesichert") == true
-            ? "checkmark.circle.fill"
-            : "exclamationmark.triangle.fill"
-    }
-
-    private var annotationMessageColor: Color {
-        annotationEditorMessage?.hasPrefix("Notiz lokal gesichert") == true
-            ? NativeTheme.positiveDay
-            : NativeTheme.danger
-    }
-
-    private var saveStateSymbol: String {
-        switch appStore.saveState {
-        case .saved: return "checkmark.circle"
-        case .unsaved: return "pencil.line"
-        case .saving: return "arrow.triangle.2.circlepath"
-        case .failed: return "exclamationmark.triangle.fill"
+                .writingLine(mono: true)
         }
     }
 
-    private var saveStateColor: Color {
-        switch appStore.saveState {
-        case .saved: return NativeTheme.positiveDay
-        case .unsaved, .saving: return NativeTheme.dayInkTertiary
-        case .failed: return NativeTheme.danger
-        }
-    }
-
-    private func lafCard(_ prompt: ReflectionPromptID, number: Int, index: ReflectionAnnotationIndex) -> some View {
+    private func lafRow(_ prompt: ReflectionPromptID, number: Int, index: ReflectionAnnotationIndex) -> some View {
         let filled = !appStore.session.reflection[prompt].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         let linked = !index.annotations(for: prompt).isEmpty
-        let progress = (filled ? 0.5 : 0) + (linked ? 0.5 : 0)
         let active = focusedPrompt == prompt
 
-        return HStack(alignment: .top, spacing: 10) {
-            Text(String(format: "%02d", number))
-                .font(.system(.caption2, design: .monospaced))
-                .foregroundStyle(active ? NativeTheme.accent : NativeTheme.dayInkTertiary)
-                .frame(width: 20, alignment: .leading)
-            VStack(alignment: .leading, spacing: 5) {
+        return HStack(alignment: .firstTextBaseline, spacing: 0) {
+            MarginMark(text: String(format: "%02d", number), emphasized: active)
+                .frame(width: Space.marginCompact, alignment: .leading)
+            VStack(alignment: .leading, spacing: Space.xs) {
                 Text(prompt.titleDE)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(NativeTheme.dayInk)
-                    .lineLimit(1)
+                    .font(Typeface.heading)
+                    .foregroundStyle(Ink.primary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(prompt.visionFacetDE)
-                    .font(.caption2)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                    .lineLimit(2)
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(NativeTheme.dayHairline)
-                        Capsule()
-                            .fill(NativeTheme.accent)
-                            .frame(width: max(2, geo.size.width * progress))
-                    }
+                    .font(Typeface.captionSmall)
+                    .foregroundStyle(Ink.tertiary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: Space.m) {
+                    StatusMark("Notiz", kind: filled ? .secured : .open)
+                    StatusMark("Beleg", kind: linked ? .secured : .open)
                 }
-                .frame(height: 2)
-                .padding(.top, 4)
+                .padding(.top, Space.xxs)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, Space.m)
+        .padding(.leading, Space.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(active ? Ink.humanWash : Color.clear)
+        .overlay(alignment: .leading) {
+            if active {
+                Rectangle().fill(Ink.human).frame(width: 2)
             }
         }
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(active ? NativeTheme.accent.opacity(0.45) : NativeTheme.dayHairline)
-                .frame(height: 1)
-        }
+        .contentShape(Rectangle())
     }
 
     var mediaEvidenceStudio: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Space.l) {
             if appStore.session.mediaAssets.isEmpty {
-                mediaImportControl
-                ContentUnavailableView(
-                    "Keine Aufnahme verknüpft",
-                    systemImage: "video.slash",
-                    description: Text("Verknüpfen Sie zu jeder LAF-Frage mindestens einen Medienbeleg.")
-                )
-                .frame(minHeight: 180)
+                VStack(alignment: .leading, spacing: Space.m) {
+                    Text("Noch keine Aufnahme verknüpft")
+                        .font(Typeface.section)
+                        .foregroundStyle(Ink.primary)
+                        .accessibilityAddTraits(.isHeader)
+                    Text("Nehmen Sie im Bereich 02 Aufnahme auf oder importieren Sie eine lokale MP4-Datei. Zu jeder der vier Fragen gehört mindestens ein Medienbeleg.")
+                        .font(Typeface.prose)
+                        .foregroundStyle(Ink.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: Space.measure, alignment: .leading)
+                    mediaImportControl
+                }
+                .padding(.vertical, Space.l)
             } else {
                 ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 10) {
+                    HStack(alignment: .bottom, spacing: Space.l) {
                         mediaPicker
                         mediaImportControl
                     }
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: Space.s) {
                         mediaPicker
                         mediaImportControl
                     }
@@ -353,13 +297,17 @@ extension ReflectView {
                             rangeStartMilliseconds: $rangeStartMilliseconds
                         )
                         gaussianExplorationControl
+                        Rule()
                         annotationIntervalFields
                         annotationIntervalActions
                     } else if isCheckingMedia {
-                        ProgressView("Videodatei wird geprüft…")
+                        ProgressView {
+                            Text("Videodatei wird geprüft…")
+                                .font(Typeface.caption)
+                                .foregroundStyle(Ink.tertiary)
+                        }
                     } else {
-                        Label("Die verknüpfte Videodatei fehlt oder kann nicht geöffnet werden.", systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(NativeTheme.warning)
+                        StatusMark("Die verknüpfte Videodatei fehlt oder kann nicht geöffnet werden.", kind: .attention, prominent: true)
                             .accessibilityLabel("Videodatei fehlt oder ist beschädigt")
                     }
                 }
@@ -368,13 +316,18 @@ extension ReflectView {
     }
 
     private var mediaPicker: some View {
-        Picker("Medium", selection: $selectedAssetID) {
-            ForEach(appStore.session.mediaAssets) { asset in
-                Text(assetLabel(asset)).tag(Optional(asset.id))
-            }
+        LedgerField("Medium") {
+            LedgerMenuPicker(
+                title: "Medium",
+                selection: Binding(
+                    get: { selectedAsset?.id },
+                    set: { selectedAssetID = $0 }
+                ),
+                options: appStore.session.mediaAssets.map { (Optional($0.id), assetLabel($0)) },
+                accessibilityID: "reflect.mediaPicker",
+                mono: true
+            )
         }
-        .pickerStyle(.menu)
-        .accessibilityIdentifier("reflect.mediaPicker")
     }
 
     @ViewBuilder
@@ -387,19 +340,18 @@ extension ReflectView {
                     gaussianLaunchID = UUID()
                 } label: {
                     Label(gaussianLaunchID == nil ? "Standbild-Perspektive erkunden · Experiment" : "Freigaben werden gesichert…", systemImage: "viewfinder")
-                        .font(.caption.weight(.semibold))
-                        .frame(minHeight: 44)
                 }
-                .buttonStyle(ScientificButtonStyle())
+                .buttonStyle(InkButtonStyle(kind: .secondary))
                 .disabled(gaussianLaunchID != nil || playback.isSeeking)
                 .accessibilityIdentifier("reflect.gaussian.open")
                 if let gaussianLaunchMessage {
-                    Text(gaussianLaunchMessage).font(.caption).foregroundStyle(NativeTheme.warning)
+                    StatusMark(gaussianLaunchMessage, kind: .attention)
                 }
             } else {
                 Text("Perspektivexperimente benötigen ein aktuelles Forschungsprotokoll sowie Freigaben für Forschung und lokale Reflexion.")
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
+                    .font(Typeface.caption)
+                    .foregroundStyle(Ink.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -445,15 +397,12 @@ extension ReflectView {
             Button { isImportingMedia = true } label: {
                 Label(isProcessingMediaImport ? "Video wird importiert…" : "Video importieren",
                       systemImage: isProcessingMediaImport ? "hourglass" : "square.and.arrow.down")
-                    .font(.caption.weight(.semibold))
-                    .frame(minHeight: 44)
             }
+            .buttonStyle(InkButtonStyle(kind: .quiet))
             .disabled(isProcessingMediaImport)
             .accessibilityIdentifier("reflect.importMedia")
         } else {
-            Label("Videoimport erfordert eine aktive Freigabe für lokale Reflexion.", systemImage: "lock")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+            StatusMark("Videoimport erfordert eine aktive Freigabe für lokale Reflexion.", kind: .open)
         }
     }
 
@@ -463,7 +412,10 @@ extension ReflectView {
                 .frame(width: proxy.size.width, height: proxy.size.width * 9 / 16)
         }
         .aspectRatio(16 / 9, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: NativeTheme.cornerRadius, style: .continuous))
+        .clipShape(Rectangle())
+        .overlay {
+            Rectangle().strokeBorder(Ink.rule, lineWidth: 1)
+        }
         .accessibilityLabel("Videowiedergabe für \(assetLabel(asset))")
     }
 
@@ -473,37 +425,31 @@ extension ReflectView {
            appStore.session.hasUsableExperimentalProtocol,
            let snapshot = appStore.session.latestCodingSnapshot
         {
-            FieldPanel {
-                Label("Experimentelle Hypothese · nicht validiert", systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(NativeTheme.warning)
-                    .accessibilityLabel("Experimentelle, nicht validierte Hypothese")
+            HypothesisBlock(title: "Experimentelle Hypothese · nicht validiert") {
                 Text(snapshot.summaryDE)
-                    .font(.caption)
-                    .foregroundStyle(NativeTheme.dayInkSecondary)
-                    .padding(.top, 6)
+                    .font(Typeface.caption)
+                    .foregroundStyle(Ink.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let report = appStore.session.researchCaptureReport(
                     generatorProvenance: BuildProvenanceFactory.export
                 ) {
                     Text(report.summaryDE)
-                        .font(.caption2)
-                        .foregroundStyle(NativeTheme.dayInkTertiary)
-                        .padding(.top, 4)
+                        .font(Typeface.captionSmall)
+                        .foregroundStyle(Ink.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 if let scaffold = appStore.session.reflectionScaffoldNotes()[focusedPrompt.rawValue] {
                     Text(scaffold)
-                        .font(.caption2)
-                        .foregroundStyle(NativeTheme.dayInkTertiary)
-                        .padding(.top, 4)
+                        .font(Typeface.captionSmall)
+                        .foregroundStyle(Ink.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Text("Keine pädagogische Bewertung, keine Konfidenzangabe und kein Ersatz für menschliche Kodierung.")
-                    .font(.caption2)
-                    .foregroundStyle(NativeTheme.dayInkTertiary)
-                    .padding(.top, 4)
+                    .font(Typeface.captionSmall)
+                    .foregroundStyle(Ink.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .overlay {
-                RoundedRectangle(cornerRadius: NativeTheme.cardCornerRadius, style: .continuous)
-                    .strokeBorder(NativeTheme.warning.opacity(0.3), lineWidth: 1)
-            }
+            .accessibilityLabel("Experimentelle, nicht validierte Hypothese")
         }
     }
 
@@ -511,75 +457,94 @@ extension ReflectView {
     func reflectPromptEvidenceControls(for prompt: ReflectionPromptID) -> some View {
         if selectedAsset == nil {
             Text("Für diesen Schritt ist noch kein Medium verfügbar.")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+                .font(Typeface.caption)
+                .foregroundStyle(Ink.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
         } else if hasPlayableSelectedMedia {
             ViewThatFits(in: .horizontal) {
-                HStack {
+                HStack(spacing: Space.m) {
                     Button("Aktuelle Position verknüpfen") { addAnnotation(for: prompt, wholeAsset: false) }
-                        .buttonStyle(ScientificButtonStyle())
+                        .buttonStyle(InkButtonStyle(kind: .secondary))
                     Button("Ganzes Video verknüpfen") { addAnnotation(for: prompt, wholeAsset: true) }
-                        .buttonStyle(ScientificButtonStyle())
+                        .buttonStyle(InkButtonStyle(kind: .secondary))
                 }
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: Space.s) {
                     Button("Aktuelle Position verknüpfen") { addAnnotation(for: prompt, wholeAsset: false) }
-                        .buttonStyle(ScientificButtonStyle())
+                        .buttonStyle(InkButtonStyle(kind: .secondary))
                     Button("Ganzes Video verknüpfen") { addAnnotation(for: prompt, wholeAsset: true) }
-                        .buttonStyle(ScientificButtonStyle())
+                        .buttonStyle(InkButtonStyle(kind: .secondary))
                 }
             }
-            .font(.caption)
         }
     }
 
+    /// Linked evidence reads like a transcript: the timecode sits in the margin.
     @ViewBuilder
     func reflectEvidenceSummary(for prompt: ReflectionPromptID, index: ReflectionAnnotationIndex) -> some View {
         let annotations = index.annotations(for: prompt)
         if annotations.isEmpty {
-            Label("Noch kein Medienbeleg", systemImage: "link.badge.plus")
-                .font(.caption)
-                .foregroundStyle(NativeTheme.dayInkTertiary)
+            StatusMark("Noch kein Medienbeleg", kind: .open)
         } else {
-            ForEach(annotations, id: \.id) { annotation in
-                HStack {
-                    Label(annotationLabel(annotation), systemImage: "link")
-                    Spacer()
-                    Button("Entfernen", role: .destructive) {
-                        appStore.removeAnnotation(id: annotation.id)
+            VStack(alignment: .leading, spacing: 0) {
+                Rule()
+                ForEach(annotations, id: \.id) { annotation in
+                    HStack(alignment: .firstTextBaseline, spacing: Space.s) {
+                        MarginMark(text: annotationLabel(annotation))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(width: 96, alignment: .leading)
+                        Image(systemName: "link")
+                            .font(.footnote)
+                            .foregroundStyle(Ink.tertiary)
+                            .accessibilityHidden(true)
+                        Spacer(minLength: Space.s)
+                        Button("Entfernen", role: .destructive) {
+                            appStore.removeAnnotation(id: annotation.id)
+                        }
+                        .font(Typeface.callout.weight(.semibold))
+                        .foregroundStyle(Ink.fault)
+                        .frame(minHeight: Space.target)
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Medienbeleg entfernen")
                     }
-                    .font(.caption)
-                    .accessibilityLabel("Medienbeleg entfernen")
+                    Rule()
                 }
-                .font(.caption)
             }
         }
     }
 
     @ViewBuilder
     func reflectProgress(index: ReflectionAnnotationIndex) -> some View {
-        FieldPanel {
-            let filled = appStore.session.reflection.filledCount
-            let linked = index.linkedPromptCount
-            ProgressView(value: Double(filled), total: Double(ReflectionPromptID.allCases.count)) {
-                Text("\(filled) / 4 Antworten")
-                    .font(.caption.weight(.medium))
+        let filled = appStore.session.reflection.filledCount
+        let linked = index.linkedPromptCount
+        let complete = reflectionIsComplete(index: index)
+        VStack(alignment: .leading, spacing: Space.m) {
+            Text("\(filled) / 4 Antworten · \(linked) / 4 belegt")
+                .font(Typeface.value)
+                .foregroundStyle(Ink.instrument)
+                .monospacedDigit()
+            HStack(spacing: Space.xs) {
+                ForEach(ReflectionPromptID.allCases) { prompt in
+                    let isFilled = !appStore.session.reflection[prompt]
+                        .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    ZStack {
+                        Rectangle().fill(isFilled ? Ink.human : Color.clear)
+                        Rectangle().strokeBorder(isFilled ? Ink.human : Ink.ruleStrong, lineWidth: 1)
+                    }
+                    .frame(width: 12, height: 12)
+                }
             }
-            .tint(NativeTheme.accent)
-            Text("\(linked) / 4 Fragen mit Medienbeleg")
-                .font(.caption)
-                .foregroundStyle(reflectionIsComplete(index: index) ? NativeTheme.positiveDay : NativeTheme.dayInkTertiary)
-            Label(
-                reflectionIsComplete(index: index) ? "Reflexion vollständig" : "Vollständig nach vier Antworten und je einem Medienbeleg",
-                systemImage: reflectionIsComplete(index: index) ? "checkmark.circle.fill" : "circle.dashed"
+            .accessibilityHidden(true)
+            StatusMark(
+                complete ? "Reflexion vollständig" : "Vollständig nach vier Antworten und je einem Medienbeleg",
+                kind: complete ? .secured : .open
             )
-            .font(.caption)
-            .foregroundStyle(reflectionIsComplete(index: index) ? NativeTheme.positiveDay : NativeTheme.dayInkTertiary)
             Button("Entwurf speichern") {
                 appStore.save()
             }
-            .buttonStyle(ScientificButtonStyle(prominent: true))
+            .buttonStyle(InkButtonStyle(kind: .secondary))
             .accessibilityIdentifier("reflect.save")
-            .padding(.top, 8)
+            .padding(.top, Space.xs)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
