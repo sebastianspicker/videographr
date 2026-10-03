@@ -277,7 +277,11 @@ extension SessionStore {
 
     private func copyImportedMedia(_ transaction: ImportedMediaTransaction) throws {
         try importSourceOpenedHook?()
-        try streamCopy(source: transaction.source, to: transaction.staging)
+        try streamCopy(
+            source: transaction.source,
+            to: transaction.staging,
+            admittedSize: transaction.sourceSize
+        )
         let copiedSize = try validatedImportedCopySize(at: transaction.staging)
         guard copiedSize == transaction.sourceSize else {
             throw SessionStoreError.importedMediaSourceIsNotRegularFile

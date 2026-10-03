@@ -97,7 +97,8 @@ struct LiveGuidanceView: View {
             .onChange(of: appStore.session.experimentalProtocol) { _, _ in
                 liveStore.synchronizeSession()
             }
-                .onChange(of: appStore.session.consentGrants) { _, _ in
+            .onChange(of: appStore.session.consentGrants) { _, _ in
+                audioCheck.invalidateIfUnauthorized(for: appStore.session)
                 liveStore.synchronizeSession()
             }
             .onChange(of: liveStore.isRecording) { _, isRecording in

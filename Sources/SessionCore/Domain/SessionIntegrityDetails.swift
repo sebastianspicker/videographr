@@ -233,6 +233,9 @@ public struct StudyExportProjection: Equatable, Sendable {
         let annotations = projected.evidenceAnnotations
         let observations = projected.captureObservations
         let codingSnapshots = projected.codingSnapshots
+        // Disclosure attempts are a local outbox/audit trail. They describe where
+        // earlier packages went and must never become content of a later package.
+        projected.exportEvents = []
         projected.evidenceAnnotations = []
         projected.captureObservations = []
         projected.codingSnapshots = []

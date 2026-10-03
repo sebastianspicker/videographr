@@ -279,10 +279,13 @@ extension SessionStore {
         return Int64(size)
     }
 
-    /// Streams a bounded source descriptor to a fresh staging path. The counter is enforced
-    /// during the read, not only from its initial metadata, so a concurrently growing source
-    /// cannot exceed the import ceiling.
-    func streamCopy(source: FileHandle, to staging: URL) throws {
+    /// Streams a source descriptor to a fresh staging path without exceeding the byte count
+    /// that passed capacity admission. Reading continues through EOF so growth is rejected,
+    /// rather than silently truncating the imported file at the admitted boundary.
+    func streamCopy(source: FileHandle, to staging: URL, admittedSize: Int64) throws {
+        guard admittedSize > 0, admittedSize <= Self.maximumImportedMediaBytes else {
+            throw SessionStoreError.importedMediaSourceTooLarge
+        }
         guard FileManager.default.createFile(atPath: staging.path, contents: nil) else {
             throw CocoaError(.fileWriteUnknown)
         }
@@ -293,10 +296,11 @@ extension SessionStore {
             try Task.checkCancellation()
             let chunk = try source.read(upToCount: Self.importCopyBufferBytes) ?? Data()
             guard !chunk.isEmpty else { break }
-            copied += Int64(chunk.count)
-            guard copied <= Self.maximumImportedMediaBytes else {
-                throw SessionStoreError.importedMediaSourceTooLarge
+            let chunkSize = Int64(chunk.count)
+            guard chunkSize <= admittedSize - copied else {
+                throw SessionStoreError.importedMediaSourceIsNotRegularFile
             }
+            copied += chunkSize
             try destination.write(contentsOf: chunk)
         }
         try destination.synchronize()

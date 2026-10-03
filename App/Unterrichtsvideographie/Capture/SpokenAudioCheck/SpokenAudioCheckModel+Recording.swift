@@ -30,6 +30,10 @@ extension SpokenAudioCheckModel {
     }
 
     func beginRecording() throws {
+        guard authorizationIsCurrent(covering: Self.recordingDuration) else {
+            cancel(resumeCapture: false)
+            return
+        }
         try configureAudioSession()
         let recorder = try makeRecorder(for: protectedRecordingURL())
         self.recorder = recorder
@@ -63,7 +67,7 @@ extension SpokenAudioCheckModel {
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ])
         recorder.delegate = self
-        guard recorder.prepareToRecord(), recorder.record(forDuration: 4) else {
+        guard recorder.prepareToRecord(), recorder.record(forDuration: Self.recordingDuration) else {
             throw CocoaError(.fileWriteUnknown, userInfo: [
                 NSLocalizedDescriptionKey: "Mikrofonaufnahme konnte nicht gestartet werden."
             ])
@@ -85,6 +89,10 @@ extension SpokenAudioCheckModel {
     func recordingFinished(_ finishedRecorder: AVAudioRecorder, successfully: Bool) {
         guard recorder === finishedRecorder, phase == .recording else { return }
         recorder = nil
+        guard authorizationIsCurrent() else {
+            cancel(resumeCapture: false)
+            return
+        }
         guard successfully, let fileURL, isRegularNonSymlinkFile(fileURL) else {
             fail("Die temporäre Audiodatei wurde nicht vollständig geschrieben.")
             return
@@ -99,6 +107,10 @@ extension SpokenAudioCheckModel {
     func playbackFinished(_ finishedPlayer: AVAudioPlayer, successfully: Bool) {
         guard player === finishedPlayer, phase == .playing else { return }
         player = nil
+        guard authorizationIsCurrent() else {
+            cancel(resumeCapture: false)
+            return
+        }
         guard successfully else {
             fail("Die Wiedergabe wurde nicht vollständig beendet.")
             return
@@ -110,10 +122,15 @@ extension SpokenAudioCheckModel {
         deactivateAudioSession()
         let resume = resumeCapture
         resumeCapture = nil
+        clearAuthorization()
         resume?()
     }
 
     func fail(_ message: String) {
+        let mayResume = authorizationIsCurrent()
+        preparationTask?.cancel()
+        preparationTask = nil
+        clearAuthorization()
         stopActiveAudio()
         cleanupFile()
         deactivateAudioSession()
@@ -121,7 +138,7 @@ extension SpokenAudioCheckModel {
         let resume = resumeCapture
         resumeCapture = nil
         playbackCompletion = nil
-        resume?()
+        if mayResume { resume?() }
     }
 
     func stopActiveAudio() {

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import shutil
 import tempfile
 import urllib.request
 from pathlib import Path
@@ -19,6 +18,23 @@ FILES = {
     "Data/com.apple.CoreML/model.mlmodel": (399433, "44ac97a3efcfd52113183fb2862ff59cd0368e9ec2e30a90a54980dd11407042"),
     "Data/com.apple.CoreML/weights/weight.bin": (49419072, "fa60d9b6a155734f59029ebb882fd54e549bfaee3539c1a9cbd2cbbab64a0fed"),
 }
+DOWNLOAD_CHUNK_BYTES = 1024 * 1024
+
+
+def copy_exact_response(response, output, expected_size: int, relative: str) -> None:
+    """Copy exactly the pinned member size without allowing excess disk writes."""
+    written = 0
+    while True:
+        remaining = expected_size - written
+        chunk = response.read(min(DOWNLOAD_CHUNK_BYTES, remaining + 1))
+        if not chunk:
+            break
+        if len(chunk) > remaining:
+            raise ValueError(f"Model hash/size mismatch: {relative}")
+        output.write(chunk)
+        written += len(chunk)
+    if written != expected_size:
+        raise ValueError(f"Model hash/size mismatch: {relative}")
 
 
 def verify(package: Path) -> None:
@@ -48,13 +64,13 @@ def main() -> int:
     directory.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="depth-model-", dir=directory) as temporary:
         staged = Path(temporary) / MODEL_NAME
-        for relative in FILES:
+        for relative, (expected_size, _) in FILES.items():
             destination = staged / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             print(f"Downloading {relative}", flush=True)
             request = urllib.request.Request(f"{BASE_URL}/{relative}", headers={"User-Agent": "Videographr-model-setup"})
             with urllib.request.urlopen(request, timeout=120) as response, destination.open("wb") as output:
-                shutil.copyfileobj(response, output)
+                copy_exact_response(response, output, expected_size, relative)
         verify(staged)
         # Do not overwrite an existing installation, including a concurrent setup.
         if package.exists():

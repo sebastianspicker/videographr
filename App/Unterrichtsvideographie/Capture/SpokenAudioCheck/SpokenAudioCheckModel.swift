@@ -1,11 +1,15 @@
 @preconcurrency import AVFoundation
 import SwiftUI
+import SessionCore
 
 /// Records one ephemeral pre-roll speech sample and counts the check only after
 /// the operator has played it to completion. Amplitude metrics alone never set
 /// this acknowledgement.
 @MainActor
 final class SpokenAudioCheckModel: NSObject, ObservableObject {
+    static let recordingDuration: TimeInterval = 4
+    static let authorizationWindow: TimeInterval = 4.5
+
     enum Phase: Equatable {
         case idle
         case preparing
@@ -21,8 +25,11 @@ final class SpokenAudioCheckModel: NSObject, ObservableObject {
     var player: AVAudioPlayer?
     var fileURL: URL?
     var preparationTask: Task<Void, Never>?
+    var authorizationExpiryTask: Task<Void, Never>?
     var resumeCapture: (() -> Void)?
     var playbackCompletion: (() -> Void)?
+    var authorization: SpokenAudioCheckAuthorization?
+    var currentSession: (() -> CaptureSession)?
 
     override init() {
         super.init()
@@ -30,19 +37,34 @@ final class SpokenAudioCheckModel: NSObject, ObservableObject {
     }
 
     func start(
+        authorization: SpokenAudioCheckAuthorization,
+        currentSession: @escaping () -> CaptureSession,
         pauseCapture: @escaping () -> Void,
         resumeCapture: @escaping () -> Void,
         playbackCompleted: @escaping () -> Void
     ) {
-        guard !blocksCapture, prepareProtectedRecording() else { return }
+        guard !blocksCapture,
+              authorization.authorizes(
+                  currentSession(),
+                  covering: Self.authorizationWindow
+              ),
+              prepareProtectedRecording()
+        else { return }
+        self.authorization = authorization
+        self.currentSession = currentSession
         self.resumeCapture = resumeCapture
         self.playbackCompletion = playbackCompleted
         pauseCapture()
+        scheduleAuthorizationExpiry(at: authorization.effectiveExpiresAt)
         scheduleRecordingStart()
     }
 
     func play() {
         guard phase == .ready, let fileURL else { return }
+        guard authorizationIsCurrent() else {
+            cancel(resumeCapture: false)
+            return
+        }
         do {
             let player = try makePlayer(for: fileURL)
             self.player = player
@@ -53,8 +75,10 @@ final class SpokenAudioCheckModel: NSObject, ObservableObject {
     }
 
     func cancel(resumeCapture shouldResume: Bool) {
+        let mayResume = shouldResume && authorizationIsCurrent()
         preparationTask?.cancel()
         preparationTask = nil
+        clearAuthorization()
         stopActiveAudio()
         cleanupFile()
         let resume = resumeCapture
@@ -62,7 +86,56 @@ final class SpokenAudioCheckModel: NSObject, ObservableObject {
         playbackCompletion = nil
         phase = .idle
         deactivateAudioSession()
-        if shouldResume { resume?() }
+        if mayResume { resume?() }
+    }
+
+    func invalidateIfUnauthorized(for session: CaptureSession, at date: Date = Date()) {
+        guard blocksCapture, authorization?.authorizes(session, at: date) != true else { return }
+        cancel(resumeCapture: false)
+    }
+
+    func authorizationIsCurrent(
+        at date: Date = Date(),
+        covering duration: TimeInterval = 0
+    ) -> Bool {
+        guard let authorization, let currentSession else { return false }
+        return authorization.authorizes(currentSession(), at: date, covering: duration)
+    }
+
+    func scheduleAuthorizationExpiry(at expiration: Date?) {
+        authorizationExpiryTask?.cancel()
+        guard let expiration else {
+            authorizationExpiryTask = nil
+            return
+        }
+        authorizationExpiryTask = Task { [weak self] in
+            do {
+                while !Task.isCancelled {
+                    let remaining = expiration.timeIntervalSinceNow
+                    if remaining <= 0 {
+                        self?.invalidateCurrentAuthorization()
+                        return
+                    }
+                    try await Task.sleep(for: .seconds(remaining))
+                }
+            } catch is CancellationError {
+                return
+            } catch {
+                self?.invalidateCurrentAuthorization()
+            }
+        }
+    }
+
+    func invalidateCurrentAuthorization() {
+        guard blocksCapture, !authorizationIsCurrent() else { return }
+        cancel(resumeCapture: false)
+    }
+
+    func clearAuthorization() {
+        authorizationExpiryTask?.cancel()
+        authorizationExpiryTask = nil
+        authorization = nil
+        currentSession = nil
     }
 }
 

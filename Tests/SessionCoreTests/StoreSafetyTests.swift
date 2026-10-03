@@ -264,6 +264,55 @@ final class StoreSafetyTests: XCTestCase {
         XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: recordings.path), [])
     }
 
+    func testGrowingImportNeverWritesBeyondAdmittedSourceSize() throws {
+        let root = try makeRoot()
+        let source = root.appendingPathComponent(".growing-import.mp4")
+        let admittedSize = SessionStore.importCopyBufferBytes + 17
+        try Data(repeating: 0x31, count: admittedSize).write(to: source)
+        let store = SessionStore({
+            var values = SessionStore.Values()
+            values.rootDirectory = root
+            values.importSourceOpenedHook = {
+                let writer = try FileHandle(forWritingTo: source)
+                defer { try? writer.close() }
+                try writer.seekToEnd()
+                try writer.write(contentsOf: Data(repeating: 0x32, count: 31))
+            }
+            return values
+        }())
+
+        XCTAssertThrowsError(try store.importMedia(from: source, into: UUID())) { error in
+            XCTAssertEqual(error as? SessionStoreError, .importedMediaSourceIsNotRegularFile)
+        }
+
+        let recordings = root.appendingPathComponent("Recordings", isDirectory: true)
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: recordings.path), [])
+        XCTAssertEqual(try Data(contentsOf: source).count, admittedSize + 31)
+    }
+
+    func testStreamCopyRejectsGrowthBeforeWritingBeyondAdmittedSize() throws {
+        let root = try makeRoot()
+        let source = root.appendingPathComponent(".stream-source.mp4")
+        let staging = root.appendingPathComponent(".stream-staging.mp4")
+        let admittedSize = SessionStore.importCopyBufferBytes + 17
+        try Data(repeating: 0x41, count: admittedSize + 31).write(to: source)
+        let sourceHandle = try FileHandle(forReadingFrom: source)
+        defer { try? sourceHandle.close() }
+
+        XCTAssertThrowsError(try makeStore(root: root).streamCopy(
+            source: sourceHandle,
+            to: staging,
+            admittedSize: Int64(admittedSize)
+        )) { error in
+            XCTAssertEqual(error as? SessionStoreError, .importedMediaSourceIsNotRegularFile)
+        }
+
+        let stagedSize = try XCTUnwrap(
+            FileManager.default.attributesOfItem(atPath: staging.path)[.size] as? NSNumber
+        ).intValue
+        XCTAssertLessThanOrEqual(stagedSize, admittedSize)
+    }
+
     func testRecordingTransactionOwnershipRejectsStaleCallbacks() {
         var ownership = RecordingArtifactOwnership<String>()
         let destination = URL(fileURLWithPath: "/private/tmp/recording.mp4")

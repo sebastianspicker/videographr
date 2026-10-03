@@ -14,6 +14,9 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_public_hygiene.py
 echo "==> Static Pages demo"
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_demo.py
 
+echo "==> Model download bounds"
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_prepare_gaussian_model
+
 echo "==> Script syntax"
 bash -n scripts/*.sh
 if command -v shellcheck >/dev/null 2>&1; then

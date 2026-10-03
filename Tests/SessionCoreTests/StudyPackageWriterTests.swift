@@ -30,6 +30,27 @@ final class StudyPackageWriterTests: XCTestCase {
         XCTAssertEqual(validated, manifest)
     }
 
+    func testBuiltPackageExcludesLocalDisclosureAuditHistory() async throws {
+        let writer = StudyPackageWriter()
+        var session = populatedSession()
+        var eventValues = ExportEvent.Values()
+        eventValues.operatorPseudonym = "audit-only-operator"
+        eventValues.operatorAuthenticationMethod = "deviceOwnerAuthentication"
+        eventValues.shareActivityIdentifier = "audit-only-provider"
+        eventValues.status = .failed
+        eventValues.failureDescription = "audit-only-failure"
+        session.exportEvents = [ExportEvent(eventValues)]
+
+        let packageURL = try await build(session, with: writer)
+        let members = try StudyPackageDirectory.validatedMemberURLs(in: packageURL)
+        let sessionData = try Data(contentsOf: try XCTUnwrap(members[StudyPackageContract.sessionFile]))
+        let sharedSession = try SessionCoding.decoder().decode(CaptureSession.self, from: sessionData)
+
+        XCTAssertEqual(session.exportEvents.count, 1, "Projection must not mutate the local outbox.")
+        XCTAssertEqual(sharedSession.exportEvents, [])
+        XCTAssertFalse(String(decoding: sessionData, as: UTF8.self).contains("audit-only-"))
+    }
+
     func testIdenticalSessionsProduceIdenticalPackageBytes() async throws {
         let writer = StudyPackageWriter()
         let first = try StudyPackageDirectory.validatedMemberURLs(in: try await build(populatedSession(), with: writer))

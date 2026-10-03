@@ -1,6 +1,7 @@
 import SwiftUI
 import ExperimentalResearch
 import GuidanceEngine
+import SessionCore
 
 extension LiveGuidanceView {
     func liveGuidanceEvidencePane(
@@ -290,7 +291,13 @@ extension LiveGuidanceView {
     private var spokenAudioControls: some View {
         if !liveStore.isRecording && !liveStore.isStartingRecording && !liveStore.isFinalizingRecording {
             Button {
+                guard let authorization = SpokenAudioCheckAuthorization.make(
+                    for: appStore.session,
+                    covering: SpokenAudioCheckModel.authorizationWindow
+                ) else { return }
                 audioCheck.start(
+                    authorization: authorization,
+                    currentSession: { appStore.session },
                     pauseCapture: { liveStore.stop() },
                     resumeCapture: { liveStore.start() },
                     playbackCompleted: { liveStore.markSpokenAudioCheckCompleted() }
@@ -301,8 +308,10 @@ extension LiveGuidanceView {
             .buttonStyle(InkButtonStyle(kind: .secondary))
             .disabled(
                 audioCheck.blocksCapture
-                    || !appStore.session.authorizes(.collection)
-                    || !appStore.session.authorizes(.localReflection)
+                    || SpokenAudioCheckAuthorization.make(
+                        for: appStore.session,
+                        covering: SpokenAudioCheckModel.authorizationWindow
+                    ) == nil
             )
             .accessibilityIdentifier("live.audioCheck.record")
             if audioCheck.canPlay {
