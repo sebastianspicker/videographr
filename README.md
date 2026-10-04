@@ -8,7 +8,7 @@ consent-scoped study package.
 This repository contains the source for `v0.1.0-alpha.1`. It does not include a
 signed application, TestFlight build, App Store package, backend, or cloud service.
 
-Explore the [static interactive demo](https://sebastianspicker.github.io/videographr/)
+Explore the [static interactive demo](https://sebastianspicker.github.io/videographr-classroom/)
 with synthetic fixture data. It demonstrates the current five-tab workflow but
 does not access a camera or microphone, read files, persist data, or create exports.
 
