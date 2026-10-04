@@ -68,6 +68,3 @@ reflection or educational outcomes.
 | Device verified | Open for this candidate. |
 | Human validated | Not available. |
 | Effectiveness tested | Not available. |
-
-The [release status](../RELEASE_STATUS.md) records the remaining candidate and
-external-validation gates.

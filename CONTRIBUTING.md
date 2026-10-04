@@ -22,7 +22,7 @@ Requirements and installation are documented in [README.md](README.md). Verify t
 package before opening the app:
 
 ```bash
-swift test --disable-sandbox \
+swift build --disable-sandbox \
   -Xswiftc -strict-concurrency=complete \
   -Xswiftc -warnings-as-errors
 
@@ -36,7 +36,6 @@ bundle names use `Unterrichtsvideographie`.
 
 - Put pure, deterministic domain logic in `Sources/`.
 - Keep SwiftUI and Apple-framework adapters in `App/`.
-- Add package tests under the matching SwiftPM target directory in `Tests/`.
 - Do not add a production dependency without maintainer approval.
 
 ## Change requirements

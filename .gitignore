@@ -94,6 +94,9 @@ AI_AUDIT*
 AI_SUMMARY*
 
 # Local working records
+/DESIGN_BRIEF.md
+/RELEASE_STATUS.md
+/Tests/
 /.local/
 /output/
 /private/

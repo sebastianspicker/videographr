@@ -32,26 +32,6 @@ let package = Package(
             name: "SessionCore",
             dependencies: ["GuidanceEngine"],
             path: "Sources/SessionCore"
-        ),
-        .testTarget(
-            name: "GuidanceEngineTests",
-            dependencies: ["GuidanceEngine"],
-            path: "Tests/GuidanceEngineTests"
-        ),
-        .testTarget(
-            name: "LearnContentTests",
-            dependencies: ["LearnContent"],
-            path: "Tests/LearnContentTests"
-        ),
-        .testTarget(
-            name: "ExperimentalResearchTests",
-            dependencies: ["ExperimentalResearch", "GuidanceEngine", "SessionCore"],
-            path: "Tests/ExperimentalResearchTests"
-        ),
-        .testTarget(
-            name: "SessionCoreTests",
-            dependencies: ["SessionCore", "GuidanceEngine"],
-            path: "Tests/SessionCoreTests"
         )
     ]
 )

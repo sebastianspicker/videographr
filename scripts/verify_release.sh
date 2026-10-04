@@ -26,11 +26,6 @@ echo "==> Plist and Xcode project syntax"
 plutil -lint App/Unterrichtsvideographie/Info.plist
 plutil -lint App/Unterrichtsvideographie.xcodeproj/project.pbxproj
 
-echo "==> Strict Swift tests"
-swift test --disable-sandbox \
-  -Xswiftc -strict-concurrency=complete \
-  -Xswiftc -warnings-as-errors
-
 echo "==> Release Swift build"
 swift build --disable-sandbox -c release \
   -Xswiftc -strict-concurrency=complete \

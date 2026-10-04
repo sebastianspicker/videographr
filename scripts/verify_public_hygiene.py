@@ -38,7 +38,6 @@ REQUIRED_FILES = {
     "LICENSE",
     "Package.swift",
     "README.md",
-    "RELEASE_STATUS.md",
     "RELEASE_VERSION",
     "RELEASING.md",
     "SECURITY.md",
@@ -115,7 +114,7 @@ TEXT_SUFFIXES = {
     ".yaml",
     ".yml",
 }
-PUBLIC_SOURCE_ROOTS = ("App", "Sources", "Tests", "docs", "scripts", ".github")
+PUBLIC_SOURCE_ROOTS = ("App", "Sources", "docs", "scripts", ".github")
 PUBLIC_SOURCE_SUFFIXES = TEXT_SUFFIXES | {".png", ".webp"}
 
 
@@ -194,7 +193,7 @@ def _is_agent_artifact(lower_name: str) -> bool:
 
 
 def _is_working_document(relative: str, lower_name: str, suffix: str) -> bool:
-    if suffix not in {".md", ".txt"} or relative == "RELEASE_STATUS.md":
+    if suffix not in {".md", ".txt"}:
         return False
     return bool(
         re.search(

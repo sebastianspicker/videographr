@@ -5,7 +5,6 @@ import UIKit
 // a dark room, and colour states provenance. Königsblau marks what a person wrote
 // or decided, graphite what the instrument measured, ochre what an unvalidated
 // experiment proposes. Signal red exists only for a running take.
-// See DESIGN_BRIEF.md for the reasoning behind every value.
 
 // MARK: - Colour roles
 

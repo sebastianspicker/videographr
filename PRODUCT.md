@@ -50,5 +50,4 @@ acknowledgement. Experimental output does not control recording or export.
 - Support for Dynamic Type and reduced motion
 - Body-text contrast targeting WCAG 2.2 AA
 
-These are design requirements. The dated validation record in
-[RELEASE_STATUS.md](RELEASE_STATUS.md) identifies which checks have been exercised.
+These are design requirements.

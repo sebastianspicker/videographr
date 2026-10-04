@@ -58,9 +58,6 @@ not determine recording readiness, consent, export authority, or reflection cont
 - Final 1024 by 1024 App Store icon artwork is not present.
 - Stored schemas and interfaces may change during the alpha series.
 
-See [RELEASE_STATUS.md](RELEASE_STATUS.md) for dated local test results and open
-release gates.
-
 ## Requirements
 
 - macOS 14 or newer for the Swift package
@@ -130,8 +127,6 @@ implemented evidence boundary and platform behavior.
 | `Sources/GuidanceEngine/` | Pure capture-observation and evidence-boundary logic |
 | `Sources/SessionCore/` | Session, consent, persistence, recording, reflection, import, and export domain logic |
 | `Sources/LearnContent/` | German-language reference catalogue |
-| `Tests/GuidanceEngineTests/` | Direct guidance and evidence-boundary contracts |
-| `Tests/SessionCoreTests/` | Consent, storage, and study-package safety contracts |
 | `scripts/` | Release and repository-hygiene checks |
 | `docs/` | Architecture, evaluation, research scope, references, and release notes |
 | `.github/workflows/ci.yml` | macOS CI job that runs the release gate |
@@ -145,10 +140,10 @@ Keep deterministic domain logic under `Sources/`. Keep SwiftUI, AVFoundation,
 Vision, Core Motion, LocalAuthentication, and other Apple-framework integration
 under `App/`.
 
-Run the focused package tests while developing:
+Build the package while developing:
 
 ```bash
-swift test --disable-sandbox \
+swift build --disable-sandbox \
   -Xswiftc -strict-concurrency=complete \
   -Xswiftc -warnings-as-errors
 ```
@@ -169,7 +164,6 @@ The gate runs:
 - repository hygiene checks
 - Bash syntax checks and ShellCheck when installed
 - property-list and Xcode project syntax checks
-- Swift tests with complete concurrency checking and warnings as errors
 - a release Swift package build
 - Xcode Release analysis for a generic iOS Simulator
 - an app build for a generic iOS Simulator

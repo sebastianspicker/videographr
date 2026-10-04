@@ -299,9 +299,7 @@ validated pedagogical measurement system.
 
 ## Verification limits
 
-SwiftPM tests cover package contracts, including frozen session, journal, and
-manifest formats, exact on-disk study-package membership, recording admission, and
-the experimental analysis windows. Hardware-free Xcode app-unit tests cover
+Hardware-free Xcode app-unit tests cover
 fresh-frame readiness, stale-generation filtering, FIFO recording transactions,
 idempotent stop emission, autosave ordering, import rollback, and coalesced package
 invalidation. `scripts/verify_public_hygiene.py` checks candidate structure, file
@@ -316,5 +314,4 @@ file-protection class but skip its unsupported attribute read-back; physical iOS
 builds require an exact protection-class match. Backup exclusion is verified in
 both environments. No local check establishes physical-device capture, microphone
 routes, interruptions, file protection, thermal or storage behavior, long takes,
-human-rater validity, or educational effectiveness. See
-[release status](../RELEASE_STATUS.md).
+human-rater validity, or educational effectiveness.

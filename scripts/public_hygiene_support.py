@@ -70,12 +70,11 @@ def release_text_issues(root: Path, version: str, release_notes: str, bundle_ide
     release_paths = (
         "README.md",
         "CHANGELOG.md",
-        "RELEASE_STATUS.md",
         release_notes,
         ".github/ISSUE_TEMPLATE/bug_report.md",
     )
     issues = _missing_text_issues(root, release_paths, version, "release identifier")
-    bundle_paths = ("RELEASE_STATUS.md", release_notes)
+    bundle_paths = (release_notes,)
     issues.extend(_missing_text_issues(root, bundle_paths, bundle_identity, "app bundle identity"))
     return issues
 

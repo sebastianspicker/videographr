@@ -7,7 +7,7 @@ collect classroom or minor data.
 ## Prepare and validate a candidate
 
 1. Set `RELEASE_VERSION` and align the Xcode marketing version and build number.
-2. Update `CHANGELOG.md`, `RELEASE_STATUS.md`, and the matching file in
+2. Update `CHANGELOG.md` and the matching file in
    `docs/releases/`.
 3. Review the full candidate surface for media, exports, credentials, signing
    material, environment files, local tool state, and build output.
@@ -29,9 +29,8 @@ This file is the single description of the gate; other documents link here.
 2. `scripts/verify_public_hygiene.py` and `scripts/verify_demo.py`.
 3. Shell syntax (plus ShellCheck when installed) and `plutil` lint of the
    Info.plist and Xcode project.
-4. Strict SwiftPM tests and a Release Swift build, both with complete concurrency
-   checking and warnings as errors. The package tests freeze the persisted and
-   exported formats (session JSON, journals, study-package manifest and members).
+4. A Release Swift build with complete concurrency checking and warnings as
+   errors.
 5. Hardware-free Xcode app-unit tests on an iPhone Simulator, then
    signing-disabled Xcode Release Simulator analysis and build.
 
